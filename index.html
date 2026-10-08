@@ -242,6 +242,28 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .top{padding-block:8px 0}
 .day{margin-top:16px}
 .xc{display:contents}
+.panel.rec{padding-bottom:0}
+.actions.stick{position:sticky;bottom:0;z-index:2;background:var(--card);margin-top:0;padding:10px 0 calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 10px -10px rgba(0,0,0,.2)}
+.dtline,.xfold{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;padding:0 14px;border-radius:10px;text-align:left}
+.dtline{border:1px solid var(--line);background:var(--bg);font-size:15px;font-variant-numeric:tabular-nums}
+.dtline .ed{font-size:12.5px;color:var(--ink2)}
+.xfold{border:1px dashed var(--line);font-size:14px;color:var(--ink2)}
+.dtgrid,.xbody{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.dtgrid label{display:block;min-width:0}
+.imp{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border-radius:99px;border:1px solid var(--line);font:500 14px var(--sans);color:var(--ink2)}
+.imp.on{color:var(--c-key);border-color:var(--c-key);background:color-mix(in srgb,var(--c-key) 12%,transparent);font-weight:700}
+.scrim.mid{align-items:center;padding:16px}
+.scrim.mid .panel{max-height:78dvh;border-radius:20px}
+.cp.more{color:var(--ink2);border-style:dashed;padding-left:12px}
+.cfb{flex:none;height:36px;padding:0 11px;border-radius:99px;border:1px solid var(--line);font-size:12.5px;color:var(--ink2)}
+.cfb.on{color:var(--brand);border-color:var(--brand);font-weight:700}
+.fpanel{padding:2px 0 10px 44px}
+.fpanel .fh{margin:0 0 8px;font-size:12px;color:var(--ink2)}
+.ftoggles{display:flex;flex-wrap:wrap;gap:6px}
+.ft{padding:7px 12px;border-radius:99px;border:1px solid var(--line);font:500 13px var(--sans);color:var(--ink2)}
+.ft.on{color:var(--c);border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);font-weight:700}
+.ft.on::before{content:"✓ "}
+.msum2{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums}
 .dur-out{min-height:44px;display:flex;align-items:center;padding:0 12px;border:1px dashed var(--line);border-radius:10px;font:700 16px var(--sans);font-variant-numeric:tabular-nums}
 </style>
 </head>
@@ -289,13 +311,26 @@ const icon=id=>SVG(ICON_PATH[id]||ICON_PATH.tag);
 const CHECK=SVG('<path d="M5 12.5l4.5 4.5L19 7.5"/>');
 const COLORS=['blue','green','plum','teal','ochre','rose','persimmon','slate'];
 const DEFAULT_CATS=[
-  {id:'out',name:'외출',color:'blue'},{id:'hike',name:'등산',color:'green'},{id:'trip',name:'여행',color:'rose'},{id:'meet',name:'만남',color:'plum'},
-  {id:'read',name:'독서',color:'teal'},{id:'shop',name:'장보기',color:'ochre'},{id:'etc',name:'기타',color:'slate'}
+  {id:'out',name:'외출',color:'blue',fields:[]},{id:'hike',name:'등산',color:'green',fields:['end','dist']},{id:'trip',name:'여행',color:'rose',fields:['cost']},{id:'meet',name:'만남',color:'plum',fields:[]},
+  {id:'read',name:'독서',color:'teal',fields:['author']},{id:'shop',name:'장보기',color:'ochre',fields:['cost']},{id:'etc',name:'기타',color:'slate',fields:[]}
 ];
+/* 공통 항목(장소·날짜·시간·메모·사진)은 모든 분류에 고정. 아래는 분류마다 켜고 끄는 선택 항목 */
+const FIELD_DEFS={end:'시작·종료·소요시간',dist:'거리',cost:'비용',author:'저자'};
+const FIELD_ORDER=['end','dist','cost','author'];
+const FIELD_SHORT={end:'종료',dist:'거리',cost:'비용',author:'저자'};
+const XKEY={end:'end',dist:'distKm',cost:'cost',author:'author'};
+const PRESETS=[
+  {fields:['end','dist'],re:/등산|산행|등반|트레킹|운동|헬스|달리기|러닝|걷기|조깅|자전거|사이클|수영/},
+  {fields:['cost'],re:/여행|출장|쇼핑|장보기|구매/},
+  {fields:['author'],re:/독서|책|도서/}
+];
+const ID_PRESET={hike:['end','dist'],trip:['cost'],read:['author'],shop:['cost']};
+const presetOf=name=>{const p=PRESETS.find(q=>q.re.test(String(name||'')));return p?p.fields.slice():[];};
+const fieldsOf=c=>(c&&Array.isArray(c.fields))?c.fields:((c&&ID_PRESET[c.id])||[]);
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:DEFAULT_CATS.map(c=>Object.assign({},c)),ready:false,mem:false,
-  tab:'today',cat:'all',q:'',day:null,cal:{y:new Date().getFullYear(),m:new Date().getMonth()},sheet:null,snack:null,far:false};
+  tab:'today',cat:'all',imp:false,q:'',day:null,cal:{y:new Date().getFullYear(),m:new Date().getMonth()},sheet:null,snack:null,far:false};
 const catOf=id=>S.cats.find(c=>c.id===id)||S.cats.find(c=>c.id==='etc')||{id:'etc',name:'기타',color:'slate'};
 const colorOf=c=>'var(--k-'+c.color+')';
 const byTimeDesc=(a,b)=>((b.date||'')+(b.time||'')).localeCompare((a.date||'')+(a.time||''));
@@ -329,7 +364,7 @@ const lastBackup=()=>Number(lsGet(LB_KEY))||0;
 const agoText=t=>{const d=Math.floor((Date.now()-t)/864e5);return d<1?'오늘':d+'일 전';};
 const needBackup=()=>{const lb=lastBackup();return (S.entries.length+S.todos.length)>=3&&(!lb||Date.now()-lb>14*864e5);};
 
-function ensureEtc(){if(!S.cats.some(c=>c.id==='etc'))S.cats.push({id:'etc',name:'기타',color:'slate'});}
+function ensureEtc(){if(!S.cats.some(c=>c.id==='etc'))S.cats.push({id:'etc',name:'기타',color:'slate',fields:[]});}
 function normEntry(e){
   if(!e.f||typeof e.f!=='object')e.f={};
   if(!S.cats.some(c=>c.id===e.cat))e.cat='etc';
@@ -344,8 +379,13 @@ async function init(){
     const meta=await idbAll('meta'),m=meta.find(x=>x.key==='cats');
     if(m&&Array.isArray(m.list)&&m.list.length)S.cats=m.list;
     ensureEtc();
+    let mig=false;S.cats.forEach(c=>{
+      if(!Array.isArray(c.fields)){c.fields=(ID_PRESET[c.id]||[]).slice();mig=true;}
+      else if(c.fields.some(k=>!FIELD_ORDER.includes(k))){c.fields=c.fields.filter(k=>FIELD_ORDER.includes(k));mig=true;}
+    });
+    if(mig){try{await saveCats();}catch(_){}}
     if(lsGet('harujang:tripAdded')!=='1'){
-      if(!S.cats.some(c=>c.id==='trip')){const i=S.cats.findIndex(c=>c.id==='etc');S.cats.splice(i<0?S.cats.length:i,0,{id:'trip',name:'여행',color:'rose'});try{await saveCats();}catch(_){}}
+      if(!S.cats.some(c=>c.id==='trip')){const i=S.cats.findIndex(c=>c.id==='etc');S.cats.splice(i<0?S.cats.length:i,0,{id:'trip',name:'여행',color:'rose',fields:['cost']});try{await saveCats();}catch(_){}}
       lsSet('harujang:tripAdded','1');
     }
     S.entries=(await idbAll('entries')).map(normEntry);
@@ -400,18 +440,23 @@ const durMinOf=(a,b)=>{
 };
 const durText=m=>m?(m>=60?Math.floor(m/60)+'시간':'')+(m%60?(m>=60?' ':'')+(m%60)+'분':''):'';
 function legacyFacts(e){
-  const f=e.f||{},o=[];
+  const f=e.f||{},o=[],en=fieldsOf(catOf(e.cat));
   ['place','purpose','move','who','topics','next','mountain','course','weather','meaning'].forEach(k=>{
     if(f[k]&&!(k==='place'&&f[k]===e.title))o.push(String(f[k]));});
   if(f.spend)o.push(fmt(f.spend)+'원');
-  if(f.distKm)o.push(fmt(f.distKm)+'km');
+  if(f.cost&&en.includes('cost'))o.push(fmt(f.cost)+'원');
+  if(f.book)o.push(String(f.book));
+  if(f.author&&en.includes('author'))o.push(String(f.author));
+  if(f.distKm&&en.includes('dist'))o.push(fmt(f.distKm)+'km');
   if(f.summit)o.push('정상 '+fmt(f.summit)+'m');
   const d=(f.durH||f.durM)?[f.durH?f.durH+'시간':'',f.durM?f.durM+'분':''].filter(Boolean).join(' '):'';
   if(d)o.push(d);
   if(f.gain)o.push('누적 +'+fmt(f.gain)+'m');
   if(f.dest&&f.dest!==e.title)o.push(String(f.dest));
-  if(f.end&&e.time)o.push(e.time+'~'+f.end);
-  if(f.durMin)o.push(durText(f.durMin));
+  if(en.includes('end')){
+    if(f.end&&e.time)o.push(e.time+'~'+f.end);
+    if(f.durMin)o.push(durText(f.durMin));
+  }
   return o;
 }
 
@@ -428,10 +473,27 @@ function cardHtml(e){
     }).join('')+'</div>';
   }
   if(e.tags&&e.tags.length)body+='<div class="tags">'+e.tags.map(t=>'<span>#'+esc(t)+'</span>').join('')+'</div>';
-  const star=e.star?'<span class="stars-s" aria-label="중요도 '+e.star+'">'+'★'.repeat(e.star)+'</span>':'';
+  const star=e.star?'<span class="stars-s" aria-label="중요">★</span>':'';
   return '<div class="card" data-act="rec-open" data-id="'+esc(e.id)+'" tabindex="0" style="--c:'+colorOf(c)+'">'
     +'<div class="card-head"><span class="tag-cat">'+icon(c.id)+esc(c.name)+'</span><span class="time">'+esc(e.time||'')+'</span>'+star+'</div>'
     +'<h3>'+esc(e.title)+'</h3>'+body+'</div>';
+}
+const CAT_TOP=5;
+function catRank(){
+  const last={};
+  S.entries.forEach(e=>{const t=e.createdAt||e.updatedAt||0;if(!(last[e.cat]>=t))last[e.cat]=t;});
+  return S.cats.map((c,i)=>({c:c,t:last[c.id]||0,i:i})).sort((a,b)=>b.t-a.t||a.i-b.i).map(o=>o.c);
+}
+function catChipsHtml(sh){
+  const all=catRank(),many=all.length>CAT_TOP;
+  let vis=all;
+  if(many&&!sh.catAll){
+    vis=all.slice(0,CAT_TOP);
+    const sel=all.find(c=>c.id===sh.cat);
+    if(sel&&!vis.includes(sel))vis=all.slice(0,CAT_TOP-1).concat(sel);
+  }
+  return vis.map(c=>'<button type="button" class="cp'+(c.id===sh.cat?' on':'')+'" role="radio" aria-checked="'+(c.id===sh.cat)+'" data-act="setcat" data-id="'+esc(c.id)+'" style="--c:'+colorOf(c)+'">'+icon(c.id)+esc(c.name)+'</button>').join('')
+    +(many?'<button type="button" class="cp more" data-act="cat-more" aria-expanded="'+(!!sh.catAll)+'">'+(sh.catAll?'접기 ▴':'더보기 ▾')+'</button>':'');
 }
 function todoRow(x,td){
   const late=!x.done&&x.due&&x.due<td;
@@ -458,7 +520,7 @@ function todosBlock(td){
 const hay=e=>[e.title,e.note,catOf(e.cat).name,(e.tags||[]).join(' '),legacyFacts(e).join(' ')].join(' ').toLowerCase();
 function filtered(){
   const q=S.q.trim().toLowerCase();
-  return S.entries.filter(e=>(S.cat==='all'||e.cat===S.cat)&&(!q||hay(e).includes(q))).sort(byTimeDesc);
+  return S.entries.filter(e=>(S.cat==='all'||e.cat===S.cat)&&(!S.imp||e.star)&&(!q||hay(e).includes(q))).sort(byTimeDesc);
 }
 function feedHtml(){
   if(!S.ready)return '<p class="empty">기록을 불러오는 중입니다.</p>';
@@ -481,8 +543,9 @@ function viewToday(){
 }
 function viewLog(){
   return topHtml()+'<h1 class="pg">기록</h1>'
-  +'<div class="chips" role="group" aria-label="분류 필터">'+[{id:'all',name:'전체'}].concat(S.cats).map(c=>
-    '<button class="chip-f" data-act="filter" data-cat="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>').join('')
+  +'<div class="chips" role="group" aria-label="분류 필터">'+[{id:'all',name:'전체'}].concat(S.cats).map((c,i)=>
+    '<button class="chip-f" data-act="filter" data-cat="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'
+    +(i===0?'<button class="chip-f" data-act="imp-filter" aria-pressed="'+S.imp+'">★ 중요</button>':'')).join('')
   +'<button class="chip-f edit" data-act="cats-open">분류 편집</button></div>'
   +'<input class="search" id="q" type="search" placeholder="제목, 메모 검색" value="'+esc(S.q)+'" aria-label="검색">'
   +'<div id="feed">'+feedHtml()+'</div>';
@@ -508,11 +571,14 @@ function viewCal(){
       +(dt.length?'<div class="todos">'+dt.map(x=>todoRow(x,td)).join('')+'</div>':'')
       +(dr.length?dr.map(cardHtml).join(''):'<p class="none pad">이 날의 기록이 없습니다.</p>');
   }
+  let km=0,won=0;
+  es.forEach(e=>{const en=fieldsOf(catOf(e.cat));if(en.includes('dist'))km+=Number(e.f.distKm)||0;if(en.includes('cost'))won+=Number(e.f.cost)||0;});
+  const sums=(km||won)?'<p class="msum2">'+[km?'거리 합계 '+fmt(Math.round(km*10)/10)+'km':'',won?'비용 합계 '+fmt(won)+'원':''].filter(Boolean).join(' · ')+'</p>':'';
   return topHtml()
   +'<div class="cal-head"><button class="nav-b" data-act="mon" data-d="-1" aria-label="이전 달">'+SVG('<path d="M15 5l-7 7 7 7"/>')+'</button><h2>'+y+'년 '+(m+1)+'월</h2><button class="nav-b" data-act="mon" data-d="1" aria-label="다음 달">'+SVG('<path d="M9 5l7 7-7 7"/>')+'</button></div>'
   +'<div class="cal">'+cells+'</div>'
   +'<p class="legend"><i></i> 기록 <i class="ring"></i> 남은 할 일</p>'
-  +'<section class="msum"><h3>이달의 기록 '+es.length+'건'+(ts.length?' · 할 일 '+ts.filter(x=>x.done).length+'/'+ts.length+' 완료':'')+'</h3>'+(chips?'<div class="mchips">'+chips+'</div>':'')+'</section>'
+  +'<section class="msum"><h3>이달의 기록 '+es.length+'건'+(ts.length?' · 할 일 '+ts.filter(x=>x.done).length+'/'+ts.length+' 완료':'')+'</h3>'+(chips?'<div class="mchips">'+chips+'</div>':'')+sums+'</section>'
   +detail;
 }
 function viewArch(){
@@ -538,20 +604,20 @@ function recFormHtml(sh){
   const e=sh.entry,now=new Date();
   return '<div class="sh-head"><h2>'+(e?'기록 수정':'기록 남기기')+'</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
   +'<form id="f" class="grid" autocomplete="off" novalidate>'
-  +'<div class="fld"><span class="lbl">분류</span><div class="catpick" role="radiogroup" aria-label="분류">'+S.cats.map(c=>
-    '<button type="button" class="cp'+(c.id===sh.cat?' on':'')+'" role="radio" aria-checked="'+(c.id===sh.cat)+'" data-act="setcat" data-id="'+esc(c.id)+'" style="--c:'+colorOf(c)+'">'+icon(c.id)+esc(c.name)+'</button>').join('')+'</div></div>'
-  +'<div class="xc" id="xf-top"></div>'
+  +'<div class="fld"><span class="lbl">분류</span><div class="catpick" id="catpick" role="radiogroup" aria-label="분류">'+catChipsHtml(sh)+'</div></div>'
   +'<label class="fld"><span class="lbl">제목</span><input id="f-title" type="text" maxlength="80" placeholder="한 줄로 적어요" value="'+esc(sh.title||'')+'"><small class="err" id="err-title" hidden>제목을 입력하세요</small></label>'
-  +'<label class="fld half"><span class="lbl">날짜</span><input id="f-date" type="date" value="'+(e?e.date:ymd(now))+'"></label>'
-  +'<label class="fld half"><span class="lbl" id="lbl-time">시간</span><input id="f-time" type="time" value="'+(e?e.time:hm(now))+'"></label>'
-  +'<div class="xc" id="xf-end"></div>'
-  +'<label class="fld"><span class="lbl">메모</span><textarea id="f-note" rows="4" placeholder="장면, 생각, 기억해 둘 것 (금액 같은 숫자도 여기에)">'+esc(e?e.note:'')+'</textarea></label>'
+  +'<div class="xc" id="xf-top"></div>'
+  +'<div class="fld"><button type="button" class="dtline" id="dtline" data-act="dt-toggle" aria-expanded="false"><span id="dt-text"></span><span class="ed" id="dt-ed">✎ 바꾸기</span></button>'
+  +'<div class="dtgrid" id="dt-box" hidden><label><span class="lbl">날짜</span><input id="f-date" type="date" value="'+(e?e.date:ymd(now))+'"></label>'
+  +'<label><span class="lbl" id="lbl-time">시간</span><input id="f-time" type="time" value="'+(e?e.time:hm(now))+'"></label></div></div>'
+  +'<div class="fld" id="xwrap" hidden><button type="button" class="xfold" id="xfold" data-act="x-toggle" aria-expanded="false"></button><div class="xbody" id="xbody" hidden></div></div>'
+  +'<label class="fld"><span class="lbl">메모</span><textarea id="f-note" rows="3" placeholder="장면, 생각, 기억해 둘 것 (금액 같은 숫자도 여기에)">'+esc(e?e.note:'')+'</textarea></label>'
   +'<div class="fld"><span class="lbl">사진 <span id="ph-n"></span></span><div class="strip" id="strip"></div>'
   +'<div class="btns"><label class="btn">촬영<input id="f-cam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn">앨범에서 선택<input id="f-pic" type="file" accept="image/*" multiple hidden></label></div>'
   +'<p class="hint">사진은 줄여서 폰에 저장합니다. 찍은 시간과 위치가 사진에 있으면 자동으로 채웁니다.</p></div>'
-  +'<div class="fld"><span class="lbl">중요도</span><div class="stars" id="f-star" data-v="'+(sh.star||0)+'">'+[1,2,3].map(n=>'<button type="button" data-act="star" data-v="'+n+'" aria-label="'+n+'단계" class="'+(n<=(sh.star||0)?'on':'')+'">★</button>').join('')+'</div></div>'
+  +'<div class="fld"><button type="button" class="imp'+(sh.star?' on':'')+'" id="f-star" data-act="imp" data-v="'+(sh.star?1:0)+'" aria-pressed="'+(!!sh.star)+'">'+(sh.star?'★':'☆')+' 중요한 기록</button></div>'
   +'<p class="fld geo" id="geo"></p>'
-  +'<div class="fld actions"><button class="btn pri" type="submit" id="save">저장</button>'+(e?'<button class="btn danger" type="button" id="del" data-act="rec-del">삭제</button>':'')+'</div></form>';
+  +'<div class="fld actions stick"><button class="btn pri" type="submit" id="save">저장</button>'+(e?'<button class="btn danger" type="button" id="del" data-act="rec-del">삭제</button>':'')+'</div></form>';
 }
 function todoFormHtml(sh){
   const x=sh.todo;
@@ -567,30 +633,45 @@ function catsHtml(sh){
     const n=S.entries.filter(e=>e.cat===c.id).length;
     return '<div class="crow"><button type="button" class="cdot" data-act="cat-color" data-id="'+esc(c.id)+'" style="--c:'+colorOf(c)+'" aria-label="'+esc(c.name)+' 색 바꾸기"></button>'
       +'<input class="cname" data-cat-name="'+esc(c.id)+'" value="'+esc(c.name)+'" maxlength="10" aria-label="분류 이름"><span class="cn">'+n+'건</span>'
+      +'<button type="button" class="cfb'+(fieldsOf(c).length?' on':'')+'" data-act="cat-fields" data-id="'+esc(c.id)+'" aria-expanded="'+(sh.fopen===c.id)+'">항목'+(fieldsOf(c).length?' '+fieldsOf(c).length:'')+'</button>'
       +(c.id==='etc'?'<span class="cdel off"></span>':'<button type="button" class="cdel" data-act="cat-del" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+' 삭제">×</button>')+'</div>'
+      +(sh.fopen===c.id?'<div class="fpanel" style="--c:'+colorOf(c)+'"><p class="fh">모든 분류에 장소·날짜·시간·메모·사진은 기본으로 들어갑니다. 추가로 쓸 항목을 고르세요. 꺼도 입력한 값은 보관됩니다.</p><div class="ftoggles">'
+        +FIELD_ORDER.map(k=>'<button type="button" class="ft'+(fieldsOf(c).includes(k)?' on':'')+'" data-act="cat-field" data-id="'+esc(c.id)+'" data-f="'+k+'" aria-pressed="'+fieldsOf(c).includes(k)+'">'+FIELD_DEFS[k]+'</button>').join('')+'</div></div>':'')
       +(sh.open===c.id?'<div class="swatches">'+COLORS.map(k=>'<button type="button" class="sw'+(k===c.color?' on':'')+'" data-act="cat-sw" data-id="'+esc(c.id)+'" data-color="'+k+'" style="--c:var(--k-'+k+')" aria-label="'+k+'"></button>').join('')+'</div>':'');
   }).join('');
   return '<div class="sh-head"><h2>분류 관리</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
     +'<div class="clist">'+rows+'</div><div class="btns"><button type="button" class="btn" data-act="cat-add">+ 분류 추가</button></div>'
-    +'<p class="hint">이름과 색만 바꿉니다. 분류를 지우면 그 분류의 기록은 기타로 옮겨집니다. 이름을 바꿔도 기존 기록은 그대로 이어집니다.</p>';
+    +'<p class="hint">새 분류를 만들 때 이름(등산, 운동, 여행, 쇼핑, 독서 등)을 보고 항목을 추천해 채웁니다. 그 뒤에는 이름을 바꿔도 항목이 유지됩니다. 분류를 지우면 그 분류의 기록은 기타로 옮겨집니다.</p>';
 }
+function dtText(){
+  const d=$('#f-date'),t=$('#f-time'),sh=S.sheet;if(!d||!t)return '';
+  const td=ymd(new Date()),v=d.value||td;
+  let lab;
+  if(v===td)lab='오늘';else if(v===addDays(td,-1))lab='어제';
+  else{const a=pYmd(v);lab=(a.getMonth()+1)+'월 '+a.getDate()+'일 ('+WD[a.getDay()]+')';}
+  const pre=(sh&&sh.kind==='rec'&&fieldsOf(catOf(sh.cat)).includes('end'))?'시작 ':'';
+  return lab+' · '+pre+(t.value||'--:--');
+}
+function updDt(){const el=$('#dt-text');if(el)el.textContent=dtText();}
 function renderExtra(){
   const sh=S.sheet;if(!sh||sh.kind!=='rec')return;
-  const top=$('#xf-top'),end=$('#xf-end');if(!top||!end)return;
-  const x=sh.x||(sh.x={});
-  let t='',en='';
-  if(sh.cat==='hike'){
-    t='<label class="fld"><span class="lbl">장소</span><input id="f-place" type="text" maxlength="60" placeholder="산·코스 이름" value="'+esc(x.place||'')+'"></label>'
-     +'<label class="fld half"><span class="lbl">거리</span><span class="unit-wrap"><input id="f-dist" type="number" inputmode="decimal" step="0.1" min="0" value="'+esc(x.dist||'')+'"><em>km</em></span></label><div class="fld half"></div>';
-    en='<label class="fld half"><span class="lbl">종료시간</span><input id="f-end" type="time" value="'+esc(x.end||'')+'"></label>'
-     +'<div class="fld half"><span class="lbl">소요시간</span><div class="dur-out" id="dur-out">-</div></div>';
-  }else if(sh.cat==='trip'){
-    t='<label class="fld"><span class="lbl">목적지</span><input id="f-dest" type="text" maxlength="60" placeholder="어디로 가나요" value="'+esc(x.dest||'')+'"></label>';
-  }
-  top.innerHTML=t;end.innerHTML=en;
-  const ti=$('#f-title');if(ti)ti.placeholder=(sh.cat==='hike'||sh.cat==='trip')?'비워 두면 '+(sh.cat==='hike'?'장소':'목적지')+'가 제목':'한 줄로 적어요';
-  $('#lbl-time').textContent=sh.cat==='hike'?'시작시간':'시간';
-  updDur();
+  const top=$('#xf-top'),wrap=$('#xwrap'),body=$('#xbody'),fold=$('#xfold');if(!top||!wrap||!body||!fold)return;
+  const x=sh.x||(sh.x={}),en=fieldsOf(catOf(sh.cat)),has=k=>en.includes(k);
+  top.innerHTML='<label class="fld"><span class="lbl">장소</span><input id="f-place" type="text" maxlength="60" placeholder="어디에서" value="'+esc(x.place||'')+'"></label>';
+  let b='';
+  if(has('end'))b+='<label class="fld half"><span class="lbl">종료시간</span><input id="f-end" type="time" value="'+esc(x.end||'')+'"></label>'
+    +'<div class="fld half"><span class="lbl">소요시간</span><div class="dur-out" id="dur-out">-</div></div>';
+  if(has('dist'))b+='<label class="fld half"><span class="lbl">거리</span><span class="unit-wrap"><input id="f-dist" type="number" inputmode="decimal" step="0.1" min="0" value="'+esc(x.dist||'')+'"><em>km</em></span></label>';
+  if(has('cost'))b+='<label class="fld half"><span class="lbl">비용</span><span class="unit-wrap"><input id="f-cost" type="number" inputmode="numeric" step="100" min="0" value="'+esc(x.cost||'')+'"><em>원</em></span></label>';
+  if(has('author'))b+='<label class="fld"><span class="lbl">저자</span><input id="f-author" type="text" maxlength="60" placeholder="저자 이름" value="'+esc(x.author||'')+'"></label>';
+  const names=FIELD_ORDER.filter(has).map(k=>FIELD_SHORT[k]);
+  body.innerHTML=b;wrap.hidden=!names.length;
+  const open=!!sh.xopen;body.hidden=!open;
+  fold.setAttribute('aria-expanded',String(open));
+  fold.innerHTML='<span>추가 항목 · '+names.join(', ')+'</span><span aria-hidden="true">'+(open?'▴':'▾')+'</span>';
+  const ti=$('#f-title');if(ti)ti.placeholder=has('author')?'책 제목':'비워 두면 장소가 제목';
+  $('#lbl-time').textContent=has('end')?'시작시간':'시간';
+  updDur();updDt();
 }
 function updDur(){
   const o=$('#dur-out');if(!o)return;
@@ -599,6 +680,8 @@ function updDur(){
 }
 function renderSheet(){
   const sh=S.sheet;if(!sh)return;
+  $('#sheet').classList.toggle('mid',sh.kind==='view');
+  $('#panel').classList.toggle('rec',sh.kind==='rec');
   $('#panel').innerHTML=sh.kind==='rec'?recFormHtml(sh):sh.kind==='view'?viewHtml(sh):sh.kind==='todo'?todoFormHtml(sh):catsHtml(sh);
   if(sh.kind==='rec'){renderStrip();renderGeo();renderExtra();}
 }
@@ -608,12 +691,13 @@ function openSheet(sh){
   const f=sh.kind==='rec'?'#f-title':sh.kind==='todo'?'#t-title':null;
   if(f&&!(sh.entry||sh.todo))setTimeout(()=>{const t=$(f);if(t)t.focus();},60);
 }
+const xOpenOf=(entry,cat)=>!!entry&&fieldsOf(catOf(cat)).some(k=>entry.f&&entry.f[XKEY[k]]);
 function recSheetOf(entry,prefill){
   const last=lsGet(LC_KEY);
   const cat=entry?entry.cat:(S.cats.some(c=>c.id===last)?last:S.cats[0].id);
   return {kind:'rec',entry:entry||null,cat:cat,title:entry?entry.title:(prefill&&prefill.title)||'',star:entry?(entry.star||0):0,
-    photos:entry?(entry.photos||[]).slice():[],busy:0,geo:(entry&&entry.geo)||null,touched:{dt:!!entry},arm:false,
-    x:entry?{place:entry.f.place||'',dist:entry.f.distKm||'',dest:entry.f.dest||'',end:entry.f.end||''}:{}};
+    photos:entry?(entry.photos||[]).slice():[],busy:0,geo:(entry&&entry.geo)||null,touched:{dt:!!entry},arm:false,xopen:xOpenOf(entry,cat),
+    x:entry?{place:entry.f.place||entry.f.dest||'',dist:entry.f.distKm||'',end:entry.f.end||'',cost:entry.f.cost||entry.f.spend||'',author:entry.f.author||''}:{}};
 }
 function openRec(entry,prefill){openSheet(recSheetOf(entry,prefill));}
 /* 기록 카드를 누르면 먼저 읽기 전용 상세 화면, 거기서 '수정'을 눌러야 입력창으로 넘어간다 */
@@ -624,7 +708,7 @@ function viewHtml(sh){
   const g=e.geo;
   return '<div class="sh-head"><h2>기록</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
   +'<div class="vmeta" style="--c:'+colorOf(c)+'"><span class="tag-cat">'+icon(c.id)+esc(c.name)+'</span><span>'+esc(ds)+(e.time?' '+esc(e.time):'')+'</span>'
-  +(e.star?'<span class="stars-s" aria-label="중요도 '+e.star+'">'+'★'.repeat(e.star)+'</span>':'')+'</div>'
+  +(e.star?'<span class="stars-s" aria-label="중요">★</span>':'')+'</div>'
   +'<h3 class="vtitle">'+esc(e.title)+'</h3>'
   +(lf.length?'<div class="facts">'+lf.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>':'')
   +(e.note?'<p class="vnote">'+esc(e.note)+'</p>':'')
@@ -654,31 +738,32 @@ function renderGeo(){
 function collectX(){
   const sh=S.sheet;if(!sh||sh.kind!=='rec')return;
   const x=sh.x||(sh.x={}),g=id=>{const el=$(id);return el?el.value:undefined;};
-  const v={place:g('#f-place'),dist:g('#f-dist'),dest:g('#f-dest'),end:g('#f-end')};
+  const v={place:g('#f-place'),dist:g('#f-dist'),end:g('#f-end'),cost:g('#f-cost'),author:g('#f-author')};
   Object.keys(v).forEach(k=>{if(v[k]!==undefined)x[k]=v[k];});
 }
 async function saveRec(){
   const sh=S.sheet;if(!sh||sh.kind!=='rec'||sh.busy)return;
   collectX();
   const x=sh.x||{};
-  const title=$('#f-title').value.trim()||(sh.cat==='hike'?(x.place||'').trim():sh.cat==='trip'?(x.dest||'').trim():'');
+  const en=fieldsOf(catOf(sh.cat)),place=(x.place||'').trim();
+  const title=$('#f-title').value.trim()||place;
   if(!title){$('#err-title').hidden=false;$('#f-title').focus();return;}
-  const now=Date.now(),old=sh.entry,star=Number($('#f-star').dataset.v||0);
+  const now=Date.now(),old=sh.entry,star=($('#f-star').dataset.v==='1')?((old&&old.star)||1):0;
   const e=Object.assign({},old||{},{id:old?old.id:newId(),cat:sh.cat,title:title,date:$('#f-date').value||ymd(new Date()),time:$('#f-time').value||hm(new Date()),
     note:$('#f-note').value.trim(),photos:sh.photos.slice(),star:star,createdAt:old?old.createdAt:now,updatedAt:now});
   e.f=Object.assign({},e.f||{});
-  if(sh.cat==='hike'){
-    const place=(x.place||'').trim(),dist=parseFloat(x.dist);
-    if(place)e.f.place=place;else delete e.f.place;
-    if(isFinite(dist)&&dist>0)e.f.distKm=dist;else delete e.f.distKm;
+  if(place)e.f.place=place;else delete e.f.place;
+  delete e.f.dest;
+  /* 켜진 항목만 갱신하고, 꺼진 항목의 기존 값은 지우지 않고 보관한다 */
+  if(en.includes('end')){
     const m=durMinOf(e.time,x.end);
     if(x.end)e.f.end=x.end;else delete e.f.end;
     if(m)e.f.durMin=m;else delete e.f.durMin;
     delete e.f.durH;delete e.f.durM;
-  }else if(sh.cat==='trip'){
-    const dest=(x.dest||'').trim();
-    if(dest)e.f.dest=dest;else delete e.f.dest;
   }
+  if(en.includes('dist')){const d=parseFloat(x.dist);if(isFinite(d)&&d>0)e.f.distKm=d;else delete e.f.distKm;}
+  if(en.includes('cost')){const c=parseFloat(String(x.cost==null?'':x.cost).replace(/,/g,''));if(isFinite(c)&&c>0)e.f.cost=Math.round(c);else delete e.f.cost;delete e.f.spend;}
+  if(en.includes('author')){const a=(x.author||'').trim();if(a)e.f.author=a;else delete e.f.author;}
   if(sh.geo)e.geo=sh.geo;else delete e.geo;
   const b=$('#save');b.disabled=true;
   try{await putEntry(e);lsSet(LC_KEY,sh.cat);closeSheet();toast('저장했습니다');}
@@ -763,7 +848,7 @@ async function prepPhoto(file,max,q){
 }
 function applyExif(ex){
   const sh=S.sheet;if(!sh||sh.kind!=='rec')return;let used=false;
-  if(ex.date&&!sh.touched.dt&&!sh.entry){$('#f-date').value=ex.date;$('#f-time').value=ex.time;used=true;}
+  if(ex.date&&!sh.touched.dt&&!sh.entry){$('#f-date').value=ex.date;$('#f-time').value=ex.time;used=true;updDt();}
   if(ex.geo&&!sh.geo){sh.geo=ex.geo;renderGeo();used=true;}
   if(used)updDur();
   if(used)toast('사진 정보로 시간·위치를 채웠습니다');
@@ -790,7 +875,7 @@ function toMarkdown(){
     const ts=S.todos.filter(x=>x.due===d);
     if(ts.length){s+='할 일\n';ts.forEach(x=>{s+='- ['+(x.done?'x':' ')+'] '+x.title+'\n';});s+='\n';}
     S.entries.filter(e=>e.date===d).sort((a,b)=>(a.time||'').localeCompare(b.time||'')).forEach(e=>{
-      s+='### '+(e.time||'')+' ['+catOf(e.cat).name+'] '+e.title+(e.star?' '+'★'.repeat(e.star):'')+'\n';
+      s+='### '+(e.time||'')+' ['+catOf(e.cat).name+'] '+e.title+(e.star?' ★':'')+'\n';
       legacyFacts(e).forEach(x=>{s+='- '+x+'\n';});
       if(e.note)s+='\n'+e.note+'\n';
       if(e.photos&&e.photos.length)s+='\n사진 '+e.photos.length+'장 (백업 파일에만 포함)\n';
@@ -832,7 +917,7 @@ async function doImport(file){
   if(data&&Array.isArray(data.categories)){
     for(const c of data.categories){
       if(c&&typeof c.id==='string'&&typeof c.name==='string'&&!S.cats.some(x=>x.id===c.id)){
-        S.cats.push({id:c.id,name:c.name.slice(0,10),color:COLORS.includes(c.color)?c.color:'slate'});catsChanged=true;}
+        S.cats.push({id:c.id,name:c.name.slice(0,10),color:COLORS.includes(c.color)?c.color:'slate',fields:Array.isArray(c.fields)?FIELD_ORDER.filter(k=>c.fields.includes(k)):(ID_PRESET[c.id]||[]).slice()});catsChanged=true;}
     }
     ensureEtc();
   }
@@ -881,12 +966,16 @@ document.addEventListener('click',ev=>{
     case 'todo-edit':{const x=S.todos.find(y=>y.id===t.dataset.id);if(x)openSheet({kind:'todo',todo:x,arm:false});break;}
     case 'todo-toggle':toggleTodo(t.dataset.id);break;
     case 'close':closeSheet();break;
-    case 'setcat':{const sh=S.sheet;if(sh){sh.cat=t.dataset.id;document.querySelectorAll('.cp').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();}break;}
+    case 'setcat':{const sh=S.sheet;if(sh){sh.cat=t.dataset.id;document.querySelectorAll('.cp[data-id]').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();}break;}
+    case 'cat-more':{const sh=S.sheet;if(sh&&sh.kind==='rec'){sh.catAll=!sh.catAll;$('#catpick').innerHTML=catChipsHtml(sh);}break;}
+    case 'dt-toggle':{const box=$('#dt-box'),btn=$('#dtline');if(box&&btn){box.hidden=!box.hidden;btn.setAttribute('aria-expanded',String(!box.hidden));$('#dt-ed').textContent=box.hidden?'✎ 바꾸기':'닫기';}break;}
+    case 'x-toggle':{const sh=S.sheet;if(sh&&sh.kind==='rec'){collectX();sh.xopen=!sh.xopen;renderExtra();}break;}
     case 'far-toggle':S.far=!S.far;render();break;
     case 'filter':S.cat=t.dataset.cat;render();break;
     case 'day':S.day=(S.day===t.dataset.date)?null:t.dataset.date;render();break;
     case 'mon':{let m=S.cal.m+Number(t.dataset.d),y=S.cal.y;if(m<0){m=11;y--;}if(m>11){m=0;y++;}S.cal={y:y,m:m};S.day=null;render();break;}
-    case 'star':{const box=$('#f-star'),v=Number(t.dataset.v),cur=Number(box.dataset.v),nv=(cur===v)?v-1:v;box.dataset.v=nv;box.querySelectorAll('button').forEach(b=>b.classList.toggle('on',Number(b.dataset.v)<=nv));break;}
+    case 'imp':{const b=$('#f-star'),on=b.dataset.v!=='1';b.dataset.v=on?'1':'0';b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));b.textContent=(on?'★':'☆')+' 중요한 기록';break;}
+    case 'imp-filter':S.imp=!S.imp;render();break;
     case 'rm-photo':{const sh=S.sheet;if(sh){sh.photos.splice(Number(t.dataset.i),1);renderStrip();}break;}
     case 'geo-clear':if(S.sheet){S.sheet.geo=null;renderGeo();}break;
     case 'rec-del':delRec();break;
@@ -903,8 +992,13 @@ document.addEventListener('click',ev=>{
     case 'cat-sw':{const c=S.cats.find(x=>x.id===t.dataset.id);if(c){c.color=t.dataset.color;renderSheet();catChanged();}break;}
     case 'cat-add':{
       const used=new Set(S.cats.map(c=>c.color)),color=COLORS.find(k=>!used.has(k))||COLORS[S.cats.length%COLORS.length];
-      const c={id:'c'+newId(),name:'새 분류',color:color};S.cats.push(c);renderSheet();catChanged();
+      const c={id:'c'+newId(),name:'새 분류',color:color,fields:[],fresh:true};S.cats.push(c);renderSheet();catChanged();
       setTimeout(()=>{const el=document.querySelector('[data-cat-name="'+c.id+'"]');if(el){el.focus();el.select();}},40);break;}
+    case 'cat-fields':{const sh=S.sheet;if(sh){sh.fopen=(sh.fopen===t.dataset.id)?null:t.dataset.id;renderSheet();}break;}
+    case 'cat-field':{
+      const c=S.cats.find(x=>x.id===t.dataset.id),k=t.dataset.f;if(!c||!FIELD_ORDER.includes(k))break;
+      const cur=fieldsOf(c).slice(),i=cur.indexOf(k);if(i<0)cur.push(k);else cur.splice(i,1);
+      c.fields=FIELD_ORDER.filter(f=>cur.includes(f));delete c.fresh;renderSheet();catChanged();break;}
     case 'cat-del':{
       const sh=S.sheet,c=S.cats.find(x=>x.id===t.dataset.id);if(!sh||!c)break;
       if(sh.armCat!==c.id){sh.armCat=c.id;t.textContent='지움?';t.classList.add('arm');setTimeout(()=>{if(S.sheet===sh&&sh.armCat===c.id){sh.armCat=null;if(t.isConnected){t.textContent='×';t.classList.remove('arm');}}},3000);break;}
@@ -914,7 +1008,8 @@ document.addEventListener('click',ev=>{
 document.addEventListener('input',ev=>{
   const id=ev.target&&ev.target.id;
   if(id==='f-end'||id==='f-time')updDur();
-  if(id==='f-place'||id==='f-dist'||id==='f-dest'||id==='f-end')collectX();
+  if(id==='f-date'||id==='f-time')updDt();
+  if(id==='f-place'||id==='f-dist'||id==='f-end'||id==='f-cost'||id==='f-author')collectX();
 });
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'){if(!$('#lb').hidden)hideLb();else if(S.sheet)closeSheet();}
@@ -930,13 +1025,22 @@ document.addEventListener('input',ev=>{
 });
 document.addEventListener('change',ev=>{
   const t=ev.target;
+  if(t.id==='f-date'||t.id==='f-time')updDt();
   if(t.id==='f-cam'||t.id==='f-pic'){addFiles(t.files);t.value='';}
   else if(t.id==='imp'){const f=t.files&&t.files[0];t.value='';if(f)doImport(f);}
   else if(t.dataset&&t.dataset.catName){
     const c=S.cats.find(x=>x.id===t.dataset.catName);if(!c)return;
     const v=t.value.trim();
     if(!v){t.value=c.name;return;}
-    c.name=v.slice(0,10);catChanged();
+    c.name=v.slice(0,10);
+    if(c.fresh){
+      /* 새로 만든 분류의 첫 이름에서만 추천 항목을 채운다. 이후 이름을 바꿔도 항목은 유지 */
+      delete c.fresh;
+      const pf=presetOf(c.name);
+      if(pf.length){c.fields=pf;if(S.sheet&&S.sheet.kind==='cats')S.sheet.fopen=c.id;toast('추천 항목을 채웠습니다: '+pf.map(k=>FIELD_DEFS[k]).join(', '));}
+      catChanged();if(S.sheet&&S.sheet.kind==='cats')renderSheet();return;
+    }
+    catChanged();
   }
 });
 document.addEventListener('submit',ev=>{
