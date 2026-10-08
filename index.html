@@ -271,7 +271,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .vdel{margin-top:18px;text-align:left}
 .tdel{font-size:13px;color:var(--c-key);text-decoration:underline;text-underline-offset:3px;padding:8px 2px}
 .crow{gap:6px}
-.cfs{margin:-2px 0 8px 44px;font-size:12px;color:var(--ink2)}
+.clist.cm{gap:4px;margin-bottom:8px}
+.cm .crow{gap:5px}
+.cm .cdot{width:22px;height:22px;border-width:2px}
+.cm .cname{height:38px;padding:0 10px;font-size:15px}
+.cm .mv{width:32px;height:34px}
+.cm .cfb{height:34px;min-width:50px;padding:0 8px}
+.cm .cmeta{flex:none;width:52px;text-align:right;font-size:11px;line-height:1.2;color:var(--ink2)}
+.cmh .sh-head{margin-bottom:6px}
+.cmh .hint{margin-top:4px;font-size:11.5px}
 .cdot.st{display:block}
 .cfb{min-width:60px}
 .mv{flex:none;width:34px;height:36px;border-radius:50%;background:var(--fill);font-size:12px;color:var(--ink2)}
@@ -661,17 +669,17 @@ function todoFormHtml(sh){
 }
 function catsHtml(sh){
   const rows=S.cats.map((c,i)=>{
-    const n=S.entries.filter(e=>e.cat===c.id).length,fl=fieldsOf(c).map(k=>FIELD_SHORT[k]||k);
+    const fl=fieldsOf(c).map(k=>FIELD_SHORT[k]||k);
     return '<div class="crow"><span class="cdot st" style="--c:'+colorOf(c)+'"></span>'
       +'<input class="cname" data-cat-name="'+esc(c.id)+'" value="'+esc(c.name)+'" maxlength="10" aria-label="분류 이름">'
+      +'<span class="cmeta">'+esc(fl.join('·'))+'</span>'
       +'<button type="button" class="mv" data-act="cat-up" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+' 위로"'+(i===0?' disabled':'')+'>▲</button>'
       +'<button type="button" class="mv" data-act="cat-down" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+' 아래로"'+(i===S.cats.length-1?' disabled':'')+'>▼</button>'
-      +(c.id==='etc'?'<span class="cfb off" style="visibility:hidden"></span>':'<button type="button" class="cfb'+(c.hidden?' on':'')+'" data-act="cat-hide" data-id="'+esc(c.id)+'" aria-pressed="'+(!!c.hidden)+'">'+(c.hidden?'숨김':'표시')+'</button>')+'</div>'
-      +'<div class="cfs">기록 '+n+'건'+(fl.length?' · 항목: '+esc(fl.join('·')):'')+'</div>';
+      +(c.id==='etc'?'<span class="cfb off" style="visibility:hidden"></span>':'<button type="button" class="cfb'+(c.hidden?' on':'')+'" data-act="cat-hide" data-id="'+esc(c.id)+'" aria-pressed="'+(!!c.hidden)+'">'+(c.hidden?'숨김':'표시')+'</button>')+'</div>';
   }).join('');
   return '<div class="sh-head"><h2>분류 관리</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
-    +'<div class="clist">'+rows+'</div>'
-    +'<p class="hint">분류는 표준 10개로 고정되어 있습니다. 표시 이름 바꾸기, ▲▼ 순서, 쓰지 않는 분류 숨기기만 할 수 있습니다. 숨겨도 기존 기록은 그대로 남습니다.</p>';
+    +'<div class="clist cm">'+rows+'</div>'
+    +'<p class="hint">분류는 표준 10개 고정. 이름 바꾸기, ▲▼ 순서, 숨기기만 가능합니다. 숨겨도 기존 기록은 남습니다.</p>';
 }
 function dtText(){
   const d=$('#f-date'),t=$('#f-time');if(!d||!t)return '';
