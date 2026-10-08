@@ -166,6 +166,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .geo button{text-decoration:underline;color:var(--ink2)}
 .actions{display:flex;gap:8px;margin-top:4px}
 .actions .pri{flex:1}
+.vmeta{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
+.vmeta .tag-cat{font-size:12px}
+.vtitle{margin:10px 0 4px;font:700 22px/1.35 var(--serif);text-wrap:balance;overflow-wrap:anywhere}
+.vnote{margin:12px 0 0;font-size:15px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.vphotos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.vphotos .ph{width:100%;height:auto;aspect-ratio:1}
+.vact{margin-top:18px}
 .lb{background:rgba(0,0,0,.88);align-items:center}
 .lb img{max-width:100%;max-height:86dvh;object-fit:contain}
 .lb .x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;background:rgba(255,255,255,.2);color:#fff}
@@ -367,12 +374,12 @@ function hideSnack(){S.snack=null;$('#snack').hidden=true;clearTimeout(snackT);}
 let layer=false;
 const pushLayer=()=>{if(!layer){history.pushState({l:1},'');layer=true;}};
 const popLayer=()=>{if(layer){layer=false;history.back();}};
-function showLb(src){$('#lb-img').src=src;$('#lb').hidden=false;pushLayer();}
-function hideLb(){$('#lb').hidden=true;$('#lb-img').removeAttribute('src');popLayer();}
+function showLb(src){$('#lb-img').src=src;$('#lb').hidden=false;if(!S.sheet)pushLayer();}
+function hideLb(){$('#lb').hidden=true;$('#lb-img').removeAttribute('src');if(!S.sheet)popLayer();}
 window.addEventListener('popstate',()=>{
   if(!layer)return;
   layer=false;
-  if(!$('#lb').hidden){$('#lb').hidden=true;$('#lb-img').removeAttribute('src');}
+  if(!$('#lb').hidden){$('#lb').hidden=true;$('#lb-img').removeAttribute('src');if(S.sheet)pushLayer();}
   else if(S.sheet)closeSheet();
 });
 const dayLabel=ds=>{const d=pYmd(ds);return (d.getMonth()+1)+'월 '+d.getDate()+'일';};
@@ -592,7 +599,7 @@ function updDur(){
 }
 function renderSheet(){
   const sh=S.sheet;if(!sh)return;
-  $('#panel').innerHTML=sh.kind==='rec'?recFormHtml(sh):sh.kind==='todo'?todoFormHtml(sh):catsHtml(sh);
+  $('#panel').innerHTML=sh.kind==='rec'?recFormHtml(sh):sh.kind==='view'?viewHtml(sh):sh.kind==='todo'?todoFormHtml(sh):catsHtml(sh);
   if(sh.kind==='rec'){renderStrip();renderGeo();renderExtra();}
 }
 function openSheet(sh){
@@ -601,12 +608,35 @@ function openSheet(sh){
   const f=sh.kind==='rec'?'#f-title':sh.kind==='todo'?'#t-title':null;
   if(f&&!(sh.entry||sh.todo))setTimeout(()=>{const t=$(f);if(t)t.focus();},60);
 }
-function openRec(entry,prefill){
+function recSheetOf(entry,prefill){
   const last=lsGet(LC_KEY);
   const cat=entry?entry.cat:(S.cats.some(c=>c.id===last)?last:S.cats[0].id);
-  openSheet({kind:'rec',entry:entry||null,cat:cat,title:entry?entry.title:(prefill&&prefill.title)||'',star:entry?(entry.star||0):0,
+  return {kind:'rec',entry:entry||null,cat:cat,title:entry?entry.title:(prefill&&prefill.title)||'',star:entry?(entry.star||0):0,
     photos:entry?(entry.photos||[]).slice():[],busy:0,geo:(entry&&entry.geo)||null,touched:{dt:!!entry},arm:false,
-    x:entry?{place:entry.f.place||'',dist:entry.f.distKm||'',dest:entry.f.dest||'',end:entry.f.end||''}:{}});
+    x:entry?{place:entry.f.place||'',dist:entry.f.distKm||'',dest:entry.f.dest||'',end:entry.f.end||''}:{}};
+}
+function openRec(entry,prefill){openSheet(recSheetOf(entry,prefill));}
+/* 기록 카드를 누르면 먼저 읽기 전용 상세 화면, 거기서 '수정'을 눌러야 입력창으로 넘어간다 */
+function viewHtml(sh){
+  const e=sh.entry,c=catOf(e.cat),lf=legacyFacts(e),ph=e.photos||[];
+  const a=String(e.date||'').split('-').map(Number),d=a.length===3?new Date(a[0],a[1]-1,a[2]):null;
+  const ds=d&&isFinite(d)?(a[0]+'년 '+a[1]+'월 '+a[2]+'일 ('+WD[d.getDay()]+')'):'';
+  const g=e.geo;
+  return '<div class="sh-head"><h2>기록</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
+  +'<div class="vmeta" style="--c:'+colorOf(c)+'"><span class="tag-cat">'+icon(c.id)+esc(c.name)+'</span><span>'+esc(ds)+(e.time?' '+esc(e.time):'')+'</span>'
+  +(e.star?'<span class="stars-s" aria-label="중요도 '+e.star+'">'+'★'.repeat(e.star)+'</span>':'')+'</div>'
+  +'<h3 class="vtitle">'+esc(e.title)+'</h3>'
+  +(lf.length?'<div class="facts">'+lf.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>':'')
+  +(e.note?'<p class="vnote">'+esc(e.note)+'</p>':'')
+  +(ph.length?'<div class="vphotos">'+ph.map((p,i)=>'<button type="button" class="ph" data-act="photo" data-id="'+esc(e.id)+'" data-i="'+i+'" aria-label="사진 크게 보기"><img alt="" src="'+esc(urlOf(p))+'"></button>').join('')+'</div>':'')
+  +(g?'<p class="geo" style="margin-top:12px">위치 '+g.lat.toFixed(4)+', '+g.lon.toFixed(4)+' · <a href="https://www.google.com/maps?q='+g.lat+','+g.lon+'" target="_blank" rel="noopener">지도에서 보기</a></p>':'')
+  +(e.tags&&e.tags.length?'<div class="tags">'+e.tags.map(t=>'<span>#'+esc(t)+'</span>').join('')+'</div>':'')
+  +'<div class="fld actions vact"><button class="btn pri" type="button" data-act="rec-edit">수정</button><button class="btn danger" type="button" id="del" data-act="rec-del">삭제</button></div>';
+}
+function openView(entry){openSheet({kind:'view',entry:entry,arm:false});}
+function editFromView(){
+  const sh=S.sheet;if(!sh||sh.kind!=='view')return;
+  S.sheet=recSheetOf(sh.entry);renderSheet();$('#panel').scrollTop=0;
 }
 function closeSheet(){
   S.sheet=null;$('#sheet').hidden=true;document.body.style.overflow='';popLayer();
@@ -846,7 +876,8 @@ document.addEventListener('click',ev=>{
     case 'tab':S.tab=t.dataset.tab;render();window.scrollTo(0,0);break;
     case 'rec-new':openRec(null);break;
     case 'todo-new':openSheet({kind:'todo',todo:null,arm:false});break;
-    case 'rec-open':{const e=S.entries.find(x=>x.id===t.dataset.id);if(e)openRec(e);break;}
+    case 'rec-open':{const e=S.entries.find(x=>x.id===t.dataset.id);if(e)openView(e);break;}
+    case 'rec-edit':editFromView();break;
     case 'todo-edit':{const x=S.todos.find(y=>y.id===t.dataset.id);if(x)openSheet({kind:'todo',todo:x,arm:false});break;}
     case 'todo-toggle':toggleTodo(t.dataset.id);break;
     case 'close':closeSheet();break;
