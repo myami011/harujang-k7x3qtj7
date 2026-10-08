@@ -224,6 +224,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .snack button{padding:8px 12px;border-radius:10px;font-weight:700;color:var(--bg)}
 .snack button.ok{background:color-mix(in srgb,var(--bg) 22%,transparent)}
 .mrow,.mhike,.quick{display:none}
+.xc{display:contents}
+.dur-out{min-height:44px;display:flex;align-items:center;padding:0 12px;border:1px dashed var(--line);border-radius:10px;font:700 16px var(--sans);font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -262,6 +264,7 @@ const ICON_PATH={
   hike:'<path d="M3 19l6.5-11 3.5 6 2-3L21 19z"/>',
   read:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v15H5.5A1.5 1.5 0 0 0 4 20.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v15h5.5a1.5 1.5 0 0 1 1.5 1.5z"/>',
   shop:'<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>',
+  trip:'<path d="M21 4L3 11l6 2.5L11.5 20l2.5-5.5zM9 13.5L21 4"/>',
   etc:'<circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/>',
   tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.2"/>'
 };
@@ -269,7 +272,7 @@ const icon=id=>SVG(ICON_PATH[id]||ICON_PATH.tag);
 const CHECK=SVG('<path d="M5 12.5l4.5 4.5L19 7.5"/>');
 const COLORS=['blue','green','plum','teal','ochre','rose','persimmon','slate'];
 const DEFAULT_CATS=[
-  {id:'out',name:'외출',color:'blue'},{id:'hike',name:'등산',color:'green'},{id:'meet',name:'만남',color:'plum'},
+  {id:'out',name:'외출',color:'blue'},{id:'hike',name:'등산',color:'green'},{id:'trip',name:'여행',color:'rose'},{id:'meet',name:'만남',color:'plum'},
   {id:'read',name:'독서',color:'teal'},{id:'shop',name:'장보기',color:'ochre'},{id:'etc',name:'기타',color:'slate'}
 ];
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
@@ -324,6 +327,10 @@ async function init(){
     const meta=await idbAll('meta'),m=meta.find(x=>x.key==='cats');
     if(m&&Array.isArray(m.list)&&m.list.length)S.cats=m.list;
     ensureEtc();
+    if(lsGet('harujang:tripAdded')!=='1'){
+      if(!S.cats.some(c=>c.id==='trip')){const i=S.cats.findIndex(c=>c.id==='etc');S.cats.splice(i<0?S.cats.length:i,0,{id:'trip',name:'여행',color:'rose'});try{await saveCats();}catch(_){}}
+      lsSet('harujang:tripAdded','1');
+    }
     S.entries=(await idbAll('entries')).map(normEntry);
     S.todos=await idbAll('todos');
   }catch(_){S.mem=true;toast('이 브라우저에서는 기록을 저장할 수 없습니다. 시크릿 모드인지 확인하세요.');}
@@ -369,6 +376,12 @@ function dueText(due,td){
   if(due===addDays(td,1))return '내일';
   return dayLabel(due);
 }
+const durMinOf=(a,b)=>{
+  if(!/^\d\d:\d\d$/.test(a||'')||!/^\d\d:\d\d$/.test(b||''))return 0;
+  let d=(Number(b.slice(0,2))*60+Number(b.slice(3)))-(Number(a.slice(0,2))*60+Number(a.slice(3)));
+  if(d<0)d+=1440;return d;
+};
+const durText=m=>m?(m>=60?Math.floor(m/60)+'시간':'')+(m%60?(m>=60?' ':'')+(m%60)+'분':''):'';
 function legacyFacts(e){
   const f=e.f||{},o=[];
   ['place','purpose','move','who','topics','next','mountain','course','weather','meaning'].forEach(k=>{
@@ -379,6 +392,9 @@ function legacyFacts(e){
   const d=(f.durH||f.durM)?[f.durH?f.durH+'시간':'',f.durM?f.durM+'분':''].filter(Boolean).join(' '):'';
   if(d)o.push(d);
   if(f.gain)o.push('누적 +'+fmt(f.gain)+'m');
+  if(f.dest&&f.dest!==e.title)o.push(String(f.dest));
+  if(f.end&&e.time)o.push(e.time+'~'+f.end);
+  if(f.durMin)o.push(durText(f.durMin));
   return o;
 }
 
@@ -504,10 +520,12 @@ function recFormHtml(sh){
   +'<form id="f" class="grid" autocomplete="off" novalidate>'
   +'<div class="fld"><span class="lbl">분류</span><div class="catpick" role="radiogroup" aria-label="분류">'+S.cats.map(c=>
     '<button type="button" class="cp'+(c.id===sh.cat?' on':'')+'" role="radio" aria-checked="'+(c.id===sh.cat)+'" data-act="setcat" data-id="'+esc(c.id)+'" style="--c:'+colorOf(c)+'">'+icon(c.id)+esc(c.name)+'</button>').join('')+'</div></div>'
+  +'<div class="xc" id="xf-top"></div>'
   +'<label class="fld"><span class="lbl">제목</span><input id="f-title" type="text" maxlength="80" placeholder="한 줄로 적어요" value="'+esc(sh.title||'')+'"><small class="err" id="err-title" hidden>제목을 입력하세요</small></label>'
   +'<label class="fld half"><span class="lbl">날짜</span><input id="f-date" type="date" value="'+(e?e.date:ymd(now))+'"></label>'
-  +'<label class="fld half"><span class="lbl">시간</span><input id="f-time" type="time" value="'+(e?e.time:hm(now))+'"></label>'
-  +'<label class="fld"><span class="lbl">메모</span><textarea id="f-note" rows="4" placeholder="오늘의 장면, 생각, 기억해 둘 것 (거리, 금액 같은 숫자도 여기에)">'+esc(e?e.note:'')+'</textarea></label>'
+  +'<label class="fld half"><span class="lbl" id="lbl-time">시간</span><input id="f-time" type="time" value="'+(e?e.time:hm(now))+'"></label>'
+  +'<div class="xc" id="xf-end"></div>'
+  +'<label class="fld"><span class="lbl">메모</span><textarea id="f-note" rows="4" placeholder="장면, 생각, 기억해 둘 것 (금액 같은 숫자도 여기에)">'+esc(e?e.note:'')+'</textarea></label>'
   +'<div class="fld"><span class="lbl">사진 <span id="ph-n"></span></span><div class="strip" id="strip"></div>'
   +'<div class="btns"><label class="btn">촬영<input id="f-cam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn">앨범에서 선택<input id="f-pic" type="file" accept="image/*" multiple hidden></label></div>'
   +'<p class="hint">사진은 줄여서 폰에 저장합니다. 찍은 시간과 위치가 사진에 있으면 자동으로 채웁니다.</p></div>'
@@ -536,10 +554,33 @@ function catsHtml(sh){
     +'<div class="clist">'+rows+'</div><div class="btns"><button type="button" class="btn" data-act="cat-add">+ 분류 추가</button></div>'
     +'<p class="hint">이름과 색만 바꿉니다. 분류를 지우면 그 분류의 기록은 기타로 옮겨집니다. 이름을 바꿔도 기존 기록은 그대로 이어집니다.</p>';
 }
+function renderExtra(){
+  const sh=S.sheet;if(!sh||sh.kind!=='rec')return;
+  const top=$('#xf-top'),end=$('#xf-end');if(!top||!end)return;
+  const x=sh.x||(sh.x={});
+  let t='',en='';
+  if(sh.cat==='hike'){
+    t='<label class="fld"><span class="lbl">장소</span><input id="f-place" type="text" maxlength="60" placeholder="산·코스 이름" value="'+esc(x.place||'')+'"></label>'
+     +'<label class="fld half"><span class="lbl">거리</span><span class="unit-wrap"><input id="f-dist" type="number" inputmode="decimal" step="0.1" min="0" value="'+esc(x.dist||'')+'"><em>km</em></span></label><div class="fld half"></div>';
+    en='<label class="fld half"><span class="lbl">종료시간</span><input id="f-end" type="time" value="'+esc(x.end||'')+'"></label>'
+     +'<div class="fld half"><span class="lbl">소요시간</span><div class="dur-out" id="dur-out">-</div></div>';
+  }else if(sh.cat==='trip'){
+    t='<label class="fld"><span class="lbl">목적지</span><input id="f-dest" type="text" maxlength="60" placeholder="어디로 가나요" value="'+esc(x.dest||'')+'"></label>';
+  }
+  top.innerHTML=t;end.innerHTML=en;
+  const ti=$('#f-title');if(ti)ti.placeholder=(sh.cat==='hike'||sh.cat==='trip')?'비워 두면 '+(sh.cat==='hike'?'장소':'목적지')+'가 제목':'한 줄로 적어요';
+  $('#lbl-time').textContent=sh.cat==='hike'?'시작시간':'시간';
+  updDur();
+}
+function updDur(){
+  const o=$('#dur-out');if(!o)return;
+  const m=durMinOf($('#f-time').value,$('#f-end')&&$('#f-end').value);
+  o.textContent=m?durText(m):'-';
+}
 function renderSheet(){
   const sh=S.sheet;if(!sh)return;
   $('#panel').innerHTML=sh.kind==='rec'?recFormHtml(sh):sh.kind==='todo'?todoFormHtml(sh):catsHtml(sh);
-  if(sh.kind==='rec'){renderStrip();renderGeo();}
+  if(sh.kind==='rec'){renderStrip();renderGeo();renderExtra();}
 }
 function openSheet(sh){
   S.sheet=sh;renderSheet();
@@ -551,7 +592,8 @@ function openRec(entry,prefill){
   const last=lsGet(LC_KEY);
   const cat=entry?entry.cat:(S.cats.some(c=>c.id===last)?last:S.cats[0].id);
   openSheet({kind:'rec',entry:entry||null,cat:cat,title:entry?entry.title:(prefill&&prefill.title)||'',star:entry?(entry.star||0):0,
-    photos:entry?(entry.photos||[]).slice():[],busy:0,geo:(entry&&entry.geo)||null,touched:{dt:!!entry},arm:false});
+    photos:entry?(entry.photos||[]).slice():[],busy:0,geo:(entry&&entry.geo)||null,touched:{dt:!!entry},arm:false,
+    x:entry?{place:entry.f.place||'',dist:entry.f.distKm||'',dest:entry.f.dest||'',end:entry.f.end||''}:{}});
 }
 function closeSheet(){
   S.sheet=null;$('#sheet').hidden=true;document.body.style.overflow='';popLayer();
@@ -566,14 +608,34 @@ function renderGeo(){
   const g=S.sheet&&S.sheet.geo,el=$('#geo');if(!el)return;
   el.innerHTML=g?'위치 '+g.lat.toFixed(4)+', '+g.lon.toFixed(4)+' · <a href="https://www.google.com/maps?q='+g.lat+','+g.lon+'" target="_blank" rel="noopener">지도에서 보기</a> · <button type="button" data-act="geo-clear">지우기</button>':'';
 }
+function collectX(){
+  const sh=S.sheet;if(!sh||sh.kind!=='rec')return;
+  const x=sh.x||(sh.x={}),g=id=>{const el=$(id);return el?el.value:undefined;};
+  const v={place:g('#f-place'),dist:g('#f-dist'),dest:g('#f-dest'),end:g('#f-end')};
+  Object.keys(v).forEach(k=>{if(v[k]!==undefined)x[k]=v[k];});
+}
 async function saveRec(){
   const sh=S.sheet;if(!sh||sh.kind!=='rec'||sh.busy)return;
-  const title=$('#f-title').value.trim();
+  collectX();
+  const x=sh.x||{};
+  const title=$('#f-title').value.trim()||(sh.cat==='hike'?(x.place||'').trim():sh.cat==='trip'?(x.dest||'').trim():'');
   if(!title){$('#err-title').hidden=false;$('#f-title').focus();return;}
   const now=Date.now(),old=sh.entry,star=Number($('#f-star').dataset.v||0);
   const e=Object.assign({},old||{},{id:old?old.id:newId(),cat:sh.cat,title:title,date:$('#f-date').value||ymd(new Date()),time:$('#f-time').value||hm(new Date()),
     note:$('#f-note').value.trim(),photos:sh.photos.slice(),star:star,createdAt:old?old.createdAt:now,updatedAt:now});
-  if(!e.f)e.f={};
+  e.f=Object.assign({},e.f||{});
+  if(sh.cat==='hike'){
+    const place=(x.place||'').trim(),dist=parseFloat(x.dist);
+    if(place)e.f.place=place;else delete e.f.place;
+    if(isFinite(dist)&&dist>0)e.f.distKm=dist;else delete e.f.distKm;
+    const m=durMinOf(e.time,x.end);
+    if(x.end)e.f.end=x.end;else delete e.f.end;
+    if(m)e.f.durMin=m;else delete e.f.durMin;
+    delete e.f.durH;delete e.f.durM;
+  }else if(sh.cat==='trip'){
+    const dest=(x.dest||'').trim();
+    if(dest)e.f.dest=dest;else delete e.f.dest;
+  }
   if(sh.geo)e.geo=sh.geo;else delete e.geo;
   const b=$('#save');b.disabled=true;
   try{await putEntry(e);lsSet(LC_KEY,sh.cat);closeSheet();toast('저장했습니다');}
@@ -660,6 +722,7 @@ function applyExif(ex){
   const sh=S.sheet;if(!sh||sh.kind!=='rec')return;let used=false;
   if(ex.date&&!sh.touched.dt&&!sh.entry){$('#f-date').value=ex.date;$('#f-time').value=ex.time;used=true;}
   if(ex.geo&&!sh.geo){sh.geo=ex.geo;renderGeo();used=true;}
+  if(used)updDur();
   if(used)toast('사진 정보로 시간·위치를 채웠습니다');
 }
 async function addFiles(files){
@@ -667,7 +730,7 @@ async function addFiles(files){
   for(const file of Array.from(files)){
     sh.busy++;renderStrip();
     try{
-      const r=await prepPhoto(file,1600,0.82);
+      const r=await prepPhoto(file,2048,0.85);
       if(S.sheet===sh){sh.photos.push(r.blob);if(r.ex)applyExif(r.ex);}
     }catch(_){toast('사진을 처리하지 못했습니다.');}
     sh.busy--;if(S.sheet===sh)renderStrip();
@@ -774,7 +837,7 @@ document.addEventListener('click',ev=>{
     case 'todo-edit':{const x=S.todos.find(y=>y.id===t.dataset.id);if(x)openSheet({kind:'todo',todo:x,arm:false});break;}
     case 'todo-toggle':toggleTodo(t.dataset.id);break;
     case 'close':closeSheet();break;
-    case 'setcat':{const sh=S.sheet;if(sh){sh.cat=t.dataset.id;document.querySelectorAll('.cp').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});}break;}
+    case 'setcat':{const sh=S.sheet;if(sh){sh.cat=t.dataset.id;document.querySelectorAll('.cp').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();}break;}
     case 'filter':S.cat=t.dataset.cat;render();break;
     case 'day':S.day=(S.day===t.dataset.date)?null:t.dataset.date;render();break;
     case 'mon':{let m=S.cal.m+Number(t.dataset.d),y=S.cal.y;if(m<0){m=11;y--;}if(m>11){m=0;y++;}S.cal={y:y,m:m};S.day=null;render();break;}
@@ -802,6 +865,11 @@ document.addEventListener('click',ev=>{
       if(sh.armCat!==c.id){sh.armCat=c.id;t.textContent='지움?';t.classList.add('arm');setTimeout(()=>{if(S.sheet===sh&&sh.armCat===c.id){sh.armCat=null;if(t.isConnected){t.textContent='×';t.classList.remove('arm');}}},3000);break;}
       removeCat(c.id);break;}
   }
+});
+document.addEventListener('input',ev=>{
+  const id=ev.target&&ev.target.id;
+  if(id==='f-end'||id==='f-time')updDur();
+  if(id==='f-place'||id==='f-dist'||id==='f-dest'||id==='f-end')collectX();
 });
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'){if(!$('#lb').hidden)hideLb();else if(S.sheet)closeSheet();}
