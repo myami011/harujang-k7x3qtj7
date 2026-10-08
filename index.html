@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>하루장</title>
-<meta name="theme-color" content="#eceff0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f1719" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1b1913" media="(prefers-color-scheme: dark)">
 <meta name="description" content="하루의 중요한 일과 할 일을 사진과 함께 남기는 개인 기록장">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -16,22 +16,22 @@
 <style>
 /* Layout: 단일 열 모바일 앱. 위에 오늘 날짜와 4개 빠른 기록 버튼, 아래로 날짜별 타임라인. 하단 탭 3개 + 새 기록 버튼. */
 :root{
-  --bg:#eceff0; --card:#f8faf9; --ink:#17262a; --ink2:#566a6b; --line:#d3dbdb; --fill:#e3e9e9;
-  --brand:#1d3f45; --on-brand:#f2f7f6;
-  --c-key:#c24d22; --k-blue:#2f64a8; --k-green:#4d7a22; --k-plum:#9a3f70; --k-teal:#17766f; --k-ochre:#a8751a; --k-rose:#c0405a; --k-persimmon:#c24d22; --k-slate:#5d6b73;
-  --shadow:0 1px 2px rgba(23,38,42,.06),0 6px 18px rgba(23,38,42,.06);
+  --bg:#f4efe4; --card:#fbf8f1; --ink:#2b2a24; --ink2:#6f6a5c; --line:#e0d9c8; --fill:#ece5d4;
+  --brand:#3f5e4a; --on-brand:#f7f4ea;
+  --c-key:#b95a2f; --k-blue:#3e6794; --k-green:#4f7a3a; --k-plum:#8c4a6b; --k-teal:#2f7468; --k-ochre:#a8751a; --k-rose:#b4485c; --k-persimmon:#b95a2f; --k-slate:#6a6a5f;
+  --shadow:0 1px 2px rgba(70,55,30,.07),0 6px 18px rgba(70,55,30,.07);
   --serif:"Gowun Batang","Noto Serif KR","Nanum Myeongjo",serif;
   --sans:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0f1719; --card:#172224; --ink:#e4eeee; --ink2:#9db2b2; --line:#2a3a3c; --fill:#223032;
-  --brand:#cfe6e3; --on-brand:#0f1719;
-  --c-key:#f09a74; --k-blue:#7fb0ea; --k-green:#9fcf62; --k-plum:#e08dbb; --k-teal:#6fd0c6; --k-ochre:#e3b45a; --k-rose:#f08aa0; --k-persimmon:#f09a74; --k-slate:#a3b1b8;
+  --bg:#1b1913; --card:#252218; --ink:#eee8d8; --ink2:#a9a290; --line:#3a3528; --fill:#2f2b20;
+  --brand:#b4cfae; --on-brand:#1b1913;
+  --c-key:#eca07b; --k-blue:#8fb4dc; --k-green:#a8cf7a; --k-plum:#dd99bb; --k-teal:#7fcfc0; --k-ochre:#e3b45a; --k-rose:#eb94a6; --k-persimmon:#eca07b; --k-slate:#b3b09f;
   --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f1719; --card:#172224; --ink:#e4eeee; --ink2:#9db2b2; --line:#2a3a3c; --fill:#223032;
-  --brand:#cfe6e3; --on-brand:#0f1719;
-  --c-key:#f09a74; --k-blue:#7fb0ea; --k-green:#9fcf62; --k-plum:#e08dbb; --k-teal:#6fd0c6; --k-ochre:#e3b45a; --k-rose:#f08aa0; --k-persimmon:#f09a74; --k-slate:#a3b1b8;
+  --bg:#1b1913; --card:#252218; --ink:#eee8d8; --ink2:#a9a290; --line:#3a3528; --fill:#2f2b20;
+  --brand:#b4cfae; --on-brand:#1b1913;
+  --c-key:#eca07b; --k-blue:#8fb4dc; --k-green:#a8cf7a; --k-plum:#dd99bb; --k-teal:#7fcfc0; --k-ochre:#e3b45a; --k-rose:#eb94a6; --k-persimmon:#eca07b; --k-slate:#b3b09f;
   --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -133,7 +133,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .fab{position:fixed;z-index:21;right:max(16px,calc((100vw - 520px)/2 + 16px));bottom:calc(74px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.28)}
 .fab svg{width:26px;height:26px}
 
-.scrim{position:fixed;inset:0;z-index:40;background:rgba(8,14,15,.55);display:flex;align-items:flex-end;justify-content:center}
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(40,30,15,.5);display:flex;align-items:flex-end;justify-content:center}
 .panel{width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;background:var(--card);border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px))}
 @media (prefers-reduced-motion:no-preference){.panel{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.4}}}
 .sh-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -264,6 +264,15 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .xchip.on{border-style:solid;border-color:var(--brand);color:var(--brand);font-weight:700}
 .xchip[aria-expanded="true"]{background:var(--fill)}
 #f-note{resize:none;overflow-y:auto;min-height:calc(4*1.5em + 22px)}
+.card{border-left:4px solid var(--c,var(--line))}
+.hedit{margin-left:auto;height:34px;padding:0 15px;border-radius:99px;border:1px solid var(--line);font-size:13.5px;font-weight:700;color:var(--brand)}
+.hedit+.x{margin-left:0}
+.vdel{margin-top:18px;text-align:left}
+.tdel{font-size:13px;color:var(--c-key);text-decoration:underline;text-underline-offset:3px;padding:8px 2px}
+.crow{gap:6px}
+.cfb{min-width:60px}
+.mv{flex:none;width:34px;height:36px;border-radius:50%;background:var(--fill);font-size:12px;color:var(--ink2)}
+.mv[disabled]{opacity:.3}
 .scrim.mid{align-items:center;padding:16px}
 .scrim.mid .panel{max-height:78dvh;border-radius:20px}
 .cp.more{color:var(--ink2);border-style:dashed;padding-left:12px}
@@ -491,18 +500,14 @@ function cardHtml(e){
     +'<h3>'+esc(e.title)+'</h3>'+body+'</div>';
 }
 const CAT_TOP=5;
-function catRank(){
-  const last={};
-  S.entries.forEach(e=>{const t=e.createdAt||e.updatedAt||0;if(!(last[e.cat]>=t))last[e.cat]=t;});
-  return S.cats.map((c,i)=>({c:c,t:last[c.id]||0,i:i})).sort((a,b)=>b.t-a.t||a.i-b.i).map(o=>o.c);
-}
+function catRank(){return S.cats.slice();}
 function catChipsHtml(sh){
   const all=catRank(),many=all.length>CAT_TOP;
   let vis=all;
   if(many&&!sh.catAll){
     vis=all.slice(0,CAT_TOP);
     const sel=all.find(c=>c.id===sh.cat);
-    if(sel&&!vis.includes(sel))vis=all.slice(0,CAT_TOP-1).concat(sel);
+    if(sel&&!vis.includes(sel))vis=vis.concat(sel);
   }
   return vis.map(c=>'<button type="button" class="cp'+(c.id===sh.cat?' on':'')+'" role="radio" aria-checked="'+(c.id===sh.cat)+'" data-act="setcat" data-id="'+esc(c.id)+'" style="--c:'+colorOf(c)+'">'+icon(c.id)+esc(c.name)+'</button>').join('')
     +(many?'<button type="button" class="cp more" data-act="cat-more" aria-expanded="'+(!!sh.catAll)+'">'+(sh.catAll?'접기 ▴':'더보기 ▾')+'</button>':'');
@@ -623,7 +628,7 @@ function recFormHtml(sh){
   +'<div class="fld dtgrid" id="dt-box" hidden><label><span class="lbl">날짜</span><input id="f-date" type="date" value="'+(e?e.date:ymd(now))+'"></label>'
   +'<label><span class="lbl" id="lbl-time">시간</span><input id="f-time" type="time" value="'+(e?e.time:hm(now))+'"></label></div>'
   +'<div class="fld xchips" id="xchips" hidden></div><div class="fld xbody" id="xbody" hidden></div>'
-  +'<label class="fld"><span class="lbl">메모</span><textarea id="f-note" rows="3" placeholder="장면, 생각, 기억해 둘 것 (금액 같은 숫자도 여기에)">'+esc(e?e.note:'')+'</textarea></label>'
+  +'<label class="fld"><span class="lbl">메모</span><textarea id="f-note" rows="3" placeholder="메모하세요">'+esc(e?e.note:'')+'</textarea></label>'
   +'<div class="fld"><span class="lbl">사진 <span id="ph-n"></span></span><div class="strip" id="strip"></div>'
   +'<div class="btns"><label class="btn">촬영<input id="f-cam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn">앨범에서 선택<input id="f-pic" type="file" accept="image/*" multiple hidden></label>'
   +'<button type="button" class="imp'+(sh.star?' on':'')+'" id="f-star" data-act="imp" data-v="'+(sh.star?1:0)+'" aria-pressed="'+(!!sh.star)+'" style="margin-left:auto">'+(sh.star?'★':'☆')+' 중요</button></div></div>'
@@ -640,19 +645,21 @@ function todoFormHtml(sh){
   +'<div class="fld actions"><button class="btn pri" type="submit" id="tsave">저장</button>'+(x?'<button class="btn danger" type="button" id="tdel" data-act="todo-del">삭제</button>':'')+'</div></form>';
 }
 function catsHtml(sh){
-  const rows=S.cats.map(c=>{
+  const rows=S.cats.map((c,i)=>{
     const n=S.entries.filter(e=>e.cat===c.id).length;
     return '<div class="crow"><button type="button" class="cdot" data-act="cat-color" data-id="'+esc(c.id)+'" style="--c:'+colorOf(c)+'" aria-label="'+esc(c.name)+' 색 바꾸기"></button>'
-      +'<input class="cname" data-cat-name="'+esc(c.id)+'" value="'+esc(c.name)+'" maxlength="10" aria-label="분류 이름"><span class="cn">'+n+'건</span>'
+      +'<input class="cname" data-cat-name="'+esc(c.id)+'" value="'+esc(c.name)+'" maxlength="10" aria-label="분류 이름">'
       +'<button type="button" class="cfb'+(fieldsOf(c).length?' on':'')+'" data-act="cat-fields" data-id="'+esc(c.id)+'" aria-expanded="'+(sh.fopen===c.id)+'">항목'+(fieldsOf(c).length?' '+fieldsOf(c).length:'')+'</button>'
+      +'<button type="button" class="mv" data-act="cat-up" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+' 위로"'+(i===0?' disabled':'')+'>▲</button>'
+      +'<button type="button" class="mv" data-act="cat-down" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+' 아래로"'+(i===S.cats.length-1?' disabled':'')+'>▼</button>'
       +(c.id==='etc'?'<span class="cdel off"></span>':'<button type="button" class="cdel" data-act="cat-del" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+' 삭제">×</button>')+'</div>'
-      +(sh.fopen===c.id?'<div class="fpanel" style="--c:'+colorOf(c)+'"><p class="fh">모든 분류에 장소·날짜·시간·메모·사진은 기본으로 들어갑니다. 추가로 쓸 항목을 고르세요. 꺼도 입력한 값은 보관됩니다.</p><div class="ftoggles">'
+      +(sh.fopen===c.id?'<div class="fpanel" style="--c:'+colorOf(c)+'"><p class="fh">기록 '+n+'건. 모든 분류에 장소·날짜·시간·메모·사진은 기본으로 들어갑니다. 추가로 쓸 항목을 고르세요. 꺼도 입력한 값은 보관됩니다.</p><div class="ftoggles">'
         +FIELD_ORDER.map(k=>'<button type="button" class="ft'+(fieldsOf(c).includes(k)?' on':'')+'" data-act="cat-field" data-id="'+esc(c.id)+'" data-f="'+k+'" aria-pressed="'+fieldsOf(c).includes(k)+'">'+FIELD_DEFS[k]+'</button>').join('')+'</div></div>':'')
       +(sh.open===c.id?'<div class="swatches">'+COLORS.map(k=>'<button type="button" class="sw'+(k===c.color?' on':'')+'" data-act="cat-sw" data-id="'+esc(c.id)+'" data-color="'+k+'" style="--c:var(--k-'+k+')" aria-label="'+k+'"></button>').join('')+'</div>':'');
   }).join('');
   return '<div class="sh-head"><h2>분류 관리</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
     +'<div class="clist">'+rows+'</div><div class="btns"><button type="button" class="btn" data-act="cat-add">+ 분류 추가</button></div>'
-    +'<p class="hint">새 분류를 만들 때 이름(등산, 운동, 여행, 쇼핑, 독서 등)을 보고 항목을 추천해 채웁니다. 그 뒤에는 이름을 바꿔도 항목이 유지됩니다. 분류를 지우면 그 분류의 기록은 기타로 옮겨집니다.</p>';
+    +'<p class="hint">새 분류를 만들 때 이름(등산, 운동, 여행, 쇼핑, 독서 등)을 보고 항목을 추천해 채웁니다. 그 뒤에는 이름을 바꿔도 항목이 유지됩니다. 분류를 지우면 그 분류의 기록은 기타로 옮겨집니다. ▲▼로 순서를 정하면 기록 남기기 화면에 그 순서로 보입니다.</p>';
 }
 function dtText(){
   const d=$('#f-date'),t=$('#f-time');if(!d||!t)return '';
@@ -730,7 +737,7 @@ function viewHtml(sh){
   const a=String(e.date||'').split('-').map(Number),d=a.length===3?new Date(a[0],a[1]-1,a[2]):null;
   const ds=d&&isFinite(d)?(a[0]+'년 '+a[1]+'월 '+a[2]+'일 ('+WD[d.getDay()]+')'):'';
   const g=e.geo;
-  return '<div class="sh-head"><h2>기록</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
+  return '<div class="sh-head"><h2>기록</h2><button type="button" class="hedit" data-act="rec-edit">수정</button><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
   +'<div class="vmeta" style="--c:'+colorOf(c)+'"><span class="tag-cat">'+icon(c.id)+esc(c.name)+'</span><span>'+esc(ds)+(e.time?' '+esc(e.time):'')+'</span>'
   +(e.star?'<span class="stars-s" aria-label="중요">★</span>':'')+'</div>'
   +'<h3 class="vtitle">'+esc(e.title)+'</h3>'
@@ -739,7 +746,7 @@ function viewHtml(sh){
   +(ph.length?'<div class="vphotos">'+ph.map((p,i)=>'<button type="button" class="ph" data-act="photo" data-id="'+esc(e.id)+'" data-i="'+i+'" aria-label="사진 크게 보기"><img alt="" src="'+esc(urlOf(p))+'"></button>').join('')+'</div>':'')
   +(g?'<p class="geo" style="margin-top:12px">위치 '+g.lat.toFixed(4)+', '+g.lon.toFixed(4)+' · <a href="https://www.google.com/maps?q='+g.lat+','+g.lon+'" target="_blank" rel="noopener">지도에서 보기</a></p>':'')
   +(e.tags&&e.tags.length?'<div class="tags">'+e.tags.map(t=>'<span>#'+esc(t)+'</span>').join('')+'</div>':'')
-  +'<div class="fld actions vact"><button class="btn pri" type="button" data-act="rec-edit">수정</button><button class="btn danger" type="button" id="del" data-act="rec-del">삭제</button></div>';
+  +'<div class="vdel"><button type="button" class="tdel" id="del" data-act="rec-del">삭제</button></div>';
 }
 function openView(entry){openSheet({kind:'view',entry:entry,arm:false});}
 function editFromView(){
@@ -1028,6 +1035,11 @@ document.addEventListener('click',ev=>{
       const c=S.cats.find(x=>x.id===t.dataset.id),k=t.dataset.f;if(!c||!FIELD_ORDER.includes(k))break;
       const cur=fieldsOf(c).slice(),i=cur.indexOf(k);if(i<0)cur.push(k);else cur.splice(i,1);
       c.fields=FIELD_ORDER.filter(f=>cur.includes(f));delete c.fresh;renderSheet();catChanged();break;}
+    case 'cat-up':case 'cat-down':{
+      const i=S.cats.findIndex(c=>c.id===t.dataset.id);if(i<0)break;
+      const j=a==='cat-up'?i-1:i+1;if(j<0||j>=S.cats.length)break;
+      const tmp=S.cats[i];S.cats[i]=S.cats[j];S.cats[j]=tmp;
+      renderSheet();catChanged();break;}
     case 'cat-del':{
       const sh=S.sheet,c=S.cats.find(x=>x.id===t.dataset.id);if(!sh||!c)break;
       if(sh.armCat!==c.id){sh.armCat=c.id;t.textContent='지움?';t.classList.add('arm');setTimeout(()=>{if(S.sheet===sh&&sh.armCat===c.id){sh.armCat=null;if(t.isConnected){t.textContent='×';t.classList.remove('arm');}}},3000);break;}
