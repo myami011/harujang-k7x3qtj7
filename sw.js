@@ -1,6 +1,6 @@
 /* 하루장 service worker: 앱 파일을 폰에 보관해 오프라인에서도 열리게 한다.
    기록 데이터는 여기서 다루지 않는다(IndexedDB에 따로 저장됨). */
-const VER = 'harujang-v5';
+const VER = 'harujang-v6';
 const SHELL = [
   './',
   './index.html',
