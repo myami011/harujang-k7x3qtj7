@@ -398,7 +398,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.56';
+const APP_VER='v0.57';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -1323,7 +1323,18 @@ document.addEventListener('click',ev=>{
     case 'photo':{const e=S.entries.find(x=>x.id===t.dataset.id);if(e&&e.photos[Number(t.dataset.i)])showLb(urlOf(e.photos[Number(t.dataset.i)]));break;}
     case 'lb-close':hideLb();break;
     case 'export':doExport(t.dataset.kind);break;
-    case 'app-update':{toast('업데이트 중…');(async()=>{try{if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}}catch(_){}location.replace(location.pathname+'?u='+Date.now());})();break;}
+    case 'app-update':{
+      if(S.updBusy)break;S.updBusy=true;toast('확인 중…');
+      (async()=>{
+        let latest=null;
+        try{const r=await fetch('./index.html?u='+Date.now(),{cache:'no-store'});if(r.ok){const m=(await r.text()).match(/APP_VER='([^']+)'/);if(m)latest=m[1];}}catch(_){}
+        if(!latest){S.updBusy=false;toast('인터넷에 연결되지 않아 확인하지 못했습니다');return;}
+        if(latest===APP_VER){S.updBusy=false;toast('이미 최신 버전입니다 ('+APP_VER+')');return;}
+        toast('새 버전 '+latest+' 받는 중…');
+        lsSet('upd_from',APP_VER);
+        try{if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}}catch(_){}
+        location.replace(location.pathname+'?u='+Date.now());
+      })();break;}
     case 'install':if(deferred){deferred.prompt();deferred.userChoice.finally(()=>{deferred=null;render();});}break;
     case 'snack-ok':{const s=S.snack;hideSnack();if(s)openRec(null,{title:s.title});break;}
     case 'snack-no':hideSnack();break;
@@ -1380,6 +1391,7 @@ $('#sheet').addEventListener('click',ev=>{if(ev.target.id==='sheet')closeSheet()
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
 }
+{const f=lsGet('upd_from');if(f){try{localStorage.removeItem('upd_from');}catch(_){}setTimeout(()=>toast(f===APP_VER?'업데이트했지만 버전이 그대로입니다. 잠시 뒤 다시 눌러 보세요':'업데이트 완료: '+f+' → '+APP_VER),600);}}
 init();
 })();
 
