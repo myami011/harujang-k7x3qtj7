@@ -398,7 +398,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.53';
+const APP_VER='v0.54';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -756,6 +756,7 @@ function viewArch(){
   +'<section class="sec"><h3>백업과 복원</h3><p>마지막 백업: <b>'+(lb?agoText(lb):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 백업 파일을 저장해 구글 드라이브나 PC로 옮겨 두세요. 파일은 폰의 다운로드 폴더에 저장됩니다.</p>'
   +'<div class="btns"><button class="btn pri" data-act="export" data-kind="json">백업 파일 저장</button><button class="btn" data-act="export" data-kind="md">읽기용(마크다운) 저장</button><label class="btn">백업 불러오기<input id="imp" type="file" accept=".json,application/json" hidden></label></div></section>'
   +'<section class="sec"><h3>앱 설치</h3>'+inst+'</section>'
+  +'<section class="sec"><h3>앱 업데이트</h3><p>새 버전을 GitHub에 올렸는데 아래 버전이 그대로면 누르세요. 기록은 지워지지 않습니다.</p><div class="btns"><button class="btn pri" data-act="app-update">업데이트</button></div></section>'
   +'<p class="ver">하루장 '+APP_VER+'</p>';
 }
 function syncFab(){
@@ -1298,6 +1299,7 @@ document.addEventListener('click',ev=>{
     case 'photo':{const e=S.entries.find(x=>x.id===t.dataset.id);if(e&&e.photos[Number(t.dataset.i)])showLb(urlOf(e.photos[Number(t.dataset.i)]));break;}
     case 'lb-close':hideLb();break;
     case 'export':doExport(t.dataset.kind);break;
+    case 'app-update':{toast('업데이트 중…');(async()=>{try{if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}}catch(_){}location.replace(location.pathname+'?u='+Date.now());})();break;}
     case 'install':if(deferred){deferred.prompt();deferred.userChoice.finally(()=>{deferred=null;render();});}break;
     case 'snack-ok':{const s=S.snack;hideSnack();if(s)openRec(null,{title:s.title});break;}
     case 'snack-no':hideSnack();break;

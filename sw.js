@@ -1,6 +1,6 @@
 /* 하루장 service worker: 앱 파일을 폰에 보관해 오프라인에서도 열리게 한다.
    기록 데이터는 여기서 다루지 않는다(IndexedDB에 따로 저장됨). */
-const VER = 'harujang-v38';
+const VER = 'harujang-v39';
 const SHELL = [
   './',
   './index.html',
@@ -12,7 +12,7 @@ const SHELL = [
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(VER).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting())
+    caches.open(VER).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())
   );
 });
 
