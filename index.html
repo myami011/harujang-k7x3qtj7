@@ -529,7 +529,7 @@ function dueText(due,td){
   if(!due)return '';
   if(due===td)return '오늘';
   if(due===addDays(td,1))return '내일';
-  return dayLabel(due);
+  return dayLabel(due)+'ㆍ'+WD[pYmd(due).getDay()];
 }
 const durMinOf=(a,b)=>{
   if(!/^\d\d:\d\d$/.test(a||'')||!/^\d\d:\d\d$/.test(b||''))return 0;
