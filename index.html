@@ -398,7 +398,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v52';
+const APP_VER='v53';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -916,7 +916,7 @@ function updSug(all){
 }
 document.addEventListener('focusin',ev=>{const t=ev.target;
   if(t.id==='f-title')updSug();else if(!(t.closest&&(t.closest('#sug')||t.id==='getbk'))){const sg=$('#sug');if(sg)sg.hidden=true;}
-  if(t.id==='f-trip')updTripSug();else if(!(t.closest&&t.closest('#tsug'))){const tg=$('#tsug');if(tg)tg.hidden=true;}
+  if(t.id==='f-trip'){if(!S.noSug)updTripSug();}else if(!(t.closest&&t.closest('#tsug'))){const tg=$('#tsug');if(tg)tg.hidden=true;}
 });
 function growTa(el){el.style.height='auto';if(el.offsetParent===null)return;el.style.height=(el.scrollHeight+2)+'px';}
 function growNote(){
@@ -936,7 +936,7 @@ function openSheet(sh){
   $('#sheet').hidden=false;document.body.style.overflow='hidden';pushLayer();
   if(sh.kind==='rec')growNote();
   const f=sh.kind==='rec'?'#f-title':sh.kind==='todo'?'#t-title':null;
-  if(f&&!(sh.entry||sh.todo))setTimeout(()=>{const t=$(f);if(t)t.focus();},60);
+  if(f&&!(sh.entry||sh.todo))setTimeout(()=>{let t=$(f);const tf=$('#f-trip');if(sh.kind==='rec'&&sh.cat==='trip'&&tf&&!tf.value.trim()){t=tf;S.noSug=true;}if(t)t.focus();S.noSug=false;},60);
 }
 function recSheetOf(entry,prefill){
   const last=lsGet(LC_KEY);
@@ -1250,7 +1250,7 @@ document.addEventListener('click',ev=>{
     case 'todo-edit':{const x=S.todos.find(y=>y.id===t.dataset.id);if(x)openSheet({kind:'todo',todo:x,arm:false});break;}
     case 'todo-toggle':toggleTodo(t.dataset.id);break;
     case 'close':closeSheet();break;
-    case 'setcat':{const sh=S.sheet;if(sh){sh.cat=t.dataset.id;document.querySelectorAll('.cp[data-id]').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();}break;}
+    case 'setcat':{const sh=S.sheet;if(sh){sh.cat=t.dataset.id;document.querySelectorAll('.cp[data-id]').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();if(sh.cat==='trip'){const tf=$('#f-trip');if(tf&&!tf.value.trim()){S.noSug=true;tf.focus();S.noSug=false;}}}break;}
     case 'cat-more':{const sh=S.sheet;if(sh&&sh.kind==='rec'){sh.catAll=!sh.catAll;$('#catpick').innerHTML=catChipsHtml(sh);}break;}
     case 'dt-toggle':{const box=$('#dt-box'),btn=$('#dtline');if(box&&btn){box.hidden=!box.hidden;btn.setAttribute('aria-expanded',String(!box.hidden));}break;}
     case 'x-chip':{
