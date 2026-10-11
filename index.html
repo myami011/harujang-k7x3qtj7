@@ -136,7 +136,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .scrim{position:fixed;inset:0;z-index:40;background:rgba(40,30,15,.5);display:flex;align-items:flex-end;justify-content:center}
 .panel{width:100%;max-width:520px;max-height:92dvh;overflow-y:auto;background:var(--card);border-radius:20px 20px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom,0px))}
 @media (prefers-reduced-motion:no-preference){.panel{animation:up .22s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.4}}}
-.sh-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sh-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;position:sticky;top:-16px;z-index:4;margin-top:-16px;padding:16px 0 8px;background:var(--card)}
 .sh-head h2{margin:0;font:700 18px var(--serif)}
 .x{margin-left:auto;width:36px;height:36px;border-radius:50%;background:var(--fill);font-size:22px;line-height:1}
 .choose{display:grid;gap:8px}
@@ -255,6 +255,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .hsave{margin-left:auto;height:36px;padding:0 18px;border-radius:99px;background:var(--brand);color:var(--on-brand);font-weight:700;font-size:14px}
 .hsave[disabled]{opacity:.5}
 .hsave+.x{margin-left:0}
+.msave-w{display:flex;justify-content:flex-end;margin-top:-4px}
+.msave{margin-left:0;height:34px;padding:0 16px}
 .ptrow{display:flex;align-items:flex-end;gap:8px}
 .ptp{flex:1;min-width:0;display:block}
 .ptp input{height:44px}
@@ -263,6 +265,31 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .xchips{display:flex;flex-wrap:wrap;gap:6px}
 .xchip{padding:7px 13px;border-radius:99px;border:1px dashed var(--line);font:500 13.5px var(--sans);color:var(--ink2)}
 .xchip.on{border-style:solid;border-color:var(--brand);color:var(--brand);font-weight:700}
+.tl-l{display:block}
+.sugw{position:relative}
+.sug{position:absolute;left:0;right:0;top:100%;z-index:6;margin-top:-2px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 18px rgba(70,40,20,.12);overflow:hidden}
+.sug button{display:block;width:100%;text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);font:500 15px var(--sans);color:var(--ink)}
+.sug button:last-child{border:0}.sug small{color:var(--ink2);font-size:12px}
+.pgrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.pgrow input{width:100%}
+.mkrow{margin-top:2px}
+.mkt{display:inline-block;margin-right:6px;padding:1px 7px;border-radius:6px;font-size:11.5px;background:var(--fill);color:var(--ink2)}
+.sgm{display:flex;background:var(--fill);border-radius:99px;padding:3px;margin:6px 0 4px}
+.sgm button{flex:1;padding:7px;border-radius:99px;font:500 13px var(--sans);color:var(--ink2)}
+.sgm button[aria-pressed="true"]{background:var(--card);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}
+.bcard b{font-size:16px}.bcard .bst{float:right;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--ink2);color:var(--card)}
+.bcard .bst.dn,.dn{background:var(--k-moss);color:#fff}
+.bar{height:6px;border-radius:9px;background:var(--fill);margin:8px 0 4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--k-moss)}
+.bkback{margin-top:10px;color:var(--ink2);font:500 14px var(--sans)}
+.bkt{margin:6px 0 2px;font-size:20px}.bkt .dn{font-size:12px;padding:2px 9px;border-radius:99px;vertical-align:middle}
+.bks{color:var(--ink2)}
+.btl{border-left:2px solid var(--line);margin:8px 0 0 6px;padding-left:14px}
+.bit{position:relative;margin-bottom:14px;cursor:pointer}
+.bit:before{content:"";position:absolute;left:-21px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--k-moss)}
+.bit small{color:var(--ink2)}.pgx{color:var(--k-moss)}
+.bm{background:var(--card);border-radius:12px;padding:10px 12px;margin-top:4px;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.dim{color:var(--ink2)}
+
 .xchip[aria-expanded="true"]{background:var(--fill)}
 #f-note{resize:none;overflow-y:auto;min-height:calc(4*1.5em + 22px)}
 .card{border-left:4px solid var(--c,var(--line))}
@@ -355,14 +382,15 @@ const STD_CATS=[
   {id:'sport',name:'운동',color:'teal',fields:['end','dist']},
   {id:'trip',name:'여행',color:'sky',fields:['cost']},
   {id:'shop',name:'쇼핑',color:'ochre',fields:['cost']},
-  {id:'read',name:'독서',color:'moss',fields:['author']},
+  {id:'read',name:'독서',color:'moss',fields:['author','pages']},
   {id:'study',name:'학습',color:'brown',fields:['end']},
   {id:'etc',name:'기타',color:'slate',fields:[]}
 ];
 const isStd=id=>STD_CATS.some(c=>c.id===id);
-const FIELD_DEFS={end:'시작·종료·소요시간',dist:'거리',cost:'비용',author:'저자'};
-const FIELD_ORDER=['end','dist','cost','author'];
-const FIELD_SHORT={end:'종료',dist:'거리',cost:'비용',author:'저자'};
+const FIELD_DEFS={end:'시작·종료·소요시간',dist:'거리',cost:'비용',author:'저자',pages:'읽은 쪽'};
+const FIELD_ORDER=['end','dist','cost','author','pages'];
+const MK={quote:'구절',think:'생각',more:'더알'},MK_ORDER=['quote','think','more'];
+const FIELD_SHORT={end:'종료',dist:'거리',cost:'비용',author:'저자',pages:'쪽'};
 const XKEY={end:'end',dist:'distKm',cost:'cost',author:'author'};
 const fieldsOf=c=>{const d=c&&STD_CATS.find(x=>x.id===c.id);return d?d.fields:[];};
 function buildCats(list){
@@ -382,7 +410,7 @@ const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
-  tab:'today',cat:'all',imp:false,q:'',day:null,cal:{y:new Date().getFullYear(),m:new Date().getMonth()},sheet:null,snack:null,far:false};
+  tab:'today',cat:'all',imp:false,q:'',day:null,cal:{y:new Date().getFullYear(),m:new Date().getMonth()},sheet:null,snack:null,far:false,bv:false,book:null,bk:''};
 const catOf=id=>S.cats.find(c=>c.id===id)||S.cats.find(c=>c.id==='etc')||{id:'etc',name:'기타',color:'slate'};
 const colorOf=c=>'var(--k-'+c.color+')';
 const byTimeDesc=(a,b)=>((b.date||'')+(b.time||'')).localeCompare((a.date||'')+(a.time||''));
@@ -483,6 +511,8 @@ const durMinOf=(a,b)=>{
   if(d<0)d+=1440;return d;
 };
 const durText=m=>m?(m>=60?Math.floor(m/60)+'시간':'')+(m%60?(m>=60?' ':'')+(m%60)+'분':''):'';
+function pagesText(f){const a=f.pFrom,b=f.pTo;return (a&&b)?(a+'–'+b+'쪽'):b?('~'+b+'쪽'):a?(a+'쪽~'):'';}
+const mkTag=e=>{const k=e.f&&e.f.mk;return MK[k]?'<b class="mkt">'+MK[k]+'</b>':'';};
 function legacyFacts(e){
   const f=e.f||{},o=[],en=fieldsOf(catOf(e.cat));
   ['place','purpose','move','who','topics','next','mountain','course','weather','meaning'].forEach(k=>{
@@ -491,6 +521,8 @@ function legacyFacts(e){
   if(f.cost&&en.includes('cost'))o.push(fmt(f.cost)+'원');
   if(f.book)o.push(String(f.book));
   if(f.author&&en.includes('author'))o.push(String(f.author));
+  if(en.includes('pages')){const pt=pagesText(f);if(pt)o.push(pt);}
+  if(e.cat==='read'&&f.done)o.push('완독');
   if(f.distKm&&en.includes('dist'))o.push(fmt(f.distKm)+'km');
   if(f.summit)o.push('정상 '+fmt(f.summit)+'m');
   const d=(f.durH||f.durM)?[f.durH?f.durH+'시간':'',f.durM?f.durM+'분':''].filter(Boolean).join(' '):'';
@@ -504,12 +536,63 @@ function legacyFacts(e){
   return o;
 }
 
+/* ---------- 책 묶기 (제목+저자) ---------- */
+const nrm=v=>String(v||'').trim().replace(/\s+/g,' ').toLowerCase();
+const mdShort=d=>String(d||'').slice(5).replace('-','/');
+function books(){
+  const g={};
+  S.entries.filter(e=>e.cat==='read').forEach(e=>{
+    const au=String((e.f&&e.f.author)||'').trim(),k=nrm(e.title)+'|'+nrm(au);
+    (g[k]=g[k]||{k:k,title:String(e.title).trim(),author:au,es:[]}).es.push(e);});
+  Object.keys(g).forEach(k=>{const b=g[k];if(!b||b.author)return;
+    const c=Object.values(g).filter(o=>o!==b&&o.author&&nrm(o.title)===nrm(b.title));
+    if(c.length===1){c[0].es=c[0].es.concat(b.es);delete g[k];}});
+  return Object.values(g).map(b=>{
+    b.es.sort((x,y)=>(x.date+(x.time||'')).localeCompare(y.date+(y.time||'')));
+    const f=b.es[b.es.length-1];
+    b.first=b.es[0].date;b.last=f.date;b.lastKey=f.date+(f.time||'');
+    b.page=Math.max.apply(null,[0].concat(b.es.map(e=>Number(e.f.pTo)||Number(e.f.pFrom)||0)));
+    b.total=0;for(let i=b.es.length-1;i>=0;i--){if(Number(b.es[i].f.pTotal)){b.total=Number(b.es[i].f.pTotal);break;}}
+    b.done=b.es.some(e=>e.f.done);
+    return b;
+  }).sort((x,y)=>y.lastKey.localeCompare(x.lastKey));
+}
+function bookBar(b){const pc=b.total&&b.page?Math.min(100,Math.round(b.page/b.total*100)):(b.done?100:0);
+  return '<div class="bar"><i style="width:'+(b.done?100:pc)+'%"></i></div><small>'+(b.total?(b.done?b.total+' / '+b.total+'쪽':(b.page||0)+' / '+b.total+'쪽 ('+pc+'%)'):(b.page?b.page+'쪽까지':''))+'</small>';}
+function booksHtml(){
+  const bs=books(),q=nrm(S.q);
+  if(S.book){
+    const b=bs.find(x=>x.k===S.book);
+    if(!b){S.book=null;}else{
+      const kinds=[['','전체']].concat(MK_ORDER.map(k=>[k,MK[k]]));
+      const list=b.es.slice().reverse().filter(e=>!S.bk||(e.f&&e.f.mk)===S.bk);
+      return '<button type="button" class="bkback" data-act="book-back">‹ 책별</button>'
+        +'<h2 class="bkt">'+esc(b.title)+(b.done?' <span class="dn">완독 ✓</span>':'')+'</h2>'
+        +'<small class="bks">'+esc(b.author||'저자 미입력')+' · '+mdShort(b.first)+' ~ '+mdShort(b.last)+' · 기록 '+b.es.length+'건</small>'+bookBar(b)
+        +'<div class="chips" style="padding-block:10px 6px">'+kinds.map(k=>'<button class="chip-f" data-act="bk-filter" data-v="'+k[0]+'" aria-pressed="'+(S.bk===k[0])+'">'+k[1]+'</button>').join('')
+        +'<button class="chip-f edit" data-act="book-export">정리 내보내기</button></div>'
+        +(list.length?'<div class="btl">'+list.map(e=>'<div class="bit" data-act="rec-open" data-id="'+esc(e.id)+'" tabindex="0"><small>'+esc(dayLabelShort(e.date))+(pagesText(e.f)?' · <b class="pgx">'+pagesText(e.f)+'</b>':'')+((e.photos||[]).length?' · 사진 '+e.photos.length:'')+'</small><div class="bm">'+mkTag(e)+(e.note?esc(e.note):'<span class="dim">메모 없음</span>')+'</div></div>').join('')+'</div>'
+          :'<p class="empty">이 종류의 메모가 없습니다.</p>');
+    }
+  }
+  const l=q?bs.filter(b=>nrm(b.title+' '+b.author).includes(q)):bs;
+  if(!l.length)return '<p class="empty">'+(bs.length?'조건에 맞는 책이 없습니다.':'독서 기록이 아직 없습니다.')+'</p>';
+  return l.map(b=>'<div class="card bcard" data-act="book-open" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-moss)"><b>'+esc(b.title)+'</b><span class="bst'+(b.done?' dn':'')+'">'+(b.done?'완독 ✓':'읽는 중')+'</span><br><small>'+esc(b.author||'저자 미입력')+' · '+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · 기록 '+b.es.length+'건</small>'+bookBar(b)+'</div>').join('');
+}
+function dayLabelShort(d){const a=String(d||'').split('-').map(Number);if(a.length!==3)return '';const t=new Date(a[0],a[1]-1,a[2]);return a[1]+'/'+a[2]+' ('+WD[t.getDay()]+')';}
+function bookMd(b){
+  let m='# '+b.title+'\n'+(b.author?'저자: '+b.author+'\n':'')+'기간: '+b.first+' ~ '+b.last+(b.total?' · '+(b.done?b.total:b.page)+'/'+b.total+'쪽':'')+(b.done?' · 완독':'')+'\n';
+  [['quote','구절'],['think','생각'],['more','더알'],['','기타 메모']].forEach(kk=>{
+    const l=b.es.filter(e=>(e.f.mk||'')===kk[0]&&e.note);if(!l.length)return;
+    m+='\n## '+kk[1]+'\n'+l.map(e=>'- ['+e.date+(pagesText(e.f)?' '+pagesText(e.f):'')+'] '+e.note.replace(/\n+/g,' ')).join('\n')+'\n';});
+  return m;
+}
 /* ---------- views ---------- */
 function cardHtml(e){
   const c=catOf(e.cat),ph=e.photos||[],lf=legacyFacts(e);
   let body='';
   if(lf.length)body+='<div class="facts">'+lf.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>';
-  if(e.note)body+='<p class="note">'+esc(e.note)+'</p>';
+  if(e.note||mkTag(e))body+='<p class="note">'+mkTag(e)+esc(e.note||'')+'</p>';
   if(ph.length){
     body+='<div class="thumbs">'+ph.slice(0,3).map((p,i)=>{
       const more=(i===2&&ph.length>3)?'<span class="more">+'+(ph.length-3)+'</span>':'';
@@ -563,6 +646,7 @@ function filtered(){
   return S.entries.filter(e=>(S.cat==='all'||e.cat===S.cat)&&(!S.imp||e.star)&&(!q||hay(e).includes(q))).sort(byTimeDesc);
 }
 function feedHtml(){
+  if(S.ready&&S.cat==='read'&&S.bv)return booksHtml();
   if(!S.ready)return '<p class="empty">기록을 불러오는 중입니다.</p>';
   if(!S.entries.length)return '<p class="empty">아직 기록이 없습니다.<br>오늘 탭이나 + 버튼으로 첫 기록을 남겨 보세요.</p>';
   const list=filtered();
@@ -587,6 +671,7 @@ function viewLog(){
     '<button class="chip-f" data-act="filter" data-cat="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'
     +(i===0?'<button class="chip-f" data-act="imp-filter" aria-pressed="'+S.imp+'">★ 중요</button>':'')).join('')
   +'<button class="chip-f edit" data-act="cats-open">분류 편집</button></div>'
+  +(S.cat==='read'?'<div class="sgm"><button data-act="bv" data-v="0" aria-pressed="'+(!S.bv)+'">기록순</button><button data-act="bv" data-v="1" aria-pressed="'+(!!S.bv)+'">책별</button></div>':'')
   +'<input class="search" id="q" type="search" placeholder="제목, 메모 검색" value="'+esc(S.q)+'" aria-label="검색">'
   +'<div id="feed">'+feedHtml()+'</div>';
 }
@@ -645,13 +730,15 @@ function recFormHtml(sh){
   return '<div class="sh-head"><h2>'+(e?'기록 수정':'기록 남기기')+'</h2><button type="submit" form="f" class="hsave" id="save">저장</button><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
   +'<form id="f" class="grid" autocomplete="off" novalidate>'
   +'<div class="fld"><span class="lbl">분류</span><div class="catpick" id="catpick" role="radiogroup" aria-label="분류">'+catChipsHtml(sh)+'</div></div>'
-  +'<label class="fld"><span class="lbl">제목</span><input id="f-title" type="text" maxlength="80" placeholder="한 줄로 적어요" value="'+esc(sh.title||'')+'"><small class="err" id="err-title" hidden>제목을 입력하세요</small></label>'
+  +'<div class="fld sugw"><label class="tl-l"><span class="lbl">제목</span><input id="f-title" type="text" maxlength="80" placeholder="한 줄로 적어요" value="'+esc(sh.title||'')+'"></label><small class="err" id="err-title" hidden>제목을 입력하세요</small><div class="sug" id="sug" hidden></div></div>'
   +'<div class="fld ptrow"><label class="ptp"><span class="lbl">장소</span><input id="f-place" type="text" maxlength="60" placeholder="어디에서" value="'+esc((sh.x&&sh.x.place)||'')+'"></label>'
   +'<div class="ptbtn"><span class="lbl">일시</span><button type="button" class="ptime" id="dtline" data-act="dt-toggle" aria-expanded="false"><span id="dt-text"></span></button></div></div>'
   +'<div class="fld dtgrid" id="dt-box" hidden><label><span class="lbl">날짜</span><input id="f-date" type="date" value="'+(e?e.date:ymd(now))+'"></label>'
   +'<label><span class="lbl" id="lbl-time">시간</span><input id="f-time" type="time" value="'+(e?e.time:hm(now))+'"></label></div>'
   +'<div class="fld xchips" id="xchips" hidden></div><div class="fld xbody" id="xbody" hidden></div>'
+  +'<div class="fld xchips mkrow" id="mkrow" hidden></div>'
   +'<label class="fld"><span class="lbl">메모</span><textarea id="f-note" rows="3" placeholder="메모하세요">'+esc(e?e.note:'')+'</textarea></label>'
+  +'<div class="fld msave-w"><button type="submit" form="f" class="hsave msave">저장</button></div>'
   +'<div class="fld"><span class="lbl">사진 <span id="ph-n"></span></span><div class="strip" id="strip"></div>'
   +'<div class="btns"><label class="btn">촬영<input id="f-cam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn">앨범에서 선택<input id="f-pic" type="file" accept="image/*" multiple hidden></label>'
   +'<button type="button" class="imp'+(sh.star?' on':'')+'" id="f-star" data-act="imp" data-v="'+(sh.star?1:0)+'" aria-pressed="'+(!!sh.star)+'" style="margin-left:auto">'+(sh.star?'★':'☆')+' 중요</button></div></div>'
@@ -690,12 +777,13 @@ function dtText(){
   return lab+' '+(t.value||'--:--');
 }
 function updDt(){const el=$('#dt-text');if(el)el.textContent=dtText();}
-const filledX=(x,k)=>!!String(x[k]==null?'':x[k]).trim();
+const filledX=(x,k)=>k==='pages'?!!(String(x.pf||'').trim()||String(x.pt||'').trim()):!!String(x[k]==null?'':x[k]).trim();
 function xChipText(k,x){
   if(k==='end'){const t=$('#f-time'),m=durMinOf(t?t.value:'',x.end);return x.end?('종료 '+x.end+(m?' · '+durText(m):'')):'종료';}
   if(k==='dist')return filledX(x,'dist')?('거리 '+x.dist+'km'):'거리';
   if(k==='cost'){const c=parseFloat(String(x.cost==null?'':x.cost).replace(/,/g,''));return (isFinite(c)&&c>0)?('비용 '+fmt(Math.round(c))+'원'):'비용';}
   if(k==='author')return filledX(x,'author')?('저자 '+x.author):'저자';
+  if(k==='pages')return filledX(x,'pages')?('쪽 '+(x.pf&&x.pt?x.pf+'–'+x.pt:x.pt?'~'+x.pt:x.pf+'~')):'쪽';
   return k;
 }
 function xRowHtml(k,x){
@@ -703,6 +791,7 @@ function xRowHtml(k,x){
   if(k==='dist')return '<label class="fld half"><span class="lbl">거리</span><span class="unit-wrap"><input id="f-dist" type="number" inputmode="decimal" step="0.1" min="0" value="'+esc(x.dist||'')+'"><em>km</em></span></label>';
   if(k==='cost')return '<label class="fld half"><span class="lbl">비용</span><span class="unit-wrap"><input id="f-cost" type="number" inputmode="numeric" step="100" min="0" value="'+esc(x.cost||'')+'"><em>원</em></span></label>';
   if(k==='author')return '<label class="fld"><span class="lbl">저자</span><input id="f-author" type="text" maxlength="60" placeholder="저자 이름" value="'+esc(x.author||'')+'"></label>';
+  if(k==='pages')return '<div class="fld pgrow"><label><span class="lbl">시작쪽</span><input id="f-pf" type="number" inputmode="numeric" min="0" value="'+esc(x.pf||'')+'"></label><label><span class="lbl">끝쪽</span><input id="f-pt" type="number" inputmode="numeric" min="0" value="'+esc(x.pt||'')+'"></label><label><span class="lbl">총 쪽수</span><input id="f-ptot" type="number" inputmode="numeric" min="0" value="'+esc(x.ptot||'')+'"></label></div>';
   return '';
 }
 function renderExtra(){
@@ -716,6 +805,10 @@ function renderExtra(){
   body.hidden=!body.innerHTML;
   const ti=$('#f-title');if(ti)ti.placeholder=en.includes('author')?'책 제목':'비워 두면 장소가 제목';
   $('#lbl-time').textContent=en.includes('end')?'시작시간':'시간';
+  const isRead=sh.cat==='read';
+  const mr=$('#mkrow');if(mr){mr.hidden=!isRead;mr.innerHTML=!isRead?'':MK_ORDER.map(k=>'<button type="button" class="xchip'+(sh.mk===k?' on':'')+'" data-act="mk" data-k="'+k+'" aria-pressed="'+(sh.mk===k)+'">'+MK[k]+'</button>').join('')+'<button type="button" class="xchip" id="f-done" data-act="done" style="margin-left:auto">□ 완독</button>';}
+  const dn=$('#f-done');if(dn){dn.classList.toggle('on',!!sh.done);dn.textContent=(sh.done?'☑':'□')+' 완독';dn.setAttribute('aria-pressed',String(!!sh.done));}
+  if(!isRead){const sg=$('#sug');if(sg)sg.hidden=true;}
   updDt();
 }
 function updChips(){
@@ -724,10 +817,21 @@ function updChips(){
   document.querySelectorAll('#xchips .xchip').forEach(b=>{const k=b.dataset.k;b.textContent=xChipText(k,x);b.classList.toggle('on',filledX(x,k));});
 }
 function updDur(){updChips();}
+function updSug(){
+  const sh=S.sheet,sg=$('#sug'),ti=$('#f-title');if(!sg||!ti)return;
+  if(!sh||sh.kind!=='rec'||sh.cat!=='read'){sg.hidden=true;return;}
+  const q=nrm(ti.value);
+  let l=books().filter(b=>!q||nrm(b.title).includes(q));
+  if(l.length===1&&nrm(l[0].title)===q&&nrm(l[0].author)===nrm((sh.x&&sh.x.author)||'')&&q)l=[];
+  l=l.slice(0,5);sh.sug=l;
+  sg.innerHTML=l.map((b,i)=>'<button type="button" data-act="sug-pick" data-i="'+i+'">'+esc(b.title)+' <small>'+esc(b.author||'')+(b.total?' · '+b.page+'/'+b.total+'쪽':(b.page?' · '+b.page+'쪽':''))+(b.done?' · 완독':'')+'</small></button>').join('');
+  sg.hidden=!l.length;
+}
+document.addEventListener('focusin',ev=>{const t=ev.target;if(t.id==='f-title')updSug();else if(!(t.closest&&t.closest('#sug'))){const sg=$('#sug');if(sg)sg.hidden=true;}});
 function growNote(){
   const el=$('#f-note');if(!el)return;
   el.style.height='auto';if(el.offsetParent===null)return;
-  el.style.height=Math.min(el.scrollHeight+2,214)+'px';
+  el.style.height=(el.scrollHeight+2)+'px';
 }
 function renderSheet(){
   const sh=S.sheet;if(!sh)return;
@@ -748,7 +852,8 @@ function recSheetOf(entry,prefill){
   const cat=entry?entry.cat:(S.cats.some(c=>c.id===last&&!c.hidden)?last:(S.cats.find(c=>!c.hidden)||S.cats[0]).id);
   return {kind:'rec',entry:entry||null,cat:cat,title:entry?entry.title:(prefill&&prefill.title)||'',star:entry?(entry.star||0):0,
     photos:entry?(entry.photos||[]).slice():[],busy:0,geo:(entry&&entry.geo)||null,touched:{dt:!!entry},arm:false,xopen:{},
-    x:entry?{place:entry.f.place||entry.f.dest||'',dist:entry.f.distKm||'',end:entry.f.end||'',cost:entry.f.cost||entry.f.spend||'',author:entry.f.author||''}:{}};
+    mk:entry?(entry.f.mk||''):'',done:entry?!!entry.f.done:false,
+    x:entry?{place:entry.f.place||entry.f.dest||'',dist:entry.f.distKm||'',end:entry.f.end||'',cost:entry.f.cost||entry.f.spend||'',author:entry.f.author||'',pf:entry.f.pFrom||'',pt:entry.f.pTo||'',ptot:entry.f.pTotal||''}:{}};
 }
 function openRec(entry,prefill){openSheet(recSheetOf(entry,prefill));}
 /* 기록 카드를 누르면 먼저 읽기 전용 상세 화면, 거기서 '수정'을 눌러야 입력창으로 넘어간다 */
@@ -762,7 +867,7 @@ function viewHtml(sh){
   +(e.star?'<span class="stars-s" aria-label="중요">★</span>':'')+'</div>'
   +'<h3 class="vtitle">'+esc(e.title)+'</h3>'
   +(lf.length?'<div class="facts">'+lf.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>':'')
-  +(e.note?'<p class="vnote">'+esc(e.note)+'</p>':'')
+  +((e.note||mkTag(e))?'<p class="vnote">'+mkTag(e)+esc(e.note||'')+'</p>':'')
   +(ph.length?'<div class="vphotos">'+ph.map((p,i)=>'<button type="button" class="ph" data-act="photo" data-id="'+esc(e.id)+'" data-i="'+i+'" aria-label="사진 크게 보기"><img alt="" src="'+esc(urlOf(p))+'"></button>').join('')+'</div>':'')
   +(g?'<p class="geo" style="margin-top:12px">위치 '+g.lat.toFixed(4)+', '+g.lon.toFixed(4)+' · <a href="https://www.google.com/maps?q='+g.lat+','+g.lon+'" target="_blank" rel="noopener">지도에서 보기</a></p>':'')
   +(e.tags&&e.tags.length?'<div class="tags">'+e.tags.map(t=>'<span>#'+esc(t)+'</span>').join('')+'</div>':'')
@@ -789,7 +894,7 @@ function renderGeo(){
 function collectX(){
   const sh=S.sheet;if(!sh||sh.kind!=='rec')return;
   const x=sh.x||(sh.x={}),g=id=>{const el=$(id);return el?el.value:undefined;};
-  const v={place:g('#f-place'),dist:g('#f-dist'),end:g('#f-end'),cost:g('#f-cost'),author:g('#f-author')};
+  const v={place:g('#f-place'),dist:g('#f-dist'),end:g('#f-end'),cost:g('#f-cost'),author:g('#f-author'),pf:g('#f-pf'),pt:g('#f-pt'),ptot:g('#f-ptot')};
   Object.keys(v).forEach(k=>{if(v[k]!==undefined)x[k]=v[k];});
 }
 async function saveRec(){
@@ -815,8 +920,19 @@ async function saveRec(){
   if(en.includes('dist')){const d=parseFloat(x.dist);if(isFinite(d)&&d>0)e.f.distKm=d;else delete e.f.distKm;}
   if(en.includes('cost')){const c=parseFloat(String(x.cost==null?'':x.cost).replace(/,/g,''));if(isFinite(c)&&c>0)e.f.cost=Math.round(c);else delete e.f.cost;delete e.f.spend;}
   if(en.includes('author')){const a=(x.author||'').trim();if(a)e.f.author=a;else delete e.f.author;}
+  if(en.includes('pages')){
+    const n=v=>{const q=parseInt(v,10);return isFinite(q)&&q>0?q:0;};
+    const a=n(x.pf),b2=n(x.pt),t=n(x.ptot);
+    if(a)e.f.pFrom=a;else delete e.f.pFrom;
+    if(b2)e.f.pTo=b2;else delete e.f.pTo;
+    if(t)e.f.pTotal=t;else delete e.f.pTotal;
+  }
+  if(sh.cat==='read'){
+    if(sh.done)e.f.done=true;else delete e.f.done;
+    if(sh.mk)e.f.mk=sh.mk;else delete e.f.mk;
+  }
   if(sh.geo)e.geo=sh.geo;else delete e.geo;
-  const b=$('#save');b.disabled=true;
+  const sv=document.querySelectorAll('.hsave'),b={set disabled(v){sv.forEach(x=>x.disabled=v);}};b.disabled=true;
   try{await putEntry(e);lsSet(LC_KEY,sh.cat);closeSheet();toast('저장했습니다');}
   catch(err){b.disabled=false;toast(err&&err.name==='QuotaExceededError'?'폰의 저장 공간이 부족합니다.':'저장하지 못했습니다. 다시 시도하세요.');}
 }
@@ -1010,11 +1126,26 @@ document.addEventListener('click',ev=>{
     case 'x-chip':{
       const sh=S.sheet,k=t.dataset.k;if(!sh||sh.kind!=='rec')break;
       collectX();sh.xopen=sh.xopen||{};sh.xopen[k]=!sh.xopen[k];renderExtra();
-      const ids={dist:'#f-dist',cost:'#f-cost',author:'#f-author'};
+      const ids={dist:'#f-dist',cost:'#f-cost',author:'#f-author',pages:'#f-pf'};
       if(sh.xopen[k]&&ids[k]){const el=$(ids[k]);if(el)el.focus();}
       break;}
     case 'far-toggle':S.far=!S.far;render();break;
-    case 'filter':S.cat=t.dataset.cat;render();break;
+    case 'filter':S.cat=t.dataset.cat;S.book=null;render();break;
+    case 'bv':S.bv=t.dataset.v==='1';S.book=null;S.bk='';render();break;
+    case 'book-open':S.book=t.dataset.k;S.bk='';$('#feed').innerHTML=feedHtml();window.scrollTo(0,0);break;
+    case 'book-back':S.book=null;$('#feed').innerHTML=feedHtml();break;
+    case 'bk-filter':S.bk=t.dataset.v;$('#feed').innerHTML=feedHtml();break;
+    case 'book-export':{const b=books().find(x=>x.k===S.book);if(b){saveBlob(new Blob([bookMd(b)],{type:'text/markdown'}),'harujang-book-'+b.title.replace(/[^\w가-힣]+/g,'_').slice(0,30)+'.md');toast('저장했습니다');}break;}
+    case 'mk':{const sh=S.sheet;if(!sh)break;collectX();sh.mk=(sh.mk===t.dataset.k)?'':t.dataset.k;renderExtra();break;}
+    case 'done':{const sh=S.sheet;if(!sh)break;sh.done=!sh.done;renderExtra();break;}
+    case 'sug-pick':{
+      const sh=S.sheet;if(!sh||!sh.sug)break;const b=sh.sug[Number(t.dataset.i)];if(!b)break;
+      collectX();const x=sh.x||(sh.x={});
+      const ti=$('#f-title');if(ti)ti.value=b.title;
+      x.author=b.author;if(b.total)x.ptot=String(b.total);x.pf=b.page?String(b.page+1):'';x.pt='';
+      sh.xopen=sh.xopen||{};sh.xopen.pages=true;
+      const sg=$('#sug');if(sg)sg.hidden=true;renderExtra();
+      const pt=$('#f-pt');if(pt)pt.focus();break;}
     case 'day':S.day=(S.day===t.dataset.date)?null:t.dataset.date;render();break;
     case 'mon':{let m=S.cal.m+Number(t.dataset.d),y=S.cal.y;if(m<0){m=11;y--;}if(m>11){m=0;y++;}S.cal={y:y,m:m};S.day=null;render();break;}
     case 'imp':{const b=$('#f-star'),on=b.dataset.v!=='1';b.dataset.v=on?'1':'0';b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on));b.textContent=(on?'★':'☆')+' 중요';break;}
@@ -1043,9 +1174,10 @@ document.addEventListener('click',ev=>{
 });
 document.addEventListener('input',ev=>{
   const id=ev.target&&ev.target.id;
-  if(id==='f-end'||id==='f-time'||id==='f-dist'||id==='f-cost'||id==='f-author')updDur();
+  if(id==='f-end'||id==='f-time'||id==='f-dist'||id==='f-cost'||id==='f-author'||id==='f-pf'||id==='f-pt')updDur();
+  if(id==='f-title')updSug();
   if(id==='f-date'||id==='f-time')updDt();
-  if(id==='f-place'||id==='f-dist'||id==='f-end'||id==='f-cost'||id==='f-author')collectX();
+  if(id==='f-place'||id==='f-dist'||id==='f-end'||id==='f-cost'||id==='f-author'||id==='f-pf'||id==='f-pt'||id==='f-ptot')collectX();
 });
 document.addEventListener('keydown',ev=>{
   if(ev.key==='Escape'){if(!$('#lb').hidden)hideLb();else if(S.sheet)closeSheet();}
