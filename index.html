@@ -49,6 +49,7 @@ svg{display:block}
 .ico{width:1em;height:1em}
 .top{display:flex;justify-content:space-between;align-items:center;padding-block:14px 0}
 .brand{font:700 calc(15px*var(--fz)) var(--serif);letter-spacing:.06em;color:var(--ink2)}
+.brand .sep{margin:0 .45em;color:var(--ink3,#999);font-weight:400}.brand .ptl{font:700 calc(15px*var(--fz)) var(--serif);color:var(--ink)}
 .pill{font-size:calc(11px*var(--fz));color:var(--ink2);border:1px solid var(--line);border-radius:99px;padding:2px 10px}
 .today{padding-block:10px 4px}
 .date{margin:0;font:400 calc(36px*var(--fz))/1.15 var(--serif);text-wrap:balance}
@@ -431,7 +432,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.62';
+const APP_VER='v0.63';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -729,7 +730,7 @@ function feedHtml(){
   return Object.keys(g).sort().reverse().map(d=>
     '<h2 class="day"><span>'+dayLabel(d)+'</span><small>'+dayNote(d)+'</small><em>'+g[d].length+'건</em></h2>'+g[d].map(cardHtml).join('')).join('');
 }
-const topHtml=()=>'<header class="top"><span class="brand">하루장</span>'+(needBackup()?'<button class="pill warn" data-act="tab" data-tab="arch">백업 필요</button>':'')+'</header>';
+const topHtml=(t)=>'<header class="top"><span class="brand">하루장'+(t?'<span class="sep">·</span><b class="ptl">'+t+'</b>':'')+'</span>'+(needBackup()?'<button class="pill warn" data-act="tab" data-tab="arch">백업 필요</button>':'')+'</header>';
 function viewToday(){
   const t=new Date(),td=ymd(t),recs=S.entries.filter(e=>e.date===td).sort(byTimeDesc);
   return topHtml()
@@ -740,7 +741,7 @@ function viewToday(){
   +(!S.ready?'<p class="empty">불러오는 중입니다.</p>':recs.length?recs.map(cardHtml).join(''):'<p class="none pad">오늘 남긴 기록이 없습니다.</p>');
 }
 function viewLog(){
-  return topHtml()+'<h1 class="pg">기록</h1>'
+  return topHtml('기록')
   +'<div class="chips" role="group" aria-label="분류 필터">'+[{id:'all',name:'전체'}].concat(S.cats.filter(c=>!c.hidden||S.cat===c.id||S.entries.some(e=>e.cat===c.id))).map((c,i)=>
     '<button class="chip-f" data-act="filter" data-cat="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'
     +(i===0?'<button class="chip-f" data-act="imp-filter" aria-pressed="'+S.imp+'">★ 중요</button>':'')).join('')
@@ -774,7 +775,7 @@ function viewCal(){
   let km=0,won=0;
   es.forEach(e=>{const en=fieldsOf(catOf(e.cat));if(en.includes('dist'))km+=Number(e.f.distKm)||0;if(en.includes('cost'))won+=Number(e.f.cost)||0;});
   const sums=(km||won)?'<p class="msum2">'+[km?'거리 합계 '+fmt(Math.round(km*10)/10)+'km':'',won?'비용 합계 '+fmt(won)+'원':''].filter(Boolean).join(' · ')+'</p>':'';
-  return topHtml()
+  return topHtml('달력')
   +'<div class="cal-head"><button class="nav-b" data-act="mon" data-d="-1" aria-label="이전 달">'+SVG('<path d="M15 5l-7 7 7 7"/>')+'</button><h2>'+y+'년 '+(m+1)+'월</h2><button class="nav-b" data-act="mon" data-d="1" aria-label="다음 달">'+SVG('<path d="M9 5l7 7-7 7"/>')+'</button></div>'
   +'<div class="cal">'+cells+'</div>'
   +'<p class="legend"><i></i> 기록 <i class="ring"></i> 남은 할 일</p>'
@@ -787,7 +788,7 @@ function viewArch(){
     :deferred?'<p>홈 화면에 아이콘을 만들어 앱처럼 실행합니다.</p><div class="btns"><button class="btn pri" data-act="install">홈 화면에 설치</button></div>'
     :IS_IOS?'<p>아이폰은 <b>사파리</b>에서 열고, 아래 <b>공유 버튼(□↑)</b>을 눌러 <b>홈 화면에 추가</b>를 누르세요. 홈 화면에 추가해서 써야 기록이 더 안전합니다.</p>'
     :'<p>Chrome 오른쪽 위 메뉴(⋮)에서 <b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누르세요.</p>';
-  return topHtml()+'<h1 class="pg">보관</h1>'
+  return topHtml('보관')
   +'<section class="sec"><h3>보관 상태</h3><p>기록 '+n+'건 · 사진 '+ph+'장 · 할 일 '+S.todos.length+'개<br>모든 내용은 이 폰의 브라우저 저장소에만 있습니다. 서버로 보내지 않습니다.'+(S.mem?'<br><b>지금은 저장이 꺼져 있어 앱을 닫으면 사라집니다.</b>':'')+'</p></section>'
   +'<section class="sec"><h3>분류</h3><p>분류는 표준 10개로 고정되어 있습니다. 표시 이름, 순서를 바꾸거나 쓰지 않는 분류를 숨깁니다.</p><div class="btns"><button class="btn" data-act="cats-open">분류 관리</button></div></section>'
   +'<section class="sec"><h3>백업과 복원</h3><p>마지막 백업: <b>'+(lb?agoText(lb):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 백업 파일을 저장해 구글 드라이브나 PC로 옮겨 두세요. '+(IS_IOS?'아이폰은 저장 창에서 <b>파일에 저장</b>을 고르세요. 사파리는 오래 안 쓴 저장소를 지울 수 있으니 백업을 자주 저장하세요.':'파일은 폰의 다운로드 폴더에 저장됩니다.')+'</p>'
