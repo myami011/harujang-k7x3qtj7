@@ -156,6 +156,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .lb{background:rgba(0,0,0,.88);align-items:center}
 .lb img{max-width:100%;max-height:86dvh;object-fit:contain}
 .lb .x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;background:rgba(255,255,255,.2);color:#fff}
+.updnote{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(40,28,22,.72);color:#fff;font-size:17px;line-height:1.6;white-space:pre-line}.updnote[hidden]{display:none}.updnote b{display:block;font-size:20px;margin-bottom:6px}.updnote button{display:block;margin:18px auto 0;padding:10px 26px;border:0;border-radius:99px;background:var(--brand);color:var(--on-brand);font:700 15px var(--sans)}
 .toast{position:fixed;z-index:70;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));max-width:calc(100vw - 32px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;box-shadow:var(--shadow)}
 .pill{background:none;font-family:var(--sans)}
 .pill.warn{color:var(--c-key);border-color:var(--c-key);font-weight:700}
@@ -338,6 +339,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="scrim" id="sheet" hidden><div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="입력"></div></div>
 <div class="scrim lb" id="lb" hidden data-act="lb-close"><button class="x" data-act="lb-close" aria-label="닫기">×</button><img id="lb-img" alt="확대한 사진"></div>
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="updnote" id="updnote" role="alert" hidden></div>
 <div class="snack" id="snack" hidden role="status"><span id="snack-t"></span><button class="ok" data-act="snack-ok">기록하기</button><button data-act="snack-no" aria-label="닫기">×</button></div>
 <script>
 (function(){
@@ -398,7 +400,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.57';
+const APP_VER='v0.59';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -458,6 +460,7 @@ async function init(){
 
 /* ---------- 설치 ---------- */
 let deferred=null;
+const IS_IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const isStandalone=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;if(S.tab==='arch')render();});
 window.addEventListener('appinstalled',()=>{deferred=null;toast('설치했습니다');render();});
@@ -749,11 +752,12 @@ function viewArch(){
   const n=S.entries.length,ph=S.entries.reduce((s,e)=>s+(e.photos||[]).length,0),lb=lastBackup();
   const inst=isStandalone()?'<p>설치된 앱으로 실행 중입니다.</p>'
     :deferred?'<p>홈 화면에 아이콘을 만들어 앱처럼 실행합니다.</p><div class="btns"><button class="btn pri" data-act="install">홈 화면에 설치</button></div>'
+    :IS_IOS?'<p>아이폰은 <b>사파리</b>에서 열고, 아래 <b>공유 버튼(□↑)</b>을 눌러 <b>홈 화면에 추가</b>를 누르세요. 홈 화면에 추가해서 써야 기록이 더 안전합니다.</p>'
     :'<p>Chrome 오른쪽 위 메뉴(⋮)에서 <b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누르세요.</p>';
   return topHtml()+'<h1 class="pg">보관</h1>'
   +'<section class="sec"><h3>보관 상태</h3><p>기록 '+n+'건 · 사진 '+ph+'장 · 할 일 '+S.todos.length+'개<br>모든 내용은 이 폰의 브라우저 저장소에만 있습니다. 서버로 보내지 않습니다.'+(S.mem?'<br><b>지금은 저장이 꺼져 있어 앱을 닫으면 사라집니다.</b>':'')+'</p></section>'
   +'<section class="sec"><h3>분류</h3><p>분류는 표준 10개로 고정되어 있습니다. 표시 이름, 순서를 바꾸거나 쓰지 않는 분류를 숨깁니다.</p><div class="btns"><button class="btn" data-act="cats-open">분류 관리</button></div></section>'
-  +'<section class="sec"><h3>백업과 복원</h3><p>마지막 백업: <b>'+(lb?agoText(lb):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 백업 파일을 저장해 구글 드라이브나 PC로 옮겨 두세요. 파일은 폰의 다운로드 폴더에 저장됩니다.</p>'
+  +'<section class="sec"><h3>백업과 복원</h3><p>마지막 백업: <b>'+(lb?agoText(lb):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 백업 파일을 저장해 구글 드라이브나 PC로 옮겨 두세요. '+(IS_IOS?'아이폰은 저장 창에서 <b>파일에 저장</b>을 고르세요. 사파리는 오래 안 쓴 저장소를 지울 수 있으니 백업을 자주 저장하세요.':'파일은 폰의 다운로드 폴더에 저장됩니다.')+'</p>'
   +'<div class="btns"><button class="btn pri" data-act="export" data-kind="json">백업 파일 저장</button><button class="btn" data-act="export" data-kind="md">읽기용(마크다운) 저장</button><label class="btn">백업 불러오기<input id="imp" type="file" accept=".json,application/json" hidden></label></div></section>'
   +'<section class="sec"><h3>앱 설치</h3>'+inst+'</section>'
   +'<section class="sec"><h3>앱 업데이트</h3><p>새 버전을 GitHub에 올렸는데 아래 버전이 그대로면 누르세요. 기록은 지워지지 않습니다.</p><div class="btns"><button class="btn pri" data-act="app-update">업데이트</button></div></section>'
@@ -1066,6 +1070,13 @@ function todoAlarm(){
   const e=new Date(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8),+tm.slice(0,2),+tm.slice(3,5)+30);
   const p2=n=>String(n).padStart(2,'0');
   const en=''+e.getFullYear()+p2(e.getMonth()+1)+p2(e.getDate())+'T'+p2(e.getHours())+p2(e.getMinutes())+'00';
+  if(IS_IOS){
+    const z=n=>String(n).padStart(2,'0'),now=new Date(),stamp=''+now.getUTCFullYear()+z(now.getUTCMonth()+1)+z(now.getUTCDate())+'T'+z(now.getUTCHours())+z(now.getUTCMinutes())+z(now.getUTCSeconds())+'Z';
+    const esc2=t=>t.replace(/[\\;,]/g,m=>'\\'+m).replace(/\n/g,' ');
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Harujang//KO','BEGIN:VEVENT','UID:'+Date.now()+'@harujang','DTSTAMP:'+stamp,'DTSTART:'+st,'DTEND:'+en,'SUMMARY:'+esc2(title),'DESCRIPTION:하루장 할 일','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc2(title),'TRIGGER:PT0S','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    window.open(URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'})),'_blank');
+    toast('열린 창에서 캘린더에 추가를 누르세요');return;
+  }
   const url='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+st+'/'+en+'&details='+encodeURIComponent('하루장 할 일');
   window.open(url,'_blank','noopener');
 }
@@ -1330,7 +1341,7 @@ document.addEventListener('click',ev=>{
         try{const r=await fetch('./index.html?u='+Date.now(),{cache:'no-store'});if(r.ok){const m=(await r.text()).match(/APP_VER='([^']+)'/);if(m)latest=m[1];}}catch(_){}
         if(!latest){S.updBusy=false;toast('인터넷에 연결되지 않아 확인하지 못했습니다');return;}
         if(latest===APP_VER){S.updBusy=false;toast('이미 최신 버전입니다 ('+APP_VER+')');return;}
-        toast('새 버전 '+latest+' 받는 중…');
+        {const n=$('#updnote');if(n){n.innerHTML='<div><b>업데이트 중</b>'+APP_VER+' → '+latest+'\n잠시만 기다려 주세요</div>';n.hidden=false;}}
         lsSet('upd_from',APP_VER);
         try{if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}}catch(_){}
         location.replace(location.pathname+'?u='+Date.now());
@@ -1391,7 +1402,7 @@ $('#sheet').addEventListener('click',ev=>{if(ev.target.id==='sheet')closeSheet()
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});
 }
-{const f=lsGet('upd_from');if(f){try{localStorage.removeItem('upd_from');}catch(_){}setTimeout(()=>toast(f===APP_VER?'업데이트했지만 버전이 그대로입니다. 잠시 뒤 다시 눌러 보세요':'업데이트 완료: '+f+' → '+APP_VER),600);}}
+{const f=lsGet('upd_from');if(f){try{localStorage.removeItem('upd_from');}catch(_){}setTimeout(()=>{const n=$('#updnote');if(!n)return;n.innerHTML='<div><b>'+(f===APP_VER?'버전이 그대로입니다':'업데이트 완료')+'</b>'+(f===APP_VER?'잠시 뒤 다시 눌러 보세요':f+' → '+APP_VER)+'<button type="button" id="updok">확인</button></div>';n.hidden=false;$('#updok').onclick=()=>{n.hidden=true;};},500);}}
 init();
 })();
 
