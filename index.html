@@ -276,6 +276,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .bar{height:6px;border-radius:9px;background:var(--fill);margin:8px 0 4px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--k-moss)}
 .bkback{margin-top:10px;color:var(--ink2);font:500 14px var(--sans)}
+.bkh{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .bkt{margin:6px 0 2px;font-size:20px}
 .bkt .dn{font-size:12px;padding:2px 9px;border-radius:99px;vertical-align:middle}
 .bks{color:var(--ink2)}
@@ -376,7 +377,7 @@ const STD_CATS=[
 ];
 const isStd=id=>STD_CATS.some(c=>c.id===id);
 const FIELD_ORDER=['end','dist','cost','author','pages'];
-const MK={quote:'구절',think:'생각',more:'더알'},MK_ORDER=['quote','think','more'];
+const MK={quote:'인용',think:'생각',more:'더알'},MK_ORDER=['quote','think','more'];
 const FIELD_SHORT={end:'종료',dist:'거리',cost:'비용',author:'저자',pages:'쪽'};
 const fieldsOf=c=>{const d=c&&STD_CATS.find(x=>x.id===c.id);return d?d.fields:[];};
 function buildCats(list){
@@ -541,13 +542,12 @@ function booksHtml(){
   if(S.book){
     const b=bs.find(x=>x.k===S.book);
     if(!b){S.book=null;}else{
-      const kinds=[['','전체']].concat(MK_ORDER.map(k=>[k,MK[k]]));
-      const list=b.es.slice().reverse().filter(e=>!S.bk||(e.f&&e.f.mk)===S.bk||(S.bk==='think'&&e.f&&e.f.thought));
+      const kinds=[['','전체']].concat(MK_ORDER.map(k=>[k,MK[k]]),[['none','기타']]);
+      const list=b.es.slice().reverse().filter(e=>!S.bk||(S.bk==='none'?!(e.f&&e.f.mk):(e.f&&e.f.mk)===S.bk||(S.bk==='think'&&e.f&&e.f.thought)));
       return '<button type="button" class="bkback" data-act="book-back">‹ 책별</button>'
-        +'<h2 class="bkt">'+esc(b.title)+(b.done?' <span class="dn">완독 ✓</span>':'')+'</h2>'
+        +'<div class="bkh"><h2 class="bkt">'+esc(b.title)+(b.done?' <span class="dn">완독 ✓</span>':'')+'</h2><button class="chip-f edit" data-act="book-export">내보내기</button></div>'
         +'<small class="bks">'+esc(b.author||'저자 미입력')+' · '+mdShort(b.first)+' ~ '+mdShort(b.last)+' · 기록 '+b.es.length+'건</small>'+bookBar(b)
-        +'<div class="chips" style="padding-block:10px 6px">'+kinds.map(k=>'<button class="chip-f" data-act="bk-filter" data-v="'+k[0]+'" aria-pressed="'+(S.bk===k[0])+'">'+k[1]+'</button>').join('')
-        +'<button class="chip-f edit" data-act="book-export">정리 내보내기</button></div>'
+        +'<div class="chips" style="padding-block:10px 6px">'+kinds.map(k=>'<button class="chip-f" data-act="bk-filter" data-v="'+k[0]+'" aria-pressed="'+(S.bk===k[0])+'">'+k[1]+'</button>').join('')+'</div>'
         +(list.length?'<div class="btl">'+list.map(e=>'<div class="bit" data-act="rec-open" data-id="'+esc(e.id)+'" tabindex="0"><small>'+esc(dayLabelShort(e.date))+(pagesText(e.f)?' · <b class="pgx">'+pagesText(e.f)+'</b>':'')+((e.photos||[]).length?' · 사진 '+e.photos.length:'')+'</small><div class="bm">'+mkTag(e)+(e.note?esc(e.note):(e.f.thought?'':'<span class="dim">메모 없음</span>'))+(e.f.thought?'<div class="thk"><b>생각</b>'+esc(e.f.thought)+'</div>':'')+'</div></div>').join('')+'</div>'
           :'<p class="empty">이 종류의 메모가 없습니다.</p>');
     }
@@ -592,11 +592,10 @@ function tripsHtml(){
       const tl=Object.keys(g).sort().map(d=>'<h2 class="day"><span>'+dayLabel(d)+'</span><small>'+dayNote(d)+'</small><em>'+g[d].length+'건</em></h2>'+g[d].map(cardHtml).join('')).join('');
       S._ht=false;
       return '<button type="button" class="bkback" data-act="trip-back">‹ 여행별</button>'
-        +'<h2 class="bkt">'+(none?'여행명 없음':esc(b.title))+'</h2>'
+        +'<div class="bkh"><h2 class="bkt">'+(none?'여행명 없음':esc(b.title))+'</h2>'+(none?'':'<button class="chip-f edit" data-act="trip-export">내보내기</button>')+'</div>'
         +(none?'<small class="bks">여행명을 붙이지 않은 단독 기록 '+es.length+'건</small>'
           :'<small class="bks">'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+b.days+'일 · 기록 '+b.es.length+'건</small>'+tripSum(b)
-            +(b.places.length?'<small class="bks tpl">'+esc(b.places.join(' · '))+'</small>':'')
-            +'<div class="chips" style="padding-block:10px 6px"><button class="chip-f edit" data-act="trip-export">정리 내보내기</button></div>')
+            +(b.places.length?'<small class="bks tpl">'+esc(b.places.join(' · '))+'</small>':''))
         +tl;
     }
   }
@@ -618,7 +617,7 @@ function dayLabelShort(d){const a=String(d||'').split('-').map(Number);if(a.leng
 function bookMd(b){
   let m='# '+b.title+'\n'+(b.author?'저자: '+b.author+'\n':'')+'기간: '+b.first+' ~ '+b.last+(b.total?' · '+(b.done?b.total:b.page)+'/'+b.total+'쪽':'')+(b.done?' · 완독':'')+'\n';
   const one=e=>'- ['+e.date+(pagesText(e.f)?' '+pagesText(e.f):'')+'] '+(e.note||'').replace(/\n+/g,' ')+(e.f.thought?'\n  → 생각: '+String(e.f.thought).replace(/\n+/g,' '):'');
-  [['quote','구절'],['think','생각'],['more','더알'],['','기타 메모']].forEach(kk=>{
+  [['quote','인용'],['think','생각'],['more','더알'],['','기타 메모']].forEach(kk=>{
     const l=b.es.filter(e=>(e.f.mk||'')===kk[0]&&(e.note||e.f.thought));if(!l.length)return;
     m+='\n## '+kk[1]+'\n'+l.map(one).join('\n')+'\n';});
   return m;
@@ -872,10 +871,10 @@ function renderExtra(){
   $('#lbl-time').textContent=en.includes('end')?'시작시간':'시간';
   const ft0=$('#f-thought');if(ft0)sh.thought=ft0.value;
   const isRead=sh.cat==='read',isQ=isRead&&sh.mk==='quote';
-  const ml=$('#memo-lbl');if(ml)ml.textContent=isQ?'구절':'메모';
+  const ml=$('#memo-lbl');if(ml)ml.textContent=isQ?'인용':'메모';
   const nt=$('#f-note');if(nt){nt.placeholder=isQ?'책 문장을 옮겨 적으세요':'메모하세요';nt.classList.toggle('qt',isQ);}
-  const tb=$('#thbox');if(tb){tb.hidden=!isQ;tb.innerHTML=!isQ?'':(sh.thOpen?'<span class="lbl thl">내 생각</span><textarea id="f-thought" rows="3" placeholder="이 구절에 대한 생각">'+esc(sh.thought||'')+'</textarea>':'<button type="button" class="xchip" data-act="th-open">+ 내 생각</button>');const f2=$('#f-thought');if(f2)growTa(f2);}
-  const mr=$('#mkrow');if(mr){mr.hidden=!isRead;mr.innerHTML=!isRead?'':MK_ORDER.map(k=>'<button type="button" class="xchip'+(sh.mk===k?' on':'')+'" data-act="mk" data-k="'+k+'" aria-pressed="'+(sh.mk===k)+'">'+MK[k]+'</button>').join('')+'<button type="button" class="xchip" id="f-done" data-act="done" style="margin-left:auto">□ 완독</button>';}
+  const tb=$('#thbox');if(tb){tb.hidden=!isQ;tb.innerHTML=!isQ?'':(sh.thOpen?'<span class="lbl thl">내 생각</span><textarea id="f-thought" rows="3" placeholder="이 인용에 대한 생각">'+esc(sh.thought||'')+'</textarea>':'<button type="button" class="xchip" data-act="th-open">+ 내 생각</button>');const f2=$('#f-thought');if(f2)growTa(f2);}
+  const mr=$('#mkrow');if(mr){mr.hidden=!isRead;mr.innerHTML=!isRead?'':MK_ORDER.concat(['']).map(k=>{const on=(sh.mk||'')===k;return '<button type="button" class="xchip'+(on?' on':'')+'" data-act="mk" data-k="'+k+'" aria-pressed="'+on+'">'+(k?MK[k]:'기타')+'</button>';}).join('')+'<button type="button" class="xchip" id="f-done" data-act="done" style="margin-left:auto">□ 완독</button>';}
   const dn=$('#f-done');if(dn){dn.classList.toggle('on',!!sh.done);dn.textContent=(sh.done?'☑':'□')+' 완독';dn.setAttribute('aria-pressed',String(!!sh.done));}
   if(!isRead){const sg=$('#sug');if(sg)sg.hidden=true;}
   updDt();
@@ -1260,7 +1259,7 @@ document.addEventListener('click',ev=>{
     case 'book-back':S.book=null;$('#feed').innerHTML=feedHtml();syncFab();break;
     case 'bk-filter':S.bk=t.dataset.v;$('#feed').innerHTML=feedHtml();break;
     case 'book-export':{const b=books().find(x=>x.k===S.book);if(b){saveBlob(new Blob([bookMd(b)],{type:'text/markdown'}),mdName('book',b.title));toast('저장했습니다');}break;}
-    case 'mk':{const sh=S.sheet;if(!sh)break;collectX();sh.mk=(sh.mk===t.dataset.k)?'':t.dataset.k;renderExtra();break;}
+    case 'mk':{const sh=S.sheet;if(!sh)break;collectX();sh.mk=t.dataset.k;renderExtra();break;}
     case 'th-open':{const sh=S.sheet;if(!sh)break;sh.thOpen=true;renderExtra();const f=$('#f-thought');if(f)f.focus();break;}
     case 'done':{const sh=S.sheet;if(!sh)break;sh.done=!sh.done;renderExtra();break;}
     case 'sug-pick':{
