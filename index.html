@@ -195,6 +195,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .chk{width:22px;height:22px;border-radius:6px;border:2px solid var(--ink2);display:grid;place-items:center;color:var(--on-brand)}
 .chk.on{background:var(--brand);border-color:var(--brand)}
 .chk svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.tm{color:var(--brand);font-weight:600;font-size:13px;white-space:nowrap}
 .todo .t{flex:1;min-width:0;text-align:left;padding:6px 0;font-size:15px;line-height:1.35;overflow-wrap:anywhere}
 .todo.done .t{color:var(--ink2);text-decoration:line-through}
 .due{flex:none;font-size:12px;color:var(--ink2);background:var(--fill);border-radius:99px;padding:1px 9px}
@@ -277,6 +278,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .sug.all{max-height:300px;overflow-y:auto}
 .sug .dn2{opacity:.6}
 .tl-l{display:block;flex:2;min-width:0}
+#f-note.qt{border-left:3px solid var(--k-moss)}
+.thl{color:var(--brand);font-weight:700}
+#f-thought{resize:none;overflow:hidden;min-height:calc(3*1.5em + 22px);border-color:var(--brand)}
+.thk{margin:6px 0 0 10px;padding:7px 10px;border-left:3px solid var(--brand);background:color-mix(in srgb,var(--brand) 7%,transparent);border-radius:0 10px 10px 0;font-size:14px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.thk b{font-size:11.5px;color:var(--brand);margin-right:6px}
+.bit .thk{margin-left:4px}
 .titrow{display:flex;gap:8px}
 .aul{display:none;flex:1;min-width:0}
 .rd .aul{display:block}
@@ -531,6 +538,7 @@ const durMinOf=(a,b)=>{
 };
 const durText=m=>m?(m>=60?Math.floor(m/60)+'시간':'')+(m%60?(m>=60?' ':'')+(m%60)+'분':''):'';
 function pagesText(f){const a=f.pFrom,b=f.pTo;return (a&&b)?(a+'–'+b+'쪽'):b?('~'+b+'쪽'):a?(a+'쪽~'):'';}
+const thoughtHtml=e=>(e.cat==='read'&&e.f&&e.f.thought)?'<p class="thk"><b>생각</b>'+esc(e.f.thought)+'</p>':'';
 const mkTag=e=>{const k=e.f&&e.f.mk;return MK[k]?'<b class="mkt">'+MK[k]+'</b>':'';};
 function legacyFacts(e){
   const f=e.f||{},o=[],en=fieldsOf(catOf(e.cat));
@@ -584,13 +592,13 @@ function booksHtml(){
     const b=bs.find(x=>x.k===S.book);
     if(!b){S.book=null;}else{
       const kinds=[['','전체']].concat(MK_ORDER.map(k=>[k,MK[k]]));
-      const list=b.es.slice().reverse().filter(e=>!S.bk||(e.f&&e.f.mk)===S.bk);
+      const list=b.es.slice().reverse().filter(e=>!S.bk||(e.f&&e.f.mk)===S.bk||(S.bk==='think'&&e.f&&e.f.thought));
       return '<button type="button" class="bkback" data-act="book-back">‹ 책별</button>'
         +'<h2 class="bkt">'+esc(b.title)+(b.done?' <span class="dn">완독 ✓</span>':'')+'</h2>'
         +'<small class="bks">'+esc(b.author||'저자 미입력')+' · '+mdShort(b.first)+' ~ '+mdShort(b.last)+' · 기록 '+b.es.length+'건</small>'+bookBar(b)
         +'<div class="chips" style="padding-block:10px 6px">'+kinds.map(k=>'<button class="chip-f" data-act="bk-filter" data-v="'+k[0]+'" aria-pressed="'+(S.bk===k[0])+'">'+k[1]+'</button>').join('')
         +'<button class="chip-f edit" data-act="book-export">정리 내보내기</button></div>'
-        +(list.length?'<div class="btl">'+list.map(e=>'<div class="bit" data-act="rec-open" data-id="'+esc(e.id)+'" tabindex="0"><small>'+esc(dayLabelShort(e.date))+(pagesText(e.f)?' · <b class="pgx">'+pagesText(e.f)+'</b>':'')+((e.photos||[]).length?' · 사진 '+e.photos.length:'')+'</small><div class="bm">'+mkTag(e)+(e.note?esc(e.note):'<span class="dim">메모 없음</span>')+'</div></div>').join('')+'</div>'
+        +(list.length?'<div class="btl">'+list.map(e=>'<div class="bit" data-act="rec-open" data-id="'+esc(e.id)+'" tabindex="0"><small>'+esc(dayLabelShort(e.date))+(pagesText(e.f)?' · <b class="pgx">'+pagesText(e.f)+'</b>':'')+((e.photos||[]).length?' · 사진 '+e.photos.length:'')+'</small><div class="bm">'+mkTag(e)+(e.note?esc(e.note):(e.f.thought?'':'<span class="dim">메모 없음</span>'))+(e.f.thought?'<div class="thk"><b>생각</b>'+esc(e.f.thought)+'</div>':'')+'</div></div>').join('')+'</div>'
           :'<p class="empty">이 종류의 메모가 없습니다.</p>');
     }
   }
@@ -601,9 +609,10 @@ function booksHtml(){
 function dayLabelShort(d){const a=String(d||'').split('-').map(Number);if(a.length!==3)return '';const t=new Date(a[0],a[1]-1,a[2]);return a[1]+'/'+a[2]+' ('+WD[t.getDay()]+')';}
 function bookMd(b){
   let m='# '+b.title+'\n'+(b.author?'저자: '+b.author+'\n':'')+'기간: '+b.first+' ~ '+b.last+(b.total?' · '+(b.done?b.total:b.page)+'/'+b.total+'쪽':'')+(b.done?' · 완독':'')+'\n';
+  const one=e=>'- ['+e.date+(pagesText(e.f)?' '+pagesText(e.f):'')+'] '+(e.note||'').replace(/\n+/g,' ')+(e.f.thought?'\n  → 생각: '+String(e.f.thought).replace(/\n+/g,' '):'');
   [['quote','구절'],['think','생각'],['more','더알'],['','기타 메모']].forEach(kk=>{
-    const l=b.es.filter(e=>(e.f.mk||'')===kk[0]&&e.note);if(!l.length)return;
-    m+='\n## '+kk[1]+'\n'+l.map(e=>'- ['+e.date+(pagesText(e.f)?' '+pagesText(e.f):'')+'] '+e.note.replace(/\n+/g,' ')).join('\n')+'\n';});
+    const l=b.es.filter(e=>(e.f.mk||'')===kk[0]&&(e.note||e.f.thought));if(!l.length)return;
+    m+='\n## '+kk[1]+'\n'+l.map(one).join('\n')+'\n';});
   return m;
 }
 /* ---------- views ---------- */
@@ -612,6 +621,7 @@ function cardHtml(e){
   let body='';
   if(lf.length)body+='<div class="facts">'+lf.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>';
   if(e.note||mkTag(e))body+='<p class="note">'+mkTag(e)+esc(e.note||'')+'</p>';
+  body+=thoughtHtml(e);
   if(ph.length){
     body+='<div class="thumbs">'+ph.slice(0,3).map((p,i)=>{
       const more=(i===2&&ph.length>3)?'<span class="more">+'+(ph.length-3)+'</span>':'';
@@ -640,7 +650,7 @@ function catChipsHtml(sh){
 function todoRow(x,td){
   const late=!x.done&&x.due&&x.due<td;
   return '<div class="todo'+(x.done?' done':'')+'"><button type="button" class="chk-w" data-act="todo-toggle" data-id="'+esc(x.id)+'" aria-label="'+(x.done?'완료 취소':'완료로 표시')+'"><span class="chk'+(x.done?' on':'')+'">'+(x.done?CHECK:'')+'</span></button>'
-    +'<button type="button" class="t" data-act="todo-edit" data-id="'+esc(x.id)+'">'+esc(x.title)+'</button>'
+    +'<button type="button" class="t" data-act="todo-edit" data-id="'+esc(x.id)+'">'+(x.time?'<span class="tm">🔔 '+esc(x.time)+'</span> ':'')+esc(x.title)+'</button>'
     +(x.due&&x.due!==td?'<span class="due'+(late?' late':'')+'">'+dueText(x.due,td)+'</span>':'')+'</div>';
 }
 function todosBlock(td){
@@ -649,7 +659,7 @@ function todosBlock(td){
   const late=open.filter(x=>x.due&&x.due<td).sort((a,b)=>a.due.localeCompare(b.due));
   const seen=new Set(late.map(x=>x.id));
   const now=S.todos.filter(x=>!seen.has(x.id)&&(x.due===td||(!x.due&&!x.done)||(x.done&&x.doneDate===td)))
-    .sort((a,b)=>(a.done-b.done)||((a.createdAt||0)-(b.createdAt||0)));
+    .sort((a,b)=>(a.done-b.done)||((a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:0)||((a.createdAt||0)-(b.createdAt||0)));
   now.forEach(x=>seen.add(x.id));
   const soon=open.filter(x=>!seen.has(x.id)&&x.due>td&&x.due<=lim).sort((a,b)=>a.due.localeCompare(b.due));
   soon.forEach(x=>seen.add(x.id));
@@ -659,7 +669,7 @@ function todosBlock(td){
   return '<h2 class="day"><span>할 일</span><em>'+open.length+'개 남음</em></h2><div class="todos">'
     +(list.length?list.map(x=>todoRow(x,td)).join(''):'<p class="none">'+(far.length?'가까운 할 일이 없습니다.':'할 일이 없습니다.')+'</p>')+btn+'</div>';
 }
-const hay=e=>[e.title,e.note,catOf(e.cat).name,e.catOrig||'',(e.tags||[]).join(' '),legacyFacts(e).join(' ')].join(' ').toLowerCase();
+const hay=e=>[e.title,e.note,(e.f&&e.f.thought)||'',catOf(e.cat).name,e.catOrig||'',(e.tags||[]).join(' '),legacyFacts(e).join(' ')].join(' ').toLowerCase();
 function filtered(){
   const q=S.q.trim().toLowerCase();
   return S.entries.filter(e=>(S.cat==='all'||e.cat===S.cat)&&(!S.imp||e.star)&&(!q||hay(e).includes(q))).sort(byTimeDesc);
@@ -732,7 +742,7 @@ function viewArch(){
     :'<p>Chrome 오른쪽 위 메뉴(⋮)에서 <b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누르세요.</p>';
   return topHtml()+'<h1 class="pg">보관</h1>'
   +'<section class="sec"><h3>보관 상태</h3><p>기록 '+n+'건 · 사진 '+ph+'장 · 할 일 '+S.todos.length+'개<br>모든 내용은 이 폰의 브라우저 저장소에만 있습니다. 서버로 보내지 않습니다.'+(S.mem?'<br><b>지금은 저장이 꺼져 있어 앱을 닫으면 사라집니다.</b>':'')+'</p></section>'
-  +'<section class="sec"><h3>분류</h3><p>외출, 등산 같은 분류의 이름과 색을 바꾸거나 새로 만듭니다.</p><div class="btns"><button class="btn" data-act="cats-open">분류 관리</button></div></section>'
+  +'<section class="sec"><h3>분류</h3><p>분류는 표준 10개로 고정되어 있습니다. 표시 이름, 순서를 바꾸거나 쓰지 않는 분류를 숨깁니다.</p><div class="btns"><button class="btn" data-act="cats-open">분류 관리</button></div></section>'
   +'<section class="sec"><h3>백업과 복원</h3><p>마지막 백업: <b>'+(lb?agoText(lb):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 백업 파일을 저장해 구글 드라이브나 PC로 옮겨 두세요. 파일은 폰의 다운로드 폴더에 저장됩니다.</p>'
   +'<div class="btns"><button class="btn pri" data-act="export" data-kind="json">백업 파일 저장</button><button class="btn" data-act="export" data-kind="md">읽기용(마크다운) 저장</button><label class="btn">백업 불러오기<input id="imp" type="file" accept=".json,application/json" hidden></label></div></section>'
   +'<section class="sec"><h3>앱 설치</h3>'+inst+'</section>';
@@ -757,7 +767,8 @@ function recFormHtml(sh){
   +'<label><span class="lbl" id="lbl-time">시간</span><input id="f-time" type="time" value="'+(e?e.time:hm(now))+'"></label></div>'
   +'<div class="fld xchips" id="xchips" hidden></div><div class="fld xbody" id="xbody" hidden></div>'
   +'<div class="fld xchips mkrow" id="mkrow" hidden></div>'
-  +'<label class="fld"><span class="lbl">메모</span><textarea id="f-note" rows="3" placeholder="메모하세요">'+esc(e?e.note:'')+'</textarea></label>'
+  +'<label class="fld"><span class="lbl" id="memo-lbl">메모</span><textarea id="f-note" rows="3" placeholder="메모하세요">'+esc(e?e.note:'')+'</textarea></label>'
+  +'<div class="fld thbox" id="thbox" hidden></div>'
   +'<div class="fld msave-w"><button type="submit" form="f" class="hsave msave">저장</button></div>'
   +'<div class="fld"><span class="lbl">사진 <span id="ph-n"></span></span><div class="strip" id="strip"></div>'
   +'<div class="btns"><label class="btn">촬영<input id="f-cam" type="file" accept="image/*" capture="environment" hidden></label><label class="btn">앨범에서 선택<input id="f-pic" type="file" accept="image/*" multiple hidden></label>'
@@ -772,6 +783,7 @@ function todoFormHtml(sh){
   +'<label class="fld"><span class="lbl">할 일</span><input id="t-title" type="text" maxlength="80" placeholder="무엇을 할까요" value="'+esc(x?x.title:'')+'"><small class="err" id="err-t" hidden>할 일을 입력하세요</small></label>'
   +'<div class="fld"><span class="lbl">예정일</span><div class="duerow"><input id="t-due" type="date" value="'+esc(x?x.due:ymd(new Date()))+'" aria-label="예정일">'
   +'<button type="button" class="btn" data-act="due-set" data-n="0">오늘</button><button type="button" class="btn" data-act="due-set" data-n="1">내일</button><button type="button" class="btn" data-act="due-set" data-n="-1">날짜 없음</button></div></div>'
+  +'<div class="fld"><span class="lbl">시간 (선택)</span><div class="duerow"><input id="t-time" type="time" value="'+esc(x&&x.time||'')+'" aria-label="시간"><button type="button" class="btn" data-act="due-time-clear">지움</button><button type="button" class="btn" id="t-alarm" data-act="todo-alarm">🔔 알림 등록</button></div><small class="hint">알림은 휴대전화 캘린더가 울립니다. 버튼을 누르면 캘린더에 일정이 채워져 열리고, 저장만 누르면 됩니다.</small></div>'
   +'<div class="fld actions"><button class="btn pri" type="submit" id="tsave">저장</button>'+(x?'<button class="btn danger" type="button" id="tdel" data-act="todo-del">삭제</button>':'')+'</div></form>';
 }
 function catsHtml(sh){
@@ -828,7 +840,11 @@ function renderExtra(){
   body.hidden=!body.innerHTML;
   const ti=$('#f-title');if(ti)ti.placeholder=en.includes('author')?'책 제목':'비워 두면 장소가 제목';
   $('#lbl-time').textContent=en.includes('end')?'시작시간':'시간';
-  const isRead=sh.cat==='read';
+  const ft0=$('#f-thought');if(ft0)sh.thought=ft0.value;
+  const isRead=sh.cat==='read',isQ=isRead&&sh.mk==='quote';
+  const ml=$('#memo-lbl');if(ml)ml.textContent=isQ?'구절':'메모';
+  const nt=$('#f-note');if(nt){nt.placeholder=isQ?'책 문장을 옮겨 적으세요':'메모하세요';nt.classList.toggle('qt',isQ);}
+  const tb=$('#thbox');if(tb){tb.hidden=!isQ;tb.innerHTML=!isQ?'':(sh.thOpen?'<span class="lbl thl">내 생각</span><textarea id="f-thought" rows="3" placeholder="이 구절에 대한 생각">'+esc(sh.thought||'')+'</textarea>':'<button type="button" class="xchip" data-act="th-open">+ 내 생각</button>');const f2=$('#f-thought');if(f2)growTa(f2);}
   const mr=$('#mkrow');if(mr){mr.hidden=!isRead;mr.innerHTML=!isRead?'':MK_ORDER.map(k=>'<button type="button" class="xchip'+(sh.mk===k?' on':'')+'" data-act="mk" data-k="'+k+'" aria-pressed="'+(sh.mk===k)+'">'+MK[k]+'</button>').join('')+'<button type="button" class="xchip" id="f-done" data-act="done" style="margin-left:auto">□ 완독</button>';}
   const dn=$('#f-done');if(dn){dn.classList.toggle('on',!!sh.done);dn.textContent=(sh.done?'☑':'□')+' 완독';dn.setAttribute('aria-pressed',String(!!sh.done));}
   if(!isRead){const sg=$('#sug');if(sg)sg.hidden=true;}
@@ -863,6 +879,7 @@ function updSug(all){
   sh.sug=l;sg.innerHTML=sugItems(l);sg.hidden=!l.length;
 }
 document.addEventListener('focusin',ev=>{const t=ev.target;if(t.id==='f-title')updSug();else if(!(t.closest&&(t.closest('#sug')||t.id==='getbk'))){const sg=$('#sug');if(sg)sg.hidden=true;}});
+function growTa(el){el.style.height='auto';if(el.offsetParent===null)return;el.style.height=(el.scrollHeight+2)+'px';}
 function growNote(){
   const el=$('#f-note');if(!el)return;
   el.style.height='auto';if(el.offsetParent===null)return;
@@ -887,7 +904,7 @@ function recSheetOf(entry,prefill){
   const cat=entry?entry.cat:(S.cats.some(c=>c.id===last&&!c.hidden)?last:(S.cats.find(c=>!c.hidden)||S.cats[0]).id);
   return {kind:'rec',entry:entry||null,cat:cat,title:entry?entry.title:(prefill&&prefill.title)||'',star:entry?(entry.star||0):0,
     photos:entry?(entry.photos||[]).slice():[],busy:0,geo:(entry&&entry.geo)||null,touched:{dt:!!entry},arm:false,xopen:{},
-    picked:!!(entry&&entry.cat==='read'),mk:entry?(entry.f.mk||''):'',done:entry?!!entry.f.done:false,
+    picked:!!(entry&&entry.cat==='read'),thought:entry?(entry.f.thought||''):'',thOpen:!!(entry&&entry.f.thought),mk:entry?(entry.f.mk||''):'',done:entry?!!entry.f.done:false,
     x:entry?{place:entry.f.place||entry.f.dest||'',dist:entry.f.distKm||'',end:entry.f.end||'',cost:entry.f.cost||entry.f.spend||'',author:entry.f.author||'',pf:entry.f.pFrom||'',pt:entry.f.pTo||'',ptot:entry.f.pTotal||''}:{}};
 }
 function openRec(entry,prefill){openSheet(recSheetOf(entry,prefill));}
@@ -902,7 +919,7 @@ function viewHtml(sh){
   +(e.star?'<span class="stars-s" aria-label="중요">★</span>':'')+'</div>'
   +'<h3 class="vtitle">'+esc(e.title)+'</h3>'
   +(lf.length?'<div class="facts">'+lf.map(x=>'<span>'+esc(x)+'</span>').join('')+'</div>':'')
-  +((e.note||mkTag(e))?'<p class="vnote">'+mkTag(e)+esc(e.note||'')+'</p>':'')
+  +((e.note||mkTag(e))?'<p class="vnote">'+mkTag(e)+esc(e.note||'')+'</p>':'')+thoughtHtml(e)
   +(ph.length?'<div class="vphotos">'+ph.map((p,i)=>'<button type="button" class="ph" data-act="photo" data-id="'+esc(e.id)+'" data-i="'+i+'" aria-label="사진 크게 보기"><img alt="" src="'+esc(urlOf(p))+'"></button>').join('')+'</div>':'')
   +(g?'<p class="geo" style="margin-top:12px">위치 '+g.lat.toFixed(4)+', '+g.lon.toFixed(4)+' · <a href="https://www.google.com/maps?q='+g.lat+','+g.lon+'" target="_blank" rel="noopener">지도에서 보기</a></p>':'')
   +(e.tags&&e.tags.length?'<div class="tags">'+e.tags.map(t=>'<span>#'+esc(t)+'</span>').join('')+'</div>':'')
@@ -965,6 +982,8 @@ async function saveRec(){
   if(sh.cat==='read'){
     if(sh.done)e.f.done=true;else delete e.f.done;
     if(sh.mk)e.f.mk=sh.mk;else delete e.f.mk;
+    const ft=$('#f-thought');if(ft)sh.thought=ft.value;
+    if(sh.mk==='quote'){const th=(sh.thought||'').trim();if(th)e.f.thought=th;else delete e.f.thought;}
   }
   if(sh.geo)e.geo=sh.geo;else delete e.geo;
   const sv=document.querySelectorAll('.hsave'),b={set disabled(v){sv.forEach(x=>x.disabled=v);}};b.disabled=true;
@@ -977,12 +996,24 @@ async function delRec(){
   if(!sh.arm){sh.arm=true;b.textContent='한 번 더 누르면 삭제';setTimeout(()=>{if(S.sheet===sh&&b.isConnected){sh.arm=false;b.textContent='삭제';}},3000);return;}
   try{await delEntry(sh.entry.id);closeSheet();toast('삭제했습니다');}catch(_){toast('삭제하지 못했습니다.');}
 }
+function todoAlarm(){
+  const title=$('#t-title').value.trim(),tm=$('#t-time').value;
+  if(!title){$('#err-t').hidden=false;$('#t-title').focus();return;}
+  if(!/^\d\d:\d\d$/.test(tm)){toast('시간을 먼저 입력하세요');$('#t-time').focus();return;}
+  const d=($('#t-due').value||ymd(new Date())).replace(/-/g,'');
+  const st=d+'T'+tm.replace(':','')+'00';
+  const e=new Date(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8),+tm.slice(0,2),+tm.slice(3,5)+30);
+  const p2=n=>String(n).padStart(2,'0');
+  const en=''+e.getFullYear()+p2(e.getMonth()+1)+p2(e.getDate())+'T'+p2(e.getHours())+p2(e.getMinutes())+'00';
+  const url='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title)+'&dates='+st+'/'+en+'&details='+encodeURIComponent('하루장 할 일');
+  window.open(url,'_blank','noopener');
+}
 async function saveTodo(){
   const sh=S.sheet;if(!sh||sh.kind!=='todo')return;
   const title=$('#t-title').value.trim();
   if(!title){$('#err-t').hidden=false;$('#t-title').focus();return;}
   const now=Date.now(),old=sh.todo;
-  const x=Object.assign({done:false,doneDate:null,doneAt:null},old||{},{id:old?old.id:newId(),title:title,due:$('#t-due').value||'',createdAt:old?old.createdAt:now,updatedAt:now});
+  const x=Object.assign({done:false,doneDate:null,doneAt:null},old||{},{id:old?old.id:newId(),title:title,due:$('#t-due').value||'',time:/^\d\d:\d\d$/.test($('#t-time').value)?$('#t-time').value:'',createdAt:old?old.createdAt:now,updatedAt:now});
   const b=$('#tsave');b.disabled=true;
   try{await putTodo(x);closeSheet();toast('저장했습니다');}catch(_){b.disabled=false;toast('저장하지 못했습니다.');}
 }
@@ -1132,7 +1163,7 @@ async function doImport(file){
         if(!raw||typeof raw.id!=='string'||typeof raw.title!=='string'){skip++;continue;}
         const old=S.todos.find(x=>x.id===raw.id);
         if(old&&(old.updatedAt||0)>=(raw.updatedAt||0)){skip++;continue;}
-        await putTodo({id:raw.id,title:raw.title.slice(0,80),due:okDate(raw.due)?raw.due:'',done:!!raw.done,doneDate:okDate(raw.doneDate)?raw.doneDate:null,
+        await putTodo({id:raw.id,title:raw.title.slice(0,80),due:okDate(raw.due)?raw.due:'',time:/^\d\d:\d\d$/.test(raw.time||'')?raw.time:'',done:!!raw.done,doneDate:okDate(raw.doneDate)?raw.doneDate:null,
           doneAt:Number(raw.doneAt)||null,createdAt:Number(raw.createdAt)||Date.now(),updatedAt:Number(raw.updatedAt)||Date.now()});tn++;
       }catch(_){skip++;}
     }
@@ -1172,6 +1203,7 @@ document.addEventListener('click',ev=>{
     case 'bk-filter':S.bk=t.dataset.v;$('#feed').innerHTML=feedHtml();break;
     case 'book-export':{const b=books().find(x=>x.k===S.book);if(b){saveBlob(new Blob([bookMd(b)],{type:'text/markdown'}),'harujang-book-'+b.title.replace(/[^\w가-힣]+/g,'_').slice(0,30)+'.md');toast('저장했습니다');}break;}
     case 'mk':{const sh=S.sheet;if(!sh)break;collectX();sh.mk=(sh.mk===t.dataset.k)?'':t.dataset.k;renderExtra();break;}
+    case 'th-open':{const sh=S.sheet;if(!sh)break;sh.thOpen=true;renderExtra();const f=$('#f-thought');if(f)f.focus();break;}
     case 'done':{const sh=S.sheet;if(!sh)break;sh.done=!sh.done;renderExtra();break;}
     case 'sug-pick':{
       const sh=S.sheet;if(!sh||!sh.sug)break;const b=sh.sug[Number(t.dataset.i)];if(!b)break;
@@ -1191,6 +1223,8 @@ document.addEventListener('click',ev=>{
     case 'geo-clear':if(S.sheet){S.sheet.geo=null;renderGeo();}break;
     case 'rec-del':delRec();break;
     case 'todo-del':delTodoUi();break;
+    case 'due-time-clear':$('#t-time').value='';break;
+    case 'todo-alarm':todoAlarm();break;
     case 'due-set':{const el=$('#t-due'),n=Number(t.dataset.n);el.value=n<0?'':addDays(ymd(new Date()),n);break;}
     case 'photo':{const e=S.entries.find(x=>x.id===t.dataset.id);if(e&&e.photos[Number(t.dataset.i)])showLb(urlOf(e.photos[Number(t.dataset.i)]));break;}
     case 'lb-close':hideLb();break;
@@ -1226,6 +1260,7 @@ document.addEventListener('input',ev=>{
   const sh=S.sheet;if(!sh)return;
   if(t.id==='f-title')$('#err-title').hidden=true;
   else if(t.id==='f-note')growNote();
+  else if(t.id==='f-thought'){sh.thought=t.value;growTa(t);}
   else if(t.id==='t-title')$('#err-t').hidden=true;
   else if((t.id==='f-date'||t.id==='f-time')&&sh.kind==='rec')sh.touched.dt=true;
 });
