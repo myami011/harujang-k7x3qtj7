@@ -263,7 +263,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .tl-l{display:block;flex:2;min-width:0}
 .trl{display:none;flex:2;min-width:0}
 .tp .trl{display:block}.tp .titrow .trl{flex:3}
-.tp .tl-l{flex:3}.tp.sd .titrow .ptp{display:none}
+.tp .tl-l{flex:3}.tp.sd .titrow .ptp{display:none}.gtag{color:var(--ink2);font-weight:700}
 .tp .titrow .ptp{flex:2;min-width:0}.tp .titrow .ptp .lbl{display:flex;align-items:center;min-height:26px;margin:0 0 4px}.tp .titlbl{display:none}.trh{display:flex;align-items:center;gap:8px;min-height:26px;margin-bottom:4px}.trh .lbl{margin:0}.trh .getbk[hidden]{display:none}.tp .ptrow .tl-l{flex:3}.tp .ptrow .ptbtn{flex:2}
 #f-note.qt{border-left:3px solid var(--k-moss)}
 .thl{color:var(--brand);font-weight:700}
@@ -457,7 +457,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.88';
+const APP_VER='v0.89';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -824,12 +824,28 @@ function filtered(){
   const q=S.q.trim().toLowerCase();
   return S.entries.filter(e=>(S.cat==='all'||e.cat===S.cat)&&(!S.imp||e.star)&&(!q||hay(e).includes(q))).sort(byTimeDesc);
 }
+/* ---------- 전체 목록: 책·여행·학습은 묶음 카드로 ---------- */
+const gTag=n=>'<small class="gtag">'+n+'</small> ';
+function bookCardHtml(b){return '<div class="card bcard" data-act="grp-book" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-moss)">'+gTag('독서')+'<b>'+esc(b.title)+'</b><span class="bst'+(b.done?' dn':'')+'">'+(b.done?'완독 ✓':'읽는 중')+'</span><br><small>'+esc(b.author||'저자 미입력')+' · 기록 '+b.es.length+'건</small>'+bookBar(b)+'</div>';}
+function tripCardHtml(b){return '<div class="card bcard" data-act="grp-trip" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-sky)">'+gTag('여행')+'<b>'+esc(b.title)+'</b><br><small>'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+b.days+'일 · 기록 '+b.es.length+'건</small>'+tripSum(b)+'</div>';}
+function studyCardHtml(b){return '<div class="card bcard" data-act="grp-study" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-brown)">'+gTag('학습')+'<b>'+esc(b.title)+'</b><br><small>'+b.es.length+'회차 · 마지막: '+esc(b.lastTitle)+(b.stars?' · ★ '+b.stars+'건':'')+'</small>'+studySum(b)+'</div>';}
+function allGroupedHtml(){
+  const used=new Set(),items=[];
+  books().forEach(b=>{b.es.forEach(e=>used.add(e.id));items.push({d:b.last,k:b.lastKey,h:bookCardHtml(b)});});
+  trips().forEach(b=>{b.es.forEach(e=>used.add(e.id));items.push({d:b.last,k:b.lastKey,h:tripCardHtml(b)});});
+  studies().forEach(b=>{b.es.forEach(e=>used.add(e.id));items.push({d:b.last,k:b.lastKey,h:studyCardHtml(b)});});
+  S.entries.forEach(e=>{if(!used.has(e.id))items.push({d:e.date,k:e.date+(e.time||''),h:cardHtml(e)});});
+  items.sort((x,y)=>y.k.localeCompare(x.k));
+  const g={};items.forEach(i=>{(g[i.d]=g[i.d]||[]).push(i);});
+  return Object.keys(g).sort().reverse().map(d=>'<h2 class="day"><span>'+dayLabel(d)+'</span><small>'+dayNote(d)+'</small><em>'+g[d].length+'건</em></h2>'+g[d].map(i=>i.h).join('')).join('');
+}
 function feedHtml(){
   if(S.ready&&S.cat==='read'&&S.bv)return booksHtml();
   if(S.ready&&S.cat==='trip'&&S.tv)return tripsHtml();
   if(S.ready&&S.cat==='study'&&S.sv)return studiesHtml();
   if(!S.ready)return '<p class="empty">기록을 불러오는 중입니다.</p>';
   if(!S.entries.length)return '<p class="empty">아직 기록이 없습니다.<br>오늘 탭이나 + 버튼으로 첫 기록을 남겨 보세요.</p>';
+  if(S.cat==='all'&&!S.imp&&!S.q.trim())return allGroupedHtml();
   const list=filtered();
   if(!list.length)return '<p class="empty">조건에 맞는 기록이 없습니다.</p>';
   const g={};list.forEach(e=>{(g[e.date]=g[e.date]||[]).push(e);});
@@ -1673,6 +1689,9 @@ document.addEventListener('click',ev=>{
     case 'filter':if(t.dataset.cat==='read'&&S.cat!=='read')S.bv=true;if(t.dataset.cat==='trip'&&S.cat!=='trip')S.tv=true;if(t.dataset.cat==='study'&&S.cat!=='study')S.sv=true;S.cat=t.dataset.cat;S.book=null;S.trip=null;S.study=null;S.sf='all';render();break;
     case 'bv':S.bv=t.dataset.v==='1';S.book=null;S.bk='';render();break;
     case 'tv':S.tv=t.dataset.v==='1';S.trip=null;render();break;
+    case 'grp-book':S.cat='read';S.bv=true;S.book=t.dataset.k;S.bk='';render();window.scrollTo(0,0);break;
+    case 'grp-trip':S.cat='trip';S.tv=true;S.trip=t.dataset.k;render();window.scrollTo(0,0);break;
+    case 'grp-study':S.cat='study';S.sv=true;S.study=t.dataset.k;S.sf='all';render();window.scrollTo(0,0);break;
     case 'sv':S.sv=t.dataset.v==='1';S.study=null;S.sf='all';render();break;
     case 'study-open':S.study=t.dataset.k;S.sf='all';$('#feed').innerHTML=feedHtml();syncFab();window.scrollTo(0,0);break;
     case 'study-back':S.study=null;$('#feed').innerHTML=feedHtml();syncFab();break;
