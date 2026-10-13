@@ -456,7 +456,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.83';
+const APP_VER='v0.85';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -496,7 +496,7 @@ const bkDays=()=>{const v=lsGet('harujang:bkdays');return v===null?14:Number(v);
 const phCount=()=>S.entries.reduce((n,e)=>n+(e.photos||[]).length,0);
 const fullDays=()=>{const v=lsGet('harujang:fulldays');return v===null?60:Number(v);};
 const lastFull=()=>Number(lsGet(LF_KEY))||Number(lsGet(LB_KEY))||0;
-const phMax=()=>{const v=Number(lsGet(PM_KEY));return v===480||v===1280||v===2048?v:1600;};
+const phMax=()=>{const v=Number(lsGet(PM_KEY));return v===1280||v===1600||v===2048?v:480;};
 function markBackup(full){
   if(!lsGet(LF_KEY)&&lsGet(LB_KEY))lsSet(LF_KEY,lsGet(LB_KEY));
   lsSet(LB_KEY,String(Date.now()));
@@ -843,12 +843,12 @@ function appBytes(){
 
 function photoSecs(ph,ab){
   const mx=phMax(),opt=[[480,'썸네일','0.03MB'],[1280,'작게','0.2MB'],[1600,'보통','0.35MB'],[2048,'크게','0.6MB']];
-  let h='<section class="sec"><h3>사진 저장 크기</h3><p>새로 넣는 사진에 적용됩니다. 숫자는 사진의 긴 변(픽셀)입니다. <b>썸네일</b>은 기록을 알아볼 정도의 작은 사진으로, 한 달 100장을 넣어도 몇 MB입니다. 원본은 폰 갤러리·구글 포토에 있다고 보고 쓰는 설정입니다. 선명한 사진이 필요할 때만 <b>보통</b>이나 <b>크게</b>로 바꾸세요.</p><div class="btns szb">'
+  let h='<section class="sec"><h3>사진 저장 크기</h3><p>새로 넣는 사진에 적용됩니다. 숫자는 사진의 긴 변(픽셀)입니다. 기본은 <b>썸네일</b>이며, 기록을 알아볼 정도의 작은 사진으로 한 달 100장을 넣어도 몇 MB입니다. 원본은 폰 갤러리·구글 포토에 있다고 보고 쓰는 설정입니다. 선명한 사진이 필요할 때만 <b>보통</b>이나 <b>크게</b>로 바꾸세요.</p><div class="btns szb">'
    +opt.map(o=>'<button class="btn'+(mx===o[0]?' pri':'')+'" data-act="ph-max" data-v="'+o[0]+'">'+o[1]+' '+o[0]+'px<small>한 장 약 '+o[2]+'</small></button>').join('')+'</div></section>';
   if(!ph)return h;
   const sc=S.phScan;
   h+='<section class="sec"><h3>저장된 사진 줄이기</h3><p>이미 저장된 사진 '+ph+'장을 선택한 크기('+mx+'px)로 다시 줄입니다. 그보다 작은 사진은 그대로 둡니다. <b>되돌릴 수 없으므로</b> 먼저 [전체 백업 저장]을 하세요.</p>'
-   +(sc&&sc.msg?'<p class="bknote">'+sc.msg+'</p>':'')+'<div class="btns"><button class="btn pri" data-act="ph-shrink"'+(S.phBusy?' disabled':'')+'>'+(S.phBusy?'처리 중…':sc&&sc.n?'정말 줄이기 ('+sc.n+'장)':'줄일 사진 확인')+'</button></div></section>';
+   +(sc&&sc.msg?'<p class="bknote">'+sc.msg+'</p>':'')+'<div class="btns"><button class="btn pri" data-act="ph-shrink"'+(S.phBusy?' disabled':'')+'>'+(S.phBusy?'처리 중…':sc&&sc.n?'정말 줄이기 ('+sc.n+'장)':'줄일 사진 확인')+'</button>'+(sc&&sc.n&&!S.phBusy?'<button class="btn" data-act="ph-cancel">취소</button>':'')+'</div></section>';
   const big=S.entries.map(e=>{const b=(e.photos||[]).reduce((t,p)=>t+(typeof p==='string'?Math.round(p.length*0.75):(p&&p.size)||0),0);return {e:e,b:b,n:(e.photos||[]).length};}).filter(x=>x.n).sort((a,b)=>b.b-a.b).slice(0,3);
   h+='<section class="sec"><h3>사진이 큰 기록</h3><p>크기 순입니다. 누르면 그 기록의 <b>사진만</b> 지울 수 있습니다(글은 남습니다). 먼저 전체 백업을 저장하세요.</p>'
    +big.map(x=>{const arm=S.phDel===x.e.id;return '<button class="btn phrow'+(arm?' pri':'')+'" data-act="ph-del" data-id="'+x.e.id+'"><span>'+(arm?'한 번 더 누르면 사진 '+x.n+'장을 지웁니다':esc(x.e.title)+' · '+x.e.date.slice(5).replace('-','월 ')+'일')+'</span><span>'+x.n+'장 · '+szText(x.b)+'</span></button>';}).join('')+'</section>';
@@ -1645,6 +1645,7 @@ document.addEventListener('click',ev=>{
     case 'bk-full':doExport('json');break;
     case 'ph-max':lsSet(PM_KEY,t.dataset.v);S.phScan=null;render();break;
     case 'ph-shrink':phShrink();break;
+    case 'ph-cancel':S.phScan=null;render();toast('취소했습니다',1500);break;
     case 'ph-del':phDel(t.dataset.id);break;
     case 'bk-fdays':lsSet('harujang:fulldays',t.dataset.v);render();break;
     case 'bk-snooze':lsSet('harujang:bkSnooze',ymd(new Date()));render();break;
