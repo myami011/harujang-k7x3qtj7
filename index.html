@@ -457,7 +457,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.89';
+const APP_VER='v0.8911';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -1659,7 +1659,7 @@ document.addEventListener('click',ev=>{
   if(t.id==='lb'&&ev.target!==t)return;
   const a=t.dataset.act;
   switch(a){
-    case 'tab':S.tab=t.dataset.tab;render();window.scrollTo(0,0);break;
+    case 'tab':if(S.tab!==t.dataset.tab){S.book=null;S.trip=null;S.study=null;S.bk='';S.sf='all';}S.tab=t.dataset.tab;render();window.scrollTo(0,0);break;
     case 'rec-new':{
       const b=(S.tab==='log'&&S.cat==='read'&&S.book)?books().find(x=>x.k===S.book):null;
       if(b){const sh=recSheetOf(null,{title:b.title});sh.cat='read';sh.picked=true;sh.x={author:b.author||'',ptot:b.total?String(b.total):'',pf:(b.page&&!b.done)?String(b.page+1):'',pt:''};openSheet(sh);}
@@ -1681,7 +1681,9 @@ document.addEventListener('click',ev=>{
     case 'dt-toggle':{const box=$('#dt-box'),btn=$('#dtline');if(box&&btn){box.hidden=!box.hidden;btn.setAttribute('aria-expanded',String(!box.hidden));}break;}
     case 'x-chip':{
       const sh=S.sheet,k=t.dataset.k;if(!sh||sh.kind!=='rec')break;
-      collectX();sh.xopen=sh.xopen||{};sh.xopen[k]=!sh.xopen[k];renderExtra();
+      collectX();sh.xopen=sh.xopen||{};sh.xopen[k]=!sh.xopen[k];
+      if(k==='end'&&sh.xopen[k]){sh.x=sh.x||{};if(!sh.x.end)sh.x.end=hm(new Date());}
+      renderExtra();
       const ids={dist:'#f-dist',cost:'#f-cost',author:'#f-author',pages:'#f-pf'};
       if(sh.xopen[k]&&ids[k]){const el=$(ids[k]);if(el)el.focus();}
       break;}
