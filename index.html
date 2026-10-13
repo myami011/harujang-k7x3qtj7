@@ -159,6 +159,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .lb img{max-width:100%;max-height:86dvh;object-fit:contain}
 .lb .x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;background:rgba(255,255,255,.2);color:#fff}
 .updnote{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:rgba(40,28,22,.72);color:#fff;font-size:calc(17px*var(--fz));line-height:1.6;white-space:pre-line}.updnote[hidden]{display:none}.updnote b{display:block;font-size:calc(20px*var(--fz));margin-bottom:6px}.updnote button{display:block;margin:18px auto 0;padding:10px 26px;border:0;border-radius:99px;background:var(--brand);color:var(--on-brand);font:700 calc(15px*var(--fz)) var(--sans)}
+.how{line-height:1.7}
+.sech{display:flex;align-items:center;justify-content:space-between;gap:8px}.sech h3{margin:0}.sech .hlb{flex:none}.infob{line-height:1.65;color:var(--ink2)}.infob ul{margin:6px 0 10px;padding-left:20px}.infob li{margin-bottom:6px}.infob b{color:var(--ink)}.infob h4{margin:12px 0 2px;font-size:calc(15px*var(--fz));color:var(--ink)}
 .hbox{max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain}.hbox ol{margin:6px 0 0;padding-left:20px;line-height:1.65;color:var(--ink2)}.hbox li{margin-bottom:8px}.hbox li b{color:var(--ink)}
 .help summary{cursor:pointer;font-weight:700;font-size:calc(16px*var(--fz));min-height:32px}.help ol{margin:10px 0 0;padding-left:20px;line-height:1.65;font-size:calc(14px*var(--fz));color:var(--ink2)}.help li{margin-bottom:8px}.help li b{color:var(--ink)}
 .wipe{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(40,28,22,.72)}.wipe[hidden]{display:none}
@@ -384,7 +386,8 @@ mark.hl{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px;-webk
 <div class="toast" id="toast" role="status" hidden></div>
 <button type="button" class="hlfloat" id="hlfloat" data-act="hl-float" hidden>형광</button>
 <div class="updnote" id="updnote" role="alert" hidden></div>
-<div class="wipe" id="help" role="dialog" aria-label="사용 방법" hidden><div class="box hbox"><h3>사용 방법</h3><ol><li><b>기록 남기기</b> — 오늘 탭의 [기록 남기기]나 오른쪽 아래 + 버튼을 누르고, 분류를 고른 뒤 <b>제목</b>을 적고 저장합니다. 제목만 있어도 됩니다.</li><li><b>메모·사진·중요</b> — 메모를 길게 적고 사진을 붙일 수 있습니다. [☆ 중요]로 중요 기록을 표시합니다. 메모에서 글을 선택하고 [형광]을 누르면 강조되고, 같은 곳에서 다시 누르면 풀립니다.</li><li><b>분류별 항목</b> — 독서는 저자와 쪽수, 내 생각, 등산·운동은 거리와 종료 시간, 여행·쇼핑은 비용 등 분류에 맞는 칸이 나옵니다. 여행은 여행명이 필수입니다.</li><li><b>기록 탭</b> — 분류 칩으로 모아 보고, 검색창에서 제목과 메모를 찾고, [★ 중요]로 중요 기록만 봅니다. 독서는 책별, 여행은 여행별로 모아 보고 파일로 내보낼 수 있습니다.</li><li><b>달력 탭</b> — 날짜를 눌러 그날의 기록과 할 일을 봅니다.</li><li><b>할 일</b> — 오늘 탭의 [할 일 추가]로 날짜와 시간을 정하면 알림용 일정(.ics)으로 보낼 수 있습니다. 끝내면 체크합니다.</li><li><b>분류 관리·형광색·글자 크기</b> — 아래 설정에서 분류 이름, 순서, 숨김을 바꾸고, 형광 색(노랑·초록·분홍·파랑)과 글자 크기(보통·크게)를 고릅니다.</li><li><b>백업 파일 저장</b> — 기록은 이 폰에만 있습니다. [백업 파일 저장]은 사진까지 모두 담은 JSON 파일을 만듭니다. 파일 이름은 달마다 하나(예: harujang-backup-202610)이고, 같은 달에 또 저장하면 (1), (2)가 붙으니 번호가 큰 것이 최신입니다. 파일은 구글 드라이브나 PC에 옮겨 두세요. 드라이브 등으로 바로 보내려면 [다른 곳으로 보내기]를 두 번 누릅니다(처음은 파일 준비, 두 번째는 공유창).</li><li><b>읽기용 저장</b> — [읽기용(마크다운) 저장]은 글만 담은 문서입니다. 메모장이나 구글 문서에서 읽을 수 있지만 사진은 없어서 복원에는 쓸 수 없습니다.</li><li><b>백업 불러오기</b> — 폰을 바꾸거나 기록이 사라졌을 때 JSON 백업 파일을 고르면 복원됩니다. 지금 있는 기록에 합쳐지고, 같은 기록은 더 최근에 고친 쪽이 남습니다. 기존 기록이 지워지지는 않습니다.</li><li><b>저장 공간·모두 지우기</b> — 보관 상태에서 사용 중인 저장 공간을 봅니다. 맨 아래 [모든 기록 지우기]는 백업을 저장하고 확인한 뒤에만 지울 수 있고 되돌릴 수 없습니다.</li><li><b>앱 설치·업데이트</b> — 홈 화면에 설치해서 쓰면 기록이 더 안전합니다. [앱 업데이트]를 누르면 새 버전으로 바뀌며 기록은 지워지지 않습니다.</li></ol><div class="btns" style="margin-top:12px"><button class="btn pri" data-act="help-close">닫기</button></div></div></div>
+<div class="wipe" id="info" role="dialog" aria-label="도움말" hidden><div class="box hbox"><h3 id="info-t"></h3><div id="info-b" class="infob"></div><div class="btns" style="margin-top:12px"><button class="btn pri" data-act="info-close">닫기</button></div></div></div>
+<div class="wipe" id="help" role="dialog" aria-label="사용 방법" hidden><div class="box hbox"><h3>사용 방법</h3><ol><li><b>기록 남기기</b> — 오늘 탭의 [기록 남기기]나 오른쪽 아래 + 버튼을 누르고, 분류를 고른 뒤 <b>제목</b>을 적고 저장합니다. 제목만 있어도 됩니다.</li><li><b>메모·사진·중요</b> — 메모를 길게 적고 사진을 붙일 수 있습니다. [☆ 중요]로 중요 기록을 표시합니다. 메모에서 글을 선택하고 [형광]을 누르면 강조되고, 같은 곳에서 다시 누르면 풀립니다.</li><li><b>분류별 항목</b> — 독서는 저자와 쪽수, 내 생각, 등산·운동은 거리와 종료 시간, 여행·쇼핑은 비용 등 분류에 맞는 칸이 나옵니다. 여행은 여행명이 필수입니다.</li><li><b>기록 탭</b> — 분류 칩으로 모아 보고, 검색창에서 제목과 메모를 찾고, [★ 중요]로 중요 기록만 봅니다. 독서는 책별, 여행은 여행별로 모아 보고 파일로 내보낼 수 있습니다.</li><li><b>달력 탭</b> — 날짜를 눌러 그날의 기록과 할 일을 봅니다.</li><li><b>할 일</b> — 오늘 탭의 [할 일 추가]로 날짜와 시간을 정하면 알림용 일정(.ics)으로 보낼 수 있습니다. 끝내면 체크합니다.</li><li><b>분류 관리·형광색·글자 크기</b> — 아래 설정에서 분류 이름, 순서, 숨김을 바꾸고, 형광 색(노랑·초록·분홍·파랑)과 글자 크기(보통·크게)를 고릅니다.</li><li><b>백업 파일 저장</b> — 기록은 이 폰에만 있습니다. [백업 파일 저장]은 사진까지 모두 담은 JSON 파일을 만듭니다. 파일 이름은 달마다 하나(예: harujang-backup-202610)이고, 같은 달에 또 저장하면 (1), (2)가 붙으니 번호가 큰 것이 최신입니다. 파일은 구글 드라이브나 PC에 옮겨 두세요.</li><li><b>읽기용 저장</b> — [읽기용(마크다운) 저장]은 글만 담은 문서입니다. 메모장이나 구글 문서에서 읽을 수 있지만 사진은 없어서 복원에는 쓸 수 없습니다.</li><li><b>백업 불러오기</b> — 폰을 바꾸거나 기록이 사라졌을 때 JSON 백업 파일을 고르면 복원됩니다. 지금 있는 기록에 합쳐지고, 같은 기록은 더 최근에 고친 쪽이 남습니다. 기존 기록이 지워지지는 않습니다.</li><li><b>저장 공간·모두 지우기</b> — 보관 상태에서 사용 중인 저장 공간을 봅니다. 맨 아래 [모든 기록 지우기]는 백업을 저장하고 확인한 뒤에만 지울 수 있고 되돌릴 수 없습니다.</li><li><b>앱 설치·업데이트</b> — 홈 화면에 설치해서 쓰면 기록이 더 안전합니다. [앱 업데이트]를 누르면 새 버전으로 바뀌며 기록은 지워지지 않습니다.</li></ol><div class="btns" style="margin-top:12px"><button class="btn pri" data-act="help-close">닫기</button></div></div></div>
 <div class="wipe" id="wipe" hidden><div class="box"><h3>모든 기록 지우기</h3><p>기록, 사진, 할 일, 설정이 모두 지워지고 <b>되돌릴 수 없습니다.</b> 아래 순서대로 진행하세요.</p>
 <div id="wp1"><p><b>1.</b> 백업 파일을 저장합니다.</p><div class="btns"><button class="btn pri" data-act="wipe-backup">백업 파일 저장</button></div></div>
 <div id="wp2" hidden><p><b>2.</b> 방금 저장한 파일(다운로드 폴더의 <b id="wp-name"></b>)을 선택해 확인합니다.</p><div class="btns"><label class="btn pri">저장된 파일 선택<input id="wipe-file" type="file" accept=".json,application/json" hidden></label></div></div>
@@ -452,7 +455,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.79';
+const APP_VER='v0.81';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -815,6 +818,7 @@ function loadUsage(){
     }).catch(()=>{});
   }catch(_){}
 }
+const INFO={backup:{t:'백업과 복원 도움말',h:'<h4>백업 파일 저장</h4><ul><li>기록, 사진, 할 일을 파일 하나(JSON)로 저장합니다. 폰의 다운로드 폴더에 생깁니다.</li><li>파일 이름은 달마다 하나입니다(예: harujang-backup-202610). 같은 달에 또 저장하면 (1), (2)가 붙으니 번호가 큰 것이 최신입니다. 이전 파일은 지워도 됩니다.</li></ul><h4>읽기용(마크다운) 저장</h4><ul><li>글만 담은 문서입니다. 메모장이나 구글 문서에서 읽을 수 있습니다. 사진은 들어 있지 않아서 복원에는 쓸 수 없습니다.</li></ul><h4>다른 곳으로 보내기</h4><ul><li>공유창으로 구글 드라이브 등에 바로 보냅니다. 처음 누르면 파일을 준비하고, 두 번째 누르면 공유창이 열립니다. 폰에 따라 안 될 수 있으며, 그때는 [백업 파일 저장]을 쓰세요.</li></ul><h4>백업 불러오기 (합치기)</h4><ul><li>지금 있는 기록은 <b>하나도 지워지지 않습니다.</b></li><li>백업 파일에만 있는 기록은 <b>추가</b>됩니다.</li><li>양쪽에 같은 기록이 있으면 <b>더 최근에 고친 쪽</b>이 남습니다. 백업 쪽이 더 최신이면 백업 내용으로 바뀌고, 지금 쪽이 더 최신이거나 같으면 지금 것이 그대로 남아 "건너뜀"으로 표시됩니다.</li><li>할 일도 같은 규칙입니다.</li><li>백업 이후에 지운 기록은 그 백업을 불러오면 <b>다시 나타납니다.</b></li><li>백업 시점으로 완전히 되돌리려면 [모든 기록 지우기]로 비운 뒤 불러오세요(지우기는 되돌릴 수 없습니다).</li></ul>'}};
 function appBytes(){
   let ph=0,tx=0;
   S.entries.forEach(e=>{(e.photos||[]).forEach(p=>{ph+=typeof p==='string'?Math.round(p.length*0.75):(p&&p.size)||0;});
@@ -825,21 +829,19 @@ function appBytes(){
 function viewArch(){
   loadUsage();
   const n=S.entries.length,ph=S.entries.reduce((s,e)=>s+(e.photos||[]).length,0),lb=lastBackup();
-  const inst=isStandalone()?'<p>설치된 앱으로 실행 중입니다.</p>'
-    :deferred?'<p>홈 화면에 아이콘을 만들어 앱처럼 실행합니다.</p><div class="btns"><button class="btn pri" data-act="install">홈 화면에 설치</button></div>'
-    :IS_IOS?'<p>아이폰은 <b>사파리</b>에서 열고, 아래 <b>공유 버튼(□↑)</b>을 눌러 <b>홈 화면에 추가</b>를 누르세요. 홈 화면에 추가해서 써야 기록이 더 안전합니다.</p>'
-    :'<p>Chrome 오른쪽 위 메뉴(⋮)에서 <b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누르세요.</p>';
+  const guide='<p class="how"><b>안드로이드</b> — 크롬에서 열고 오른쪽 위 메뉴(⋮)에서 <b>앱 설치</b> 또는 <b>홈 화면에 추가</b>를 누릅니다.<br><b>아이폰</b> — 반드시 <b>사파리</b>에서 열고, 아래 <b>공유 버튼(□↑)</b>을 눌러 <b>홈 화면에 추가</b>를 누릅니다. 아이폰의 크롬 등 다른 앱에서는 설치할 수 없습니다.<br>설치하면 홈 화면 아이콘으로 앱처럼 실행되고, 기록도 더 안전하게 보관됩니다.</p>';
+  const inst=(isStandalone()?'<p>설치된 앱으로 실행 중입니다.</p>':deferred?'<div class="btns"><button class="btn pri" data-act="install">홈 화면에 설치</button></div>':'')+guide;
   return topHtml('보관')
   +'<section class="sec"><h3>보관 상태</h3><p>기록 '+n+'건 · 사진 '+ph+'장 · 할 일 '+S.todos.length+'개<br>모든 내용은 이 폰의 브라우저 저장소에만 있습니다. 서버로 보내지 않습니다.'+'<br>앱 사용 용량: <b>'+szText(appBytes().all)+'</b> (사진 '+szText(appBytes().ph)+' · 글 '+szText(appBytes().tx)+')'+(S.uUse?'<br><small>브라우저 표시: '+S.uUse+'</small>'+(S.uPer===true?' · 영구 저장 허용됨':S.uPer===false?' · 영구 저장 미허용(저장 공간이 부족하면 지워질 수 있음)':''):'')+(S.mem?'<br><b>지금은 저장이 꺼져 있어 앱을 닫으면 사라집니다.</b>':'')+'</p></section>'
   +'<section class="sec"><h3>사용 방법</h3><p>기록 남기기부터 백업, 불러오기, 설정까지 간단히 정리했습니다.</p><div class="btns"><button class="btn pri" data-act="help-open">사용 방법 보기</button></div></section>'
   +'<section class="sec"><h3>분류</h3><p>분류는 표준 10개로 고정되어 있습니다. 표시 이름, 순서를 바꾸거나 쓰지 않는 분류를 숨깁니다.</p><div class="btns"><button class="btn" data-act="cats-open">분류 관리</button></div></section>'
-  +'<section class="sec"><h3>백업과 복원</h3><p>마지막 백업: <b>'+(lb?agoText(lb)+(Number(lsGet('harujang:lastBackupSize'))?' · '+szText(Number(lsGet('harujang:lastBackupSize'))):''):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 [백업 파일 저장]으로 파일을 만들고 구글 드라이브나 PC로 옮겨 두세요. 드라이브 등으로 바로 보내려면 [다른 곳으로 보내기]를 두 번 누릅니다(처음은 파일 준비, 두 번째는 공유창). '+(IS_IOS?'아이폰은 저장 창에서 <b>파일에 저장</b>을 고르세요. 사파리는 오래 안 쓴 저장소를 지울 수 있으니 백업을 자주 저장하세요.':'파일은 폰의 다운로드 폴더에 저장됩니다.')+'<br>파일 이름은 달마다 하나입니다(예: harujang-backup-202610). 같은 달에 다시 저장하면 (1), (2)가 붙으니 번호가 큰 것이 최신입니다. 이전 파일은 지워도 됩니다.</p>'
+  +'<section class="sec"><div class="sech"><h3>백업과 복원</h3><button type="button" class="getbk hlb" data-act="info" data-k="backup">도움말</button></div><p>마지막 백업: <b>'+(lb?agoText(lb)+(Number(lsGet('harujang:lastBackupSize'))?' · '+szText(Number(lsGet('harujang:lastBackupSize'))):''):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 [백업 파일 저장]으로 파일을 만들고 구글 드라이브나 PC로 옮겨 두세요. 드라이브 등으로 바로 보내려면 [다른 곳으로 보내기]를 두 번 누릅니다(처음은 파일 준비, 두 번째는 공유창). '+(IS_IOS?'아이폰은 저장 창에서 <b>파일에 저장</b>을 고르세요. 사파리는 오래 안 쓴 저장소를 지울 수 있으니 백업을 자주 저장하세요.':'파일은 폰의 다운로드 폴더에 저장됩니다.')+'<br>자세한 사용법은 [도움말]을 누르세요.</p>'
   +'<div class="btns"><button class="btn pri" data-act="export" data-kind="json">백업 파일 저장</button><button class="btn" data-act="bk-share">다른 곳으로 보내기</button><button class="btn" data-act="export" data-kind="md">읽기용(마크다운) 저장</button><label class="btn">백업 불러오기<input id="imp" type="file" accept=".json,application/json" hidden></label></div></section>'
   +'<section class="sec"><h3>형광색</h3><p>메모에서 글을 선택하고 <b>형광</b>을 누르면 이 색으로 표시됩니다. 표시된 곳을 선택하고 다시 누르면 풀립니다.</p><div class="swrow">'+[['y','노랑'],['g','연두'],['p','분홍'],['b','하늘']].map(x=>'<button type="button" class="sw sw-'+x[0]+(HLC()===x[0]?' on':'')+'" data-act="hl-set" data-v="'+x[0]+'" aria-label="'+x[1]+'" aria-pressed="'+(HLC()===x[0])+'"></button>').join('')+'<span class="swex">예시 <mark class="hl">중요한 문장</mark></span></div></section>'
   +'<section class="sec"><h3>백업 알림 주기</h3><p>이 기간이 지나면 오늘 화면 위에 백업 안내가 뜹니다. 백업은 직접 눌러야 저장됩니다.</p><div class="btns">'+[[7,'7일'],[14,'14일'],[30,'30일'],[0,'끔']].map(x=>'<button class="btn'+(bkDays()===x[0]?' pri':'')+'" data-act="bk-days" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div></section>'
-  +'<section class="sec"><h3>글자 크기</h3><div class="btns"><button class="btn'+(FZ()==='l'?'':' pri')+'" data-act="fz-set" data-v="n">보통</button><button class="btn'+(FZ()==='l'?' pri':'')+'" data-act="fz-set" data-v="l">크게</button></div></section>'
+  +'<section class="sec"><h3>글자 크기</h3><p><b>보통</b>은 기본 크기입니다. <b>크게</b>는 글자를 약 15% 키워 읽기 편하게 하며, 대신 한 화면에 보이는 내용이 조금 줄어듭니다. 화면 구성은 그대로입니다.</p><div class="btns"><button class="btn'+(FZ()==='l'?'':' pri')+'" data-act="fz-set" data-v="n">보통</button><button class="btn'+(FZ()==='l'?' pri':'')+'" data-act="fz-set" data-v="l">크게</button></div></section>'
   +'<section class="sec"><h3>앱 설치</h3>'+inst+'</section>'
-  +'<section class="sec"><h3>앱 업데이트</h3><div class="btns"><button class="btn pri" data-act="app-update">업데이트</button></div></section>'
+  +'<section class="sec"><h3>앱 업데이트</h3><p>새 버전이 있는지 확인하고, 있으면 바꿉니다. 기록은 지워지지 않습니다. 업데이트를 원하시면 누르세요.</p><div class="btns"><button class="btn pri" data-act="app-update">업데이트</button></div></section>'
   +'<div class="wipelink"><button data-act="wipe-open">모든 기록 지우기</button></div>'
   +'<p class="ver">하루장 '+APP_VER+'</p>';
 }
@@ -1453,35 +1455,39 @@ async function doImport(file){
   try{data=JSON.parse(await file.text());}catch(_){toast('백업 파일을 읽지 못했습니다.');return;}
   const list=Array.isArray(data)?data:(data&&data.entries);
   if(!Array.isArray(list)){toast('하루장 백업 파일이 아닙니다.');return;}
-  let n=0,skip=0;
+  let n=0,upE=0,sameE=0,bad=0;
   for(const raw of list){
     try{
-      if(!raw||typeof raw.id!=='string'||typeof raw.title!=='string'||!okDate(raw.date)){skip++;continue;}
+      if(!raw||typeof raw.id!=='string'||typeof raw.title!=='string'||!okDate(raw.date)){bad++;continue;}
       const old=S.entries.find(x=>x.id===raw.id);
-      if(old&&(old.updatedAt||0)>=(raw.updatedAt||0)){skip++;continue;}
+      if(old&&(old.updatedAt||0)>=(raw.updatedAt||0)){sameE++;continue;}
       const photos=(await Promise.all((Array.isArray(raw.photos)?raw.photos:[]).map(fromDataUrl))).filter(Boolean);
       const e=normEntry({id:raw.id,cat:typeof raw.cat==='string'?raw.cat:'etc',title:raw.title.slice(0,80),date:raw.date,
         time:/^\d\d:\d\d$/.test(raw.time||'')?raw.time:'00:00',note:typeof raw.note==='string'?raw.note:'',
         f:(raw.f&&typeof raw.f==='object')?raw.f:{},photos:photos,tags:Array.isArray(raw.tags)?raw.tags.map(String):[],
         star:[1,2,3].includes(raw.star)?raw.star:0,createdAt:Number(raw.createdAt)||Date.now(),updatedAt:Number(raw.updatedAt)||Date.now()});
       if(raw.geo&&isFinite(raw.geo.lat)&&isFinite(raw.geo.lon))e.geo={lat:Number(raw.geo.lat),lon:Number(raw.geo.lon)};
-      await putEntry(e);n++;
-    }catch(_){skip++;}
+      await putEntry(e);if(old)upE++;else n++;
+    }catch(_){bad++;}
   }
-  let tn=0;
+  let tn=0,upT=0,sameT=0;
   if(data&&Array.isArray(data.todos)){
     for(const raw of data.todos){
       try{
-        if(!raw||typeof raw.id!=='string'||typeof raw.title!=='string'){skip++;continue;}
+        if(!raw||typeof raw.id!=='string'||typeof raw.title!=='string'){bad++;continue;}
         const old=S.todos.find(x=>x.id===raw.id);
-        if(old&&(old.updatedAt||0)>=(raw.updatedAt||0)){skip++;continue;}
+        if(old&&(old.updatedAt||0)>=(raw.updatedAt||0)){sameT++;continue;}
         await putTodo({id:raw.id,title:raw.title.slice(0,80),due:okDate(raw.due)?raw.due:'',time:/^\d\d:\d\d$/.test(raw.time||'')?raw.time:'',done:!!raw.done,doneDate:okDate(raw.doneDate)?raw.doneDate:null,
-          doneAt:Number(raw.doneAt)||null,createdAt:Number(raw.createdAt)||Date.now(),updatedAt:Number(raw.updatedAt)||Date.now()});tn++;
-      }catch(_){skip++;}
+          doneAt:Number(raw.doneAt)||null,createdAt:Number(raw.createdAt)||Date.now(),updatedAt:Number(raw.updatedAt)||Date.now()});if(old)upT++;else tn++;
+      }catch(_){bad++;}
     }
   }
   render();
-  toast('기록 '+n+'건'+(tn?', 할 일 '+tn+'개':'')+'를 불러왔습니다'+(skip?' (건너뜀 '+skip+')':''));
+  const L=['불러오기 결과','새로 추가: 기록 '+n+'건 · 할 일 '+tn+'개'];
+  if(upE||upT)L.push('백업이 더 최신이라 바뀜: 기록 '+upE+'건 · 할 일 '+upT+'개');
+  if(sameE||sameT)L.push('이미 있어서 건너뜀: 기록 '+sameE+'건 · 할 일 '+sameT+'개');
+  if(bad)L.push('읽지 못함: '+bad+'건');
+  toast(L.join('\n'),5000);
 }
 
 /* ---------- events ---------- */
@@ -1557,6 +1563,8 @@ document.addEventListener('click',ev=>{
     case 'wipe-open':{$('#wipe-in').value='';$('#wipe-go').disabled=true;$('#wp1').hidden=false;$('#wp2').hidden=true;$('#wp3').hidden=true;$('#wp-msg').textContent='';$('#wipe-file').value='';$('#wipe').hidden=false;break;}
     case 'wipe-backup':wipeBackup();break;
     case 'bk-share':doShare();break;
+    case 'info':{const i=INFO[t.dataset.k];if(i){$('#info-t').textContent=i.t;$('#info-b').innerHTML=i.h;$('#info').hidden=false;$('#info .box').scrollTop=0;}break;}
+    case 'info-close':$('#info').hidden=true;break;
     case 'bk-now':doExport('json');break;
     case 'bk-snooze':lsSet('harujang:bkSnooze',ymd(new Date()));render();break;
     case 'bk-days':lsSet('harujang:bkdays',t.dataset.v);render();break;
