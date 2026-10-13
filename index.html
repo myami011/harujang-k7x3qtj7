@@ -129,6 +129,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 }
 }
 .sh-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;position:sticky;top:-16px;z-index:4;margin-top:-16px;padding:16px 0 8px;background:var(--card)}
+.rst{margin-left:auto;font:500 calc(12.5px*var(--fz)) var(--sans);border:1px solid var(--line);border-radius:10px;padding:5px 10px;color:var(--ink2);background:var(--bg)}.rst.on{background:var(--brand);border-color:var(--brand);color:#fff}
 .sh-head h2{margin:0;font:700 calc(18px*var(--fz)) var(--serif)}
 .x{margin-left:auto;width:36px;height:36px;border-radius:50%;background:var(--fill);font-size:calc(22px*var(--fz));line-height:1}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -456,7 +457,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.85';
+const APP_VER='v0.86';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -975,9 +976,9 @@ function catsHtml(sh){
       +'<button type="button" class="mv" data-act="cat-down" data-id="'+esc(c.id)+'" aria-label="'+esc(c.name)+' 아래로"'+(i===S.cats.length-1?' disabled':'')+'>▼</button>'
       +(c.id==='etc'?'<span class="cfb off" style="visibility:hidden"></span>':'<button type="button" class="cfb'+(c.hidden?' on':'')+'" data-act="cat-hide" data-id="'+esc(c.id)+'" aria-pressed="'+(!!c.hidden)+'">'+(c.hidden?'숨김':'표시')+'</button>')+'</div>';
   }).join('');
-  return '<div class="sh-head"><h2>분류 관리</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
+  return '<div class="sh-head"><h2>분류 관리</h2><button type="button" class="rst'+(sh&&sh.rst?' on':'')+'" data-act="cats-reset">'+(sh&&sh.rst?'한 번 더 누르면 복원':'원래대로')+'</button><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
     +'<div class="clist cm">'+rows+'</div>'
-    +'<p class="hint">분류는 표준 10개 고정. 이름 바꾸기, ▲▼ 순서, 숨기기만 가능합니다. 숨겨도 기존 기록은 남습니다.</p>';
+    +'<p class="hint">분류는 표준 10개 고정. 이름 바꾸기, ▲▼ 순서, 숨기기만 가능합니다. 숨겨도 기존 기록은 남습니다. [원래대로]는 이름·순서·숨김을 처음 상태로 되돌리며 기록은 바뀌지 않습니다.</p>';
 }
 function dtText(){
   const d=$('#f-date'),t=$('#f-time');if(!d||!t)return '';
@@ -1674,6 +1675,10 @@ document.addEventListener('click',ev=>{
     case 'snack-ok':{const s=S.snack;hideSnack();if(s)openRec(null,{title:s.title});break;}
     case 'snack-no':hideSnack();break;
     case 'cats-open':openSheet({kind:'cats',open:null});break;
+    case 'cats-reset':{
+      const sh=S.sheet;if(!sh||sh.kind!=='cats')break;
+      if(!sh.rst){sh.rst=true;renderSheet();break;}
+      sh.rst=false;S.cats=buildCats([]);renderSheet();catChanged();toast('분류를 처음 상태로 되돌렸습니다',2500);break;}
     case 'cat-hide':{
       const c=S.cats.find(x=>x.id===t.dataset.id);if(!c||c.id==='etc')break;
       c.hidden=!c.hidden;if(c.hidden&&S.cat===c.id)S.cat='all';renderSheet();catChanged();break;}
