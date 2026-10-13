@@ -166,6 +166,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .wipe input{width:100%;margin:10px 0 4px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
 .btn.danger{color:#b3261e;border-color:#b3261e}.btn.dangerf{background:#b3261e;color:#fff;border-color:#b3261e}.btn:disabled{opacity:.4;cursor:default}
 .wipelink{margin-top:26px;text-align:center}.wipelink button{font-size:calc(12px*var(--fz));color:#b3261e;text-decoration:underline;padding:10px}
+.bkban{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:var(--card);border:1px solid var(--brand);border-radius:12px;font-size:calc(14px*var(--fz))}.bkban b{color:var(--brand)}.bkb{display:flex;gap:6px}.bkb .btn{min-height:38px;padding:6px 12px}
+.toast.multi{white-space:pre-line;text-align:center;border-radius:16px;line-height:1.5;padding:11px 18px}
 .toast{position:fixed;z-index:70;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));max-width:calc(100vw - 32px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:calc(13px*var(--fz));box-shadow:var(--shadow)}
 .pill{background:none;font-family:var(--sans)}
 .pill.warn{color:var(--c-key);border-color:var(--c-key);font-weight:700}
@@ -350,6 +352,11 @@ html{--hl:rgba(255,205,0,.45)}
 html[data-hl="g"]{--hl:rgba(110,195,80,.42)}
 html[data-hl="p"]{--hl:rgba(255,120,165,.40)}
 html[data-hl="b"]{--hl:rgba(90,170,255,.40)}
+
+.hlwrap{position:relative}.hlwrap>textarea{position:relative;z-index:1;background:transparent}
+.hlback{position:absolute;inset:0;overflow:hidden;white-space:pre-wrap;overflow-wrap:break-word;color:transparent;background:var(--bg);border:1px solid transparent;border-radius:10px;padding:10px 12px;line-height:1.5;pointer-events:none;box-sizing:border-box}
+.hlback mark{background:var(--hl);color:transparent;padding:0;border-radius:3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hlfloat{position:fixed;z-index:80;left:0;top:0;height:46px;padding:0 20px 0 16px;border-radius:99px;background:var(--card);color:var(--ink);font:700 calc(15px*var(--fz)) var(--sans);border:1px solid var(--line);box-shadow:0 3px 14px rgba(0,0,0,.25);display:flex;align-items:center;gap:8px;white-space:nowrap}.hlfloat::before{content:"";width:16px;height:16px;border-radius:50%;background:var(--hl);border:1px solid rgba(0,0,0,.25)}.hlfloat[hidden]{display:none}
 mark.hl{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .hlb{height:24px;padding:0 10px;font-size:calc(12px*var(--fz))}
 .swrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
@@ -375,6 +382,7 @@ mark.hl{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px;-webk
 <div class="scrim" id="sheet" hidden><div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="입력"></div></div>
 <div class="scrim lb" id="lb" hidden data-act="lb-close"><button class="x" data-act="lb-close" aria-label="닫기">×</button><img id="lb-img" alt="확대한 사진"></div>
 <div class="toast" id="toast" role="status" hidden></div>
+<button type="button" class="hlfloat" id="hlfloat" data-act="hl-float" hidden>형광</button>
 <div class="updnote" id="updnote" role="alert" hidden></div>
 <div class="wipe" id="help" role="dialog" aria-label="사용 방법" hidden><div class="box hbox"><h3>사용 방법</h3><ol><li><b>기록 남기기</b> — 오늘 탭의 [기록 남기기]나 오른쪽 아래 + 버튼을 누르고, 분류를 고른 뒤 <b>제목</b>을 적고 저장합니다. 제목만 있어도 됩니다.</li><li><b>메모·사진·중요</b> — 메모를 길게 적고 사진을 붙일 수 있습니다. [☆ 중요]로 중요 기록을 표시합니다. 메모에서 글을 선택하고 [형광]을 누르면 강조되고, 같은 곳에서 다시 누르면 풀립니다.</li><li><b>분류별 항목</b> — 독서는 저자와 쪽수, 내 생각, 등산·운동은 거리와 종료 시간, 여행·쇼핑은 비용 등 분류에 맞는 칸이 나옵니다. 여행은 여행명이 필수입니다.</li><li><b>기록 탭</b> — 분류 칩으로 모아 보고, 검색창에서 제목과 메모를 찾고, [★ 중요]로 중요 기록만 봅니다. 독서는 책별, 여행은 여행별로 모아 보고 파일로 내보낼 수 있습니다.</li><li><b>달력 탭</b> — 날짜를 눌러 그날의 기록과 할 일을 봅니다.</li><li><b>할 일</b> — 오늘 탭의 [할 일 추가]로 날짜와 시간을 정하면 알림용 일정(.ics)으로 보낼 수 있습니다. 끝내면 체크합니다.</li><li><b>분류 관리·형광색·글자 크기</b> — 아래 설정에서 분류 이름, 순서, 숨김을 바꾸고, 형광 색(노랑·초록·분홍·파랑)과 글자 크기(보통·크게)를 고릅니다.</li><li><b>백업 파일 저장</b> — 기록은 이 폰에만 있습니다. [백업 파일 저장]은 사진까지 모두 담은 JSON 파일을 만듭니다. 파일 이름은 달마다 하나(예: harujang-backup-202610)이고, 같은 달에 또 저장하면 (1), (2)가 붙으니 번호가 큰 것이 최신입니다. 파일은 구글 드라이브나 PC에 옮겨 두세요.</li><li><b>읽기용 저장</b> — [읽기용(마크다운) 저장]은 글만 담은 문서입니다. 메모장이나 구글 문서에서 읽을 수 있지만 사진은 없어서 복원에는 쓸 수 없습니다.</li><li><b>백업 불러오기</b> — 폰을 바꾸거나 기록이 사라졌을 때 JSON 백업 파일을 고르면 복원됩니다. 지금 있는 기록에 합쳐지고, 같은 기록은 더 최근에 고친 쪽이 남습니다. 기존 기록이 지워지지는 않습니다.</li><li><b>저장 공간·모두 지우기</b> — 보관 상태에서 사용 중인 저장 공간을 봅니다. 맨 아래 [모든 기록 지우기]는 백업을 저장하고 확인한 뒤에만 지울 수 있고 되돌릴 수 없습니다.</li><li><b>앱 설치·업데이트</b> — 홈 화면에 설치해서 쓰면 기록이 더 안전합니다. 새 버전을 올렸다면 [앱 업데이트]를 누르세요. 기록은 지워지지 않습니다.</li></ol><div class="btns" style="margin-top:12px"><button class="btn pri" data-act="help-close">닫기</button></div></div></div>
 <div class="wipe" id="wipe" hidden><div class="box"><h3>모든 기록 지우기</h3><p>기록, 사진, 할 일, 설정이 모두 지워지고 <b>되돌릴 수 없습니다.</b> 아래 순서대로 진행하세요.</p>
@@ -428,7 +436,7 @@ const STD_CATS=[
 ];
 const isStd=id=>STD_CATS.some(c=>c.id===id);
 const FIELD_ORDER=['end','dist','cost','author','pages'];
-const MK={quote:'인용',think:'생각',more:'더알'},MK_ORDER=['quote','think','more'];
+const MK={quote:'인용',think:'생각',more:'더알',sum:'요약'},MK_ORDER=['quote','think','more','sum'];
 const FIELD_SHORT={end:'종료',dist:'거리',cost:'비용',author:'저자',pages:'쪽'};
 const fieldsOf=c=>{const d=c&&STD_CATS.find(x=>x.id===c.id);return d?d.fields:[];};
 function buildCats(list){
@@ -444,7 +452,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.71';
+const APP_VER='v0.77';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -480,7 +488,11 @@ const urlCache=new WeakMap();
 const urlOf=b=>{if(typeof b==='string')return b;let u=urlCache.get(b);if(!u){u=URL.createObjectURL(b);urlCache.set(b,u);}return u;};
 const lastBackup=()=>Number(lsGet(LB_KEY))||0;
 const agoText=t=>{const d=Math.floor((Date.now()-t)/864e5);return d<1?'오늘':d+'일 전';};
-const needBackup=()=>{const lb=lastBackup();return (S.entries.length+S.todos.length)>=3&&(!lb||Date.now()-lb>14*864e5);};
+const bkDays=()=>{const v=lsGet('harujang:bkdays');return v===null?14:Number(v);};
+const needBackup=()=>{const d=bkDays();if(!d)return false;const lb=lastBackup();return (S.entries.length+S.todos.length)>=3&&(!lb||Date.now()-lb>d*864e5);};
+const bkSnoozed=()=>lsGet('harujang:bkSnooze')===ymd(new Date());
+const bkBanner=()=>{if(!needBackup()||bkSnoozed())return '';const lb=lastBackup(),d=lb?Math.floor((Date.now()-lb)/864e5):0;
+  return '<div class="bkban" role="status"><span>'+(lb?'백업한 지 <b>'+d+'일</b> 지났습니다.':'아직 백업한 적이 없습니다.')+'</span><span class="bkb"><button class="btn pri" data-act="bk-now">지금 백업</button><button class="btn" data-act="bk-snooze">나중에</button></span></div>';};
 
 function normEntry(e){
   if(!e.f||typeof e.f!=='object')e.f={};
@@ -513,7 +525,7 @@ window.addEventListener('appinstalled',()=>{deferred=null;toast('설치했습니
 
 /* ---------- helpers ---------- */
 let toastT=null;
-function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true;},2800);}
+function toast(msg,ms){const t=$('#toast');t.textContent=msg;t.classList.toggle('multi',String(msg).indexOf('\n')>=0);t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true;},ms||2800);}
 let snackT=null;
 function showSnack(todo){
   S.snack={id:todo.id,title:todo.title};
@@ -667,7 +679,7 @@ function dayLabelShort(d){const a=String(d||'').split('-').map(Number);if(a.leng
 function bookMd(b){
   let m='# '+b.title+'\n'+(b.author?'저자: '+b.author+'\n':'')+'기간: '+b.first+' ~ '+b.last+(b.total?' · '+(b.done?b.total:b.page)+'/'+b.total+'쪽':'')+(b.done?' · 완독':'')+'\n';
   const one=e=>'- ['+e.date+(pagesText(e.f)?' '+pagesText(e.f):'')+'] '+(e.note||'').replace(/\n+/g,' ')+(e.f.thought?'\n  → 생각: '+String(e.f.thought).replace(/\n+/g,' '):'');
-  [['quote','인용'],['think','생각'],['more','더알'],['','기타 메모']].forEach(kk=>{
+  [['quote','인용'],['think','생각'],['more','더알'],['sum','요약'],['','기타 메모']].forEach(kk=>{
     const l=b.es.filter(e=>(e.f.mk||'')===kk[0]&&(e.note||e.f.thought));if(!l.length)return;
     m+='\n## '+kk[1]+'\n'+l.map(one).join('\n')+'\n';});
   return m;
@@ -745,7 +757,7 @@ function feedHtml(){
 const topHtml=(t)=>'<header class="top"><span class="brand">하루장'+(t?'<span class="sep">·</span><b class="ptl">'+t+'</b>':'')+'</span>'+(needBackup()?'<button class="pill warn" data-act="tab" data-tab="arch">백업 필요</button>':'')+'</header>';
 function viewToday(){
   const t=new Date(),td=ymd(t),recs=S.entries.filter(e=>e.date===td).sort(byTimeDesc);
-  return topHtml()
+  return topHtml()+bkBanner()
   +'<section class="today"><h1 class="date">'+(t.getMonth()+1)+'월 '+t.getDate()+'일<span class="wd">'+WD[t.getDay()]+'요일</span></h1>'
   +'<div class="big"><button class="bb pri" data-act="rec-new">'+SVG('<path d="M12 5v14M5 12h14"/>')+'기록 남기기</button><button class="bb" data-act="todo-new">'+SVG('<path d="M5 12.5l4.5 4.5L19 7.5"/>')+'할 일 추가</button></div></section>'
   +(S.ready?todosBlock(td):'')
@@ -814,9 +826,10 @@ function viewArch(){
   +'<section class="sec"><h3>보관 상태</h3><p>기록 '+n+'건 · 사진 '+ph+'장 · 할 일 '+S.todos.length+'개<br>모든 내용은 이 폰의 브라우저 저장소에만 있습니다. 서버로 보내지 않습니다.'+(S.uUse?'<br>사용 중인 저장 공간: <b>'+S.uUse+'</b>'+(S.uPer===true?' · 영구 저장 허용됨':S.uPer===false?' · 영구 저장 미허용(저장 공간이 부족하면 지워질 수 있음)':''):'')+(S.mem?'<br><b>지금은 저장이 꺼져 있어 앱을 닫으면 사라집니다.</b>':'')+'</p></section>'
   +'<section class="sec"><h3>사용 방법</h3><p>기록 남기기부터 백업, 불러오기, 설정까지 간단히 정리했습니다.</p><div class="btns"><button class="btn pri" data-act="help-open">사용 방법 보기</button></div></section>'
   +'<section class="sec"><h3>분류</h3><p>분류는 표준 10개로 고정되어 있습니다. 표시 이름, 순서를 바꾸거나 쓰지 않는 분류를 숨깁니다.</p><div class="btns"><button class="btn" data-act="cats-open">분류 관리</button></div></section>'
-  +'<section class="sec"><h3>백업과 복원</h3><p>마지막 백업: <b>'+(lb?agoText(lb):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 백업 파일을 저장해 구글 드라이브나 PC로 옮겨 두세요. '+(IS_IOS?'아이폰은 저장 창에서 <b>파일에 저장</b>을 고르세요. 사파리는 오래 안 쓴 저장소를 지울 수 있으니 백업을 자주 저장하세요.':'파일은 폰의 다운로드 폴더에 저장됩니다.')+'<br>파일 이름은 달마다 하나입니다(예: harujang-backup-202610). 같은 달에 다시 저장하면 (1), (2)가 붙으니 번호가 큰 것이 최신입니다. 이전 파일은 지워도 됩니다.</p>'
-  +'<div class="btns"><button class="btn pri" data-act="export" data-kind="json">백업 파일 저장</button><button class="btn" data-act="export" data-kind="md">읽기용(마크다운) 저장</button><label class="btn">백업 불러오기<input id="imp" type="file" accept=".json,application/json" hidden></label></div></section>'
+  +'<section class="sec"><h3>백업과 복원</h3><p>마지막 백업: <b>'+(lb?agoText(lb)+(Number(lsGet('harujang:lastBackupSize'))?' · '+szText(Number(lsGet('harujang:lastBackupSize'))):''):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 백업 파일을 저장해 구글 드라이브나 PC로 옮겨 두세요. '+(IS_IOS?'아이폰은 저장 창에서 <b>파일에 저장</b>을 고르세요. 사파리는 오래 안 쓴 저장소를 지울 수 있으니 백업을 자주 저장하세요.':'파일은 폰의 다운로드 폴더에 저장됩니다.')+'<br>파일 이름은 달마다 하나입니다(예: harujang-backup-202610). 같은 달에 다시 저장하면 (1), (2)가 붙으니 번호가 큰 것이 최신입니다. 이전 파일은 지워도 됩니다.</p>'
+  +'<div class="btns"><button class="btn pri" data-act="bk-share">공유로 백업</button><button class="btn" data-act="export" data-kind="json">백업 파일 저장</button><button class="btn" data-act="export" data-kind="md">읽기용(마크다운) 저장</button><label class="btn">백업 불러오기<input id="imp" type="file" accept=".json,application/json" hidden></label></div></section>'
   +'<section class="sec"><h3>형광색</h3><p>메모에서 글을 선택하고 <b>형광</b>을 누르면 이 색으로 표시됩니다. 표시된 곳을 선택하고 다시 누르면 풀립니다.</p><div class="swrow">'+[['y','노랑'],['g','연두'],['p','분홍'],['b','하늘']].map(x=>'<button type="button" class="sw sw-'+x[0]+(HLC()===x[0]?' on':'')+'" data-act="hl-set" data-v="'+x[0]+'" aria-label="'+x[1]+'" aria-pressed="'+(HLC()===x[0])+'"></button>').join('')+'<span class="swex">예시 <mark class="hl">중요한 문장</mark></span></div></section>'
+  +'<section class="sec"><h3>백업 알림 주기</h3><p>이 기간이 지나면 오늘 화면 위에 백업 안내가 뜹니다. 백업은 직접 눌러야 저장됩니다.</p><div class="btns">'+[[7,'7일'],[14,'14일'],[30,'30일'],[0,'끔']].map(x=>'<button class="btn'+(bkDays()===x[0]?' pri':'')+'" data-act="bk-days" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div></section>'
   +'<section class="sec"><h3>글자 크기</h3><div class="btns"><button class="btn'+(FZ()==='l'?'':' pri')+'" data-act="fz-set" data-v="n">보통</button><button class="btn'+(FZ()==='l'?' pri':'')+'" data-act="fz-set" data-v="l">크게</button></div></section>'
   +'<section class="sec"><h3>앱 설치</h3>'+inst+'</section>'
   +'<section class="sec"><h3>앱 업데이트</h3><p>새 버전을 GitHub에 올렸는데 아래 버전이 그대로면 누르세요. 기록은 지워지지 않습니다.</p><div class="btns"><button class="btn pri" data-act="app-update">업데이트</button></div></section>'
@@ -998,6 +1011,63 @@ function hlToggle(el){
   el.value=nv;el.focus();el.setSelectionRange(ns,ne);
   el.dispatchEvent(new Event('input',{bubbles:true}));
 }
+
+/* 형광 미리보기(입력 칸 뒤에 색을 깔아 줌) + 글을 선택하면 따라다니는 형광 버튼 */
+function hlHtml(v){return esc(v).replace(/==([^=\n]+?)==/g,'<mark>==$1==</mark>')+'\u200b';}
+function hlInit(){
+  document.querySelectorAll('#f-note,#f-thought').forEach(t=>{
+    if(t.parentNode.classList&&t.parentNode.classList.contains('hlwrap'))return;
+    const w=document.createElement('div');w.className='hlwrap';t.parentNode.insertBefore(w,t);
+    const b=document.createElement('div');b.className='hlback';b.setAttribute('aria-hidden','true');w.appendChild(b);w.appendChild(t);
+    const cs=getComputedStyle(t);
+    const sync=()=>{const c=getComputedStyle(t);b.style.fontFamily=c.fontFamily;b.style.fontSize=c.fontSize;b.style.fontWeight=c.fontWeight;b.style.lineHeight=c.lineHeight;b.style.letterSpacing=c.letterSpacing;b.style.paddingRight=c.paddingRight;b.innerHTML=hlHtml(t.value);b.scrollTop=t.scrollTop;};
+    t.addEventListener('input',sync);t.addEventListener('scroll',()=>{b.scrollTop=t.scrollTop;});
+    t._hlsync=sync;sync();
+  });
+}
+let HLT=null,HLQ=0;
+const HL_SYS=58,HL_GAP=6,HL_HANDLE=34; /* 폰 자체 메뉴 높이, 간격, 아래 손잡이 높이(px) */
+function hlPlace(f,el,s,e){
+  const vv=window.visualViewport,vt=vv?vv.offsetTop:0,vh=vv?vv.height:innerHeight,vw=vv?vv.width:innerWidth;
+  const bottomY=vt+vh-46-14;let x=vw/2,y=bottomY,done=false;
+  try{
+    const w=el.parentNode,b=w&&w.querySelector('.hlback');
+    if(b){
+      const v=el.value,keep=b.innerHTML;
+      b.innerHTML=esc(v.slice(0,s))+'<i id="hlsel" style="font-style:normal">'+(esc(v.slice(s,e))||'\u200b')+'</i>'+esc(v.slice(e))+'\u200b';
+      const r=b.querySelector('#hlsel').getClientRects();
+      b.innerHTML=keep;
+      if(r.length){
+        const first=r[0],last=r[r.length-1],pr=el.getBoundingClientRect();
+        const vis=a=>a>=pr.top+4&&a<=pr.bottom-4&&a>=vt&&a<=vt+vh;
+        const topBar=($('#panel')?$('#panel').getBoundingClientRect().top:0)+64;
+        x=first.left+Math.min(first.width,160)/2;
+        const above=first.top-HL_SYS-HL_GAP-46;
+        const below=last.bottom+HL_HANDLE+HL_GAP;
+        if(vis(first.top)&&above>=topBar){y=above;done=true;}
+        else if(vis(last.bottom)&&below+46<=bottomY){y=below;done=true;}
+      }
+    }
+  }catch(_){}
+  const fw=f.offsetWidth||110;
+  f.style.left=Math.max(8,Math.min(vw-fw-8,x-fw/2))+'px';f.style.top=Math.round(y)+'px';
+}
+function hlFloatUpdate(){
+  const f=$('#hlfloat');if(!f)return;
+  const a=document.activeElement,ok=a&&a.tagName==='TEXTAREA'&&(a.id==='f-note'||a.id==='f-thought');
+  if(ok)HLT=a.id;
+  const el=ok?a:(HLT&&document.activeElement===f?$('#'+HLT):null);
+  if(!el){f.hidden=true;return;}
+  const s=el.selectionStart,e=el.selectionEnd,v=el.value;let inSp=false;{const re=/==([^=\n]+?)==/g;let m;while((m=re.exec(v)))if(s>=m.index&&e<=m.index+m[0].length){inSp=true;break;}}
+  if(s===e&&!inSp){f.hidden=true;return;}
+  f.textContent=inSp?'형광 풀기':'형광';f.hidden=false;
+  hlPlace(f,el,s,e);
+}
+document.addEventListener('selectionchange',()=>{if(HLQ)return;HLQ=requestAnimationFrame(()=>{HLQ=0;hlFloatUpdate();});});
+['pointerdown','mousedown'].forEach(ev=>document.addEventListener(ev,e=>{if(e.target&&e.target.id==='hlfloat')e.preventDefault();}));
+new MutationObserver(()=>hlInit()).observe(document.getElementById('panel'),{childList:true,subtree:true});
+document.addEventListener('focusout',()=>setTimeout(hlFloatUpdate,0));
+if(window.visualViewport){visualViewport.addEventListener('resize',hlFloatUpdate);visualViewport.addEventListener('scroll',hlFloatUpdate);}
 const FS=!!(window.CSS&&CSS.supports&&CSS.supports('field-sizing','content'));
 function growTa(el){if(FS){el.style.height='';return;}const pn=$('#panel'),st=pn?pn.scrollTop:0;el.style.height='auto';if(el.offsetParent===null)return;el.style.height=(el.scrollHeight+2)+'px';if(pn)pn.scrollTop=st;}
 function growNote(){
@@ -1289,17 +1359,41 @@ function saveBlob(blob,name){
   document.body.appendChild(a);a.click();
   setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},5000);
 }
+async function backupText(){
+  const entries=await Promise.all(S.entries.map(async e=>Object.assign({},e,{photos:await Promise.all((e.photos||[]).map(toDataUrl))})));
+  return JSON.stringify({app:'하루장',version:3,exportedAt:new Date().toISOString(),categories:slimCats(),todos:S.todos,entries:entries});
+}
+async function doShare(){
+  const stamp=ymd(new Date()).replace(/-/g,'').slice(0,6),fn='harujang-backup-'+stamp+'.json';
+  if(!navigator.share||!navigator.canShare){toast('이 폰에서는 공유 백업을 쓸 수 없습니다.\n[백업 파일 저장]을 사용하세요',3500);return;}
+  toast('백업 파일을 만드는 중…',3000);
+  try{
+    const text=await backupText();
+    let f=new File([text],fn,{type:'application/json'});
+    if(!navigator.canShare({files:[f]}))f=new File([text],fn,{type:'text/plain'});
+    if(!navigator.canShare({files:[f]})){toast('이 폰에서는 파일 공유가 안 됩니다.\n[백업 파일 저장]을 사용하세요',3500);return;}
+    await navigator.share({files:[f],title:'하루장 백업 '+stamp});
+    lsSet(LB_KEY,String(Date.now()));lsSet('harujang:lastBackupSize',String(f.size));render();
+    toast('공유했습니다 ('+szText(f.size)+')\n받는 곳에 저장됐는지 확인하세요',3000);
+  }catch(err){
+    if(err&&err.name==='AbortError')toast('공유를 취소했습니다',2000);
+    else toast('공유하지 못했습니다.\n[백업 파일 저장]을 사용하세요',3500);
+  }
+}
 async function doExport(kind){
   const stamp=ymd(new Date()).replace(/-/g,'').slice(0,6);
   try{
     if(kind==='json'){
       const entries=await Promise.all(S.entries.map(async e=>Object.assign({},e,{photos:await Promise.all((e.photos||[]).map(toDataUrl))})));
       const text=JSON.stringify({app:'하루장',version:3,exportedAt:new Date().toISOString(),categories:slimCats(),todos:S.todos,entries:entries});
-      saveBlob(new Blob([text],{type:'application/json'}),'harujang-backup-'+stamp+'.json');
-      lsSet(LB_KEY,String(Date.now()));render();toast('백업 파일을 저장했습니다');return true;
+      const bl=new Blob([text],{type:'application/json'}),fn='harujang-backup-'+stamp+'.json';
+      saveBlob(bl,fn);
+      lsSet(LB_KEY,String(Date.now()));lsSet('harujang:lastBackupSize',String(bl.size));render();
+      toast('백업 파일을 준비했습니다 ('+szText(bl.size)+')\n다운로드 창에서 [다운로드]를 눌러 저장하세요',3000);return true;
     }else{
-      saveBlob(new Blob([toMarkdown()],{type:'text/markdown'}),'harujang-'+stamp+'.md');
-      toast('저장했습니다');
+      const bm=new Blob([toMarkdown()],{type:'text/markdown'}),fm='harujang-'+stamp+'.md';
+      saveBlob(bm,fm);
+      toast('파일을 준비했습니다 ('+szText(bm.size)+')\n다운로드 창에서 [다운로드]를 눌러 저장하세요',3000);
     }
   }catch(_){toast('내보내지 못했습니다.');return false;}
 }
@@ -1441,6 +1535,10 @@ document.addEventListener('click',ev=>{
     case 'export':doExport(t.dataset.kind);break;
     case 'wipe-open':{$('#wipe-in').value='';$('#wipe-go').disabled=true;$('#wp1').hidden=false;$('#wp2').hidden=true;$('#wp3').hidden=true;$('#wp-msg').textContent='';$('#wipe-file').value='';$('#wipe').hidden=false;break;}
     case 'wipe-backup':wipeBackup();break;
+    case 'bk-share':doShare();break;
+    case 'bk-now':(navigator.share&&navigator.canShare)?doShare():doExport('json');break;
+    case 'bk-snooze':lsSet('harujang:bkSnooze',ymd(new Date()));render();break;
+    case 'bk-days':lsSet('harujang:bkdays',t.dataset.v);render();break;
     case 'help-open':{const h=$('#help');h.hidden=false;h.querySelector('.box').scrollTop=0;break;}
     case 'help-close':$('#help').hidden=true;break;
     case 'wipe-cancel':$('#wipe').hidden=true;break;
@@ -1457,6 +1555,7 @@ document.addEventListener('click',ev=>{
         try{if('serviceWorker' in navigator){const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));}if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}}catch(_){}
         location.replace(location.pathname+'?u='+Date.now());
       })();break;}
+    case 'hl-float':{const el=$('#'+HLT);if(el){hlToggle(el);hlFloatUpdate();}break;}
     case 'hl':{const el=$('#'+t.dataset.t);if(el)hlToggle(el);break;}
     case 'hl-set':{const v=t.dataset.v||'y';if(v==='y')document.documentElement.removeAttribute('data-hl');else document.documentElement.setAttribute('data-hl',v);lsSet('hl',v);render();break;}
     case 'fz-set':{const v=t.dataset.v==='l'?'l':'n';if(v==='l')document.documentElement.setAttribute('data-fz','l');else document.documentElement.removeAttribute('data-fz');lsSet('fz',v);render();break;}
