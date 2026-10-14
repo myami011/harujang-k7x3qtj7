@@ -2,12 +2,11 @@
 <html lang="ko">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' data: blob:; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
-<script>try{if(localStorage.getItem("fz")==="l")document.documentElement.setAttribute("data-fz","l");var h=localStorage.getItem("hl");if(h&&h!=="y")document.documentElement.setAttribute("data-hl",h);}catch(e){}</script>
+<script>try{var sk=localStorage.getItem("sk");if(["ind","dark","teal","peach"].indexOf(sk)<0)sk=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"ind";document.documentElement.setAttribute("data-sk",sk);}catch(e){document.documentElement.setAttribute("data-sk","ind");}try{if(localStorage.getItem("fz")==="l")document.documentElement.setAttribute("data-fz","l");var h=localStorage.getItem("hl");if(h&&h!=="y")document.documentElement.setAttribute("data-hl",h);}catch(e){}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>하루장</title>
-<meta name="theme-color" content="#faf0e8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1f1815" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" id="tcol" content="#f5f6fa">
 <meta name="description" content="하루의 중요한 일과 할 일을 사진과 함께 남기는 개인 기록장">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="icons/icon-192.png">
@@ -15,24 +14,17 @@
 <style>/* Layout: 단일 열 모바일 앱. 위에 오늘 날짜와 4개 빠른 기록 버튼,아래로 날짜별 타임라인. 하단 탭 3개 + 새 기록 버튼. */
 :root{
   --fz:1;
-  --bg:#faf0e8; --card:#fffaf6; --ink:#3a2a22; --ink2:#85665a; --line:#ecd9ca; --fill:#f5e4d8;
-  --brand:#bf5b35; --on-brand:#fff; --hero:#f7dcc9;
-  --c-key:#bf5b35; --k-blue:#3e6794; --k-indigo:#4a56a0; --k-plum:#8c4a6b; --k-green:#4f7a3a; --k-teal:#2f7468; --k-sky:#2a7a9a; --k-ochre:#a8751a; --k-moss:#6d7a2a; --k-brown:#7a5a3a; --k-slate:#6a6a5f;
-  --shadow:0 1px 2px rgba(70,55,30,.07),0 6px 18px rgba(70,55,30,.07);
+  --bg:#f5f6fa; --card:#fff; --ink:#14161f; --ink2:#6b7080; --line:#e6e8f0; --fill:#eceef6;
+  --brand:#4f46e5; --on-brand:#fff; --hero:#e8e9fb;
+  --c-key:#4f46e5; --k-blue:#3e6794; --k-indigo:#4a56a0; --k-plum:#8c4a6b; --k-green:#4f7a3a; --k-teal:#2f7468; --k-sky:#2a7a9a; --k-ochre:#a8751a; --k-moss:#6d7a2a; --k-brown:#7a5a3a; --k-slate:#6a6a5f;
+  --shadow:0 1px 2px rgba(20,22,40,.04),0 8px 24px rgba(20,22,40,.06);
   --serif:"Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo","AppleMyungjo","Batang",serif;
   --sans:"Noto Sans KR","Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#1f1815; --card:#2a201b; --ink:#f3e6dc; --ink2:#b9a294; --line:#41322a; --fill:#352a23;
-  --brand:#f0a37f; --on-brand:#2a1710; --hero:#3a2a22;
-  --c-key:#f0a37f; --k-blue:#8fb4dc; --k-indigo:#a3adf0; --k-plum:#dd99bb; --k-green:#a8cf7a; --k-teal:#7fcfc0; --k-sky:#7cc4e0; --k-ochre:#e3b45a; --k-moss:#c0cc7a; --k-brown:#d0a77e; --k-slate:#b3b09f;
-  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}
-}
-:root[data-theme="dark"]{
-  --bg:#1f1815; --card:#2a201b; --ink:#f3e6dc; --ink2:#b9a294; --line:#41322a; --fill:#352a23;
-  --brand:#f0a37f; --on-brand:#2a1710; --hero:#3a2a22;
-  --c-key:#f0a37f; --k-blue:#8fb4dc; --k-indigo:#a3adf0; --k-plum:#dd99bb; --k-green:#a8cf7a; --k-teal:#7fcfc0; --k-sky:#7cc4e0; --k-ochre:#e3b45a; --k-moss:#c0cc7a; --k-brown:#d0a77e; --k-slate:#b3b09f;
-  --shadow:0 1px 2px rgba(0,0,0,.4); color-scheme:dark}
+html[data-sk="teal"]{--bg:#f1f8f7;--ink:#10201e;--ink2:#5c7370;--line:#dbeae8;--fill:#e3f0ee;--brand:#0b8a78;--hero:#d9f0ec;--c-key:#0b8a78}
+html[data-sk="peach"]{--bg:#faf0e8; --card:#fffaf6; --ink:#3a2a22; --ink2:#85665a; --line:#ecd9ca; --fill:#f5e4d8; --brand:#bf5b35; --hero:#f7dcc9; --c-key:#bf5b35; --shadow:0 1px 2px rgba(70,55,30,.07),0 6px 18px rgba(70,55,30,.07);
+  --serif:"Noto Serif KR","Noto Serif CJK KR","Nanum Myeongjo","AppleMyungjo","Batang",serif}
+html[data-sk="dark"]{--bg:#0e1015; --card:#1a1d26; --ink:#f1f3f9; --ink2:#9aa1b5; --line:#2a2e3b; --fill:#232734; --brand:#8b9bff; --on-brand:#0e1015; --hero:#232734; --c-key:#8b9bff; --k-blue:#8fb4dc; --k-indigo:#a3adf0; --k-plum:#dd99bb; --k-green:#a8cf7a; --k-teal:#7fcfc0; --k-sky:#7cc4e0; --k-ochre:#e3b45a; --k-moss:#c0cc7a; --k-brown:#d0a77e; --k-slate:#b3b09f; --shadow:none; color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html{color-scheme:light}
@@ -368,6 +360,23 @@ mark.hl{background:var(--hl);color:inherit;border-radius:3px;padding:0 1px;-webk
 .sw.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--ink)}
 .sw-y{background:rgba(255,205,0,.7)}.sw-g{background:rgba(110,195,80,.7)}.sw-p{background:rgba(255,120,165,.7)}.sw-b{background:rgba(90,170,255,.7)}
 .swex{margin-left:6px;font-size:calc(14px*var(--fz))}
+html:not([data-sk="peach"]) body{letter-spacing:-.01em}
+html:not([data-sk="peach"]) .brand,html:not([data-sk="peach"]) .brand .ptl{font-family:var(--sans)!important;letter-spacing:0}
+html:not([data-sk="peach"]) .brand{font-weight:600}
+html:not([data-sk="peach"]) .day{font:800 calc(20px*var(--fz)) var(--sans)!important;letter-spacing:-.02em;margin-top:26px}
+html:not([data-sk="peach"]) .card h3,html:not([data-sk="peach"]) .bcard b{font-family:var(--sans)!important;font-weight:700}
+html:not([data-sk="peach"]) .card{border:0!important;border-left:0!important;border-radius:20px!important;padding:16px 18px!important;margin-bottom:12px!important}
+html:not([data-sk="peach"]) .chips{gap:8px;padding-block:14px 2px}
+html:not([data-sk="peach"]) .chip-f{border:0!important;padding:8px 16px!important;font-weight:600}
+html:not([data-sk="peach"]) .chip-f.edit{border:1px dashed var(--line)!important}
+html:not([data-sk="peach"]) .search{border:0!important;border-radius:14px!important}
+html:not([data-sk="peach"]) .fab{box-shadow:0 8px 24px rgba(0,0,0,.22)}
+html:not([data-sk="peach"]) .pill{border-radius:99px}
+html:not([data-sk="peach"]){--serif:var(--sans)}
+html:not([data-sk="peach"]) .chip-f{background:var(--card)}
+html:not([data-sk="peach"]) .chip-f[aria-pressed="true"]{background:var(--brand)}
+html:not([data-sk="peach"]) .search{background:var(--card)}
+html[data-sk="dark"]{color-scheme:dark}
 </style>
 </head>
 <body>
@@ -457,7 +466,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.8911';
+const APP_VER='v0.901';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -536,6 +545,9 @@ async function init(){
 let deferred=null;
 const IS_IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const HLC=()=>document.documentElement.getAttribute('data-hl')||'y';
+const SK=()=>document.documentElement.getAttribute('data-sk')||'ind';
+const TCOL={ind:'#f5f6fa',teal:'#f1f8f7',peach:'#faf0e8',dark:'#0e1015'};
+try{const m0=document.getElementById('tcol');if(m0)m0.setAttribute('content',TCOL[SK()]||'#f5f6fa');}catch(_){}
 const FZ=()=>document.documentElement.getAttribute('data-fz')==='l'?'l':'n';
 const isStandalone=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;if(S.tab==='arch')render();});
@@ -994,6 +1006,7 @@ function viewArch(){
   +'<div class="btns bk2"><button class="btn" data-act="export" data-kind="text">글만 백업 저장<small>약 '+szText(ab.tx)+' · 빠르고 가볍다 · 사진은 빠짐</small></button><button class="btn pri" data-act="export" data-kind="json">전체 백업 저장 (사진 포함)<small>약 '+szText(Math.round(ab.ph*1.37+ab.tx))+'</small></button></div>'+(ph?'<p class="bknote">글만 백업으로 복원하면 사진은 돌아오지 않습니다. 사진은 전체 백업으로 가끔 저장하세요. 마지막 전체 백업: <b>'+(lastFull()?agoText(lastFull()):'아직 없음')+'</b></p>':'')+'<div class="btns"><button class="btn" data-act="bk-share">다른 곳으로 보내기</button><button class="btn" data-act="export" data-kind="md">읽기용(마크다운) 저장</button><label class="btn">백업 불러오기<input id="imp" type="file" accept=".json,application/json" hidden></label></div></section>'+photoSecs(ph,ab)
   +'<section class="sec"><h3>형광색</h3><p>메모에서 글을 선택하고 <b>형광</b>을 누르면 이 색으로 표시됩니다. 표시된 곳을 선택하고 다시 누르면 풀립니다.</p><div class="swrow">'+[['y','노랑'],['g','연두'],['p','분홍'],['b','하늘']].map(x=>'<button type="button" class="sw sw-'+x[0]+(HLC()===x[0]?' on':'')+'" data-act="hl-set" data-v="'+x[0]+'" aria-label="'+x[1]+'" aria-pressed="'+(HLC()===x[0])+'"></button>').join('')+'<span class="swex">예시 <mark class="hl">중요한 문장</mark></span></div></section>'
   +'<section class="sec"><h3>백업 알림 주기</h3><p>이 기간이 지나면 오늘 화면 위에 백업 안내가 뜹니다. 백업은 직접 눌러야 저장됩니다.<br><b>글만 백업</b> (기록·할 일, 아무 백업이나 포함)</p><div class="btns">'+[[7,'7일'],[14,'14일'],[30,'30일'],[0,'끔']].map(x=>'<button class="btn'+(bkDays()===x[0]?' pri':'')+'" data-act="bk-days" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div><p style="margin-top:12px"><b>사진 포함 전체 백업</b> (사진이 있을 때만)</p><div class="btns">'+[[30,'30일'],[60,'60일'],[90,'90일'],[0,'끔']].map(x=>'<button class="btn'+(fullDays()===x[0]?' pri':'')+'" data-act="bk-fdays" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div></section>'
+  +'<section class="sec"><h3>화면 색</h3><p>화면 모양을 고릅니다. 기록과 사진에는 영향이 없습니다.</p><div class="btns">'+[['ind','밝은 모던'],['dark','어두운 모던'],['teal','청록 모던'],['peach','살구(클래식)']].map(x=>'<button class="btn'+(SK()===x[0]?' pri':'')+'" data-act="sk-set" data-v="'+x[0]+'">'+x[1]+'</button>').join('')+'</div></section>'
   +'<section class="sec"><h3>글자 크기</h3><p><b>보통</b>은 기본 크기입니다. <b>크게</b>는 글자를 약 15% 키워 읽기 편하게 하며, 대신 한 화면에 보이는 내용이 조금 줄어듭니다. 화면 구성은 그대로입니다.</p><div class="btns"><button class="btn'+(FZ()==='l'?'':' pri')+'" data-act="fz-set" data-v="n">보통</button><button class="btn'+(FZ()==='l'?' pri':'')+'" data-act="fz-set" data-v="l">크게</button></div></section>'
   +'<section class="sec"><h3>앱 설치</h3>'+inst+'</section>'
   +'<section class="sec"><h3>앱 업데이트</h3><p>새 버전이 있는지 확인하고, 있으면 바꿉니다. 기록은 지워지지 않습니다. 업데이트를 원하시면 누르세요.</p><div class="btns"><button class="btn pri" data-act="app-update">업데이트</button></div></section>'
@@ -1249,6 +1262,11 @@ function renderSheet(){
 }
 function openSheet(sh){
   S.sheet=sh;renderSheet();
+  if(sh.kind==='rec'&&!sh.entry){/* 방어: 선택된 분류가 칩에 없거나 양식과 어긋나면 기본 분류로 되돌려 다시 그린다 */
+    const okc=[...document.querySelectorAll('#catpick .cp[data-id]')].some(b=>b.dataset.id===sh.cat&&b.classList.contains('on'));
+    if(!okc){const f0=S.cats.find(c=>!c.hidden)||S.cats[0];sh.cat=f0.id;sh.picked=false;sh.x={};renderSheet();}
+    renderExtra();
+  }
   $('#sheet').hidden=false;document.body.style.overflow='hidden';pushLayer();
   if(sh.kind==='rec')growNote();
   const f=sh.kind==='rec'?'#f-title':sh.kind==='todo'?'#t-title':null;
@@ -1604,7 +1622,7 @@ async function wipeAll(){
   const b=$('#wipe-go');if(b.disabled)return;b.disabled=true;
   try{
     for(const n of ['entries','todos','meta']){await new Promise((res,rej)=>{const t=idb.transaction(n,'readwrite');t.objectStore(n).clear();t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);});}
-    try{Object.keys(localStorage).forEach(k=>{if(k.indexOf('harujang:')===0||k==='fz'||k==='hl'||k==='upd_from')localStorage.removeItem(k);});}catch(_){}
+    try{Object.keys(localStorage).forEach(k=>{if(k.indexOf('harujang:')===0||k==='fz'||k==='hl'||k==='sk'||k==='upd_from')localStorage.removeItem(k);});}catch(_){}
     location.reload();
   }catch(_){toast('지우지 못했습니다.');b.disabled=false;}
 }
@@ -1767,6 +1785,7 @@ document.addEventListener('click',ev=>{
     case 'hl-float':{const el=$('#'+HLT);if(el){hlToggle(el);hlFloatUpdate();}break;}
     case 'hl':{const el=$('#'+t.dataset.t);if(el)hlToggle(el);break;}
     case 'hl-set':{const v=t.dataset.v||'y';if(v==='y')document.documentElement.removeAttribute('data-hl');else document.documentElement.setAttribute('data-hl',v);lsSet('hl',v);render();break;}
+    case 'sk-set':{const v=t.dataset.v;if(!TCOL[v])break;document.documentElement.setAttribute('data-sk',v);const m=$('#tcol');if(m)m.setAttribute('content',TCOL[v]);lsSet('sk',v);render();break;}
     case 'fz-set':{const v=t.dataset.v==='l'?'l':'n';if(v==='l')document.documentElement.setAttribute('data-fz','l');else document.documentElement.removeAttribute('data-fz');lsSet('fz',v);render();break;}
     case 'install':if(deferred){deferred.prompt();deferred.userChoice.finally(()=>{deferred=null;render();});}break;
     case 'snack-ok':{const s=S.snack;hideSnack();if(s)openRec(null,{title:s.title});break;}
