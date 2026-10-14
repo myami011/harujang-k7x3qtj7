@@ -419,6 +419,33 @@ html[data-sk="jrn"] .fab{border-radius:22px;width:62px;height:62px}
 .hbar b{color:var(--ink);font-weight:600}
 .hbar .eyeb{position:static;margin-left:auto;width:30px;height:30px;opacity:1}
 .hbar .eyeb svg{width:18px;height:18px}
+
+/* 기록을 문서로 만들기 */
+.dvp{max-width:760px;margin:0 auto;padding:22px 20px 60px;font-family:var(--sans);font-size:14px;line-height:1.6;color:#14161f;background:#fff}
+.dvp h1{font-size:26px;margin:0 0 2px;letter-spacing:-.02em}
+.dvp .sub{font-size:12.5px;color:#6b7080;border-bottom:2px solid #4f46e5;padding-bottom:12px;margin-bottom:6px}
+.dvp .d{font-weight:800;font-size:16.5px;margin:22px 0 6px}
+.dvp .rec{border-bottom:1px solid #ececf2;padding:9px 0 12px;break-inside:avoid}
+.dvp .h{font-size:12px;color:#6b7080}.dvp .h b{color:#4f46e5;margin-right:6px}
+.dvp .t{font-weight:700;font-size:15.5px;margin:2px 0}
+.dvp .m{font-size:13.5px;color:#333;white-space:pre-wrap}.dvp .m b.chap{display:block;color:#14161f}
+.dvp .th{font-size:13px;color:#333;margin-top:4px;white-space:pre-wrap}
+.dvp .ph{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.dvp .ph img{width:150px;height:100px;object-fit:cover;border-radius:4px}
+.dvp .ph em{align-self:center;font-style:normal;font-size:12px;color:#6b7080}
+.dvp mark,.dvp mark.hl{background:#fff1a3;color:inherit;padding:0 1px}
+.dvp .empty{color:#6b7080;padding:30px 0}
+#docview{position:fixed;inset:0;z-index:97;background:#fff;color:#14161f;overflow:auto;color-scheme:light}
+#docview[hidden]{display:none}
+.dv-bar{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;padding:10px 12px;background:#f5f6fa;border-bottom:1px solid #e6e8f0}
+.dv-bar .btn{color:#14161f;background:#fff;border:1px solid #d9dbe6;border-radius:99px;padding:8px 14px;font-weight:600}
+.dv-bar .btn.pri{background:#4f46e5;color:#fff;border-color:#4f46e5}.dv-sp{flex:1}
+.docopt{display:flex;justify-content:space-between;align-items:center;width:100%;margin:6px 0;padding:11px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink);font:500 calc(14.5px*var(--fz)) var(--sans);text-align:left}
+.docopt i{width:40px;height:23px;border-radius:99px;background:var(--line);position:relative;flex:none}
+.docopt i:after{content:"";position:absolute;left:3px;top:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:left .12s}
+.docopt[aria-pressed="true"] i{background:var(--brand)}.docopt[aria-pressed="true"] i:after{left:20px}
+.docrow{display:flex;gap:8px}.docrow input{flex:1;min-width:0}
+.doccnt{margin:10px 0 2px;font-size:calc(13px*var(--fz));color:var(--ink2)}
+@media print{body>*:not(#docview){display:none!important}html,body{height:auto!important;overflow:visible!important;background:#fff!important;padding:0!important}#docview{position:static;overflow:visible}.dv-bar{display:none}.dvp{padding:0;max-width:none}}
 </style>
 </head>
 <body>
@@ -435,6 +462,9 @@ html[data-sk="jrn"] .fab{border-radius:22px;width:62px;height:62px}
 </div></nav>
 
 <div class="scrim" id="sheet" hidden><div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="입력"></div></div>
+<div class="wipe" id="docdlg" role="dialog" aria-label="문서로 만들기" hidden><div class="box hbox" id="docdlg-b"></div></div>
+<div class="wipe" id="ocrdlg" role="dialog" aria-label="사진으로 읽기" hidden><div class="box hbox"><h3>사진으로 읽기</h3><p style="line-height:1.7;margin:6px 0 10px">1. 아래 버튼으로 구글 렌즈를 엽니다<br>2. 책 문장을 비추고 원하는 부분을 눌러 <b>복사</b><br>3. 돌아와서 <b>붙여넣기</b>를 누릅니다</p><div class="btns"><button class="btn pri" data-act="ocr-lens">구글 렌즈 열기</button><button class="btn" data-act="ocr-paste">붙여넣기</button></div><p style="font-size:12px;color:var(--ink2);margin:8px 0">렌즈가 안 열리면 삼성 키보드의 카메라 아이콘이나 카메라 앱의 글자 인식을 쓰세요. 복사한 글은 인용 칸에서 길게 눌러 붙여넣어도 됩니다.</p><div class="btns"><button class="btn" data-act="ocr-close">닫기</button></div></div></div>
+<div id="docview" hidden><div class="dv-bar"><button class="btn" data-act="dv-close">‹ 닫기</button><span class="dv-sp"></span><button class="btn" data-act="dv-save">HTML 파일로 저장</button><button class="btn pri" data-act="dv-print">인쇄 · PDF</button></div><div class="dvp" id="dv-page"></div></div>
 <div class="scrim lb" id="lb" hidden data-act="lb-close"><button class="x" data-act="lb-close" aria-label="닫기">×</button><img id="lb-img" alt="확대한 사진"></div>
 <div class="toast" id="toast" role="status" hidden></div>
 <button type="button" class="hlfloat" id="hlfloat" data-act="hl-float" hidden>형광</button>
@@ -508,7 +538,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.9112';
+const APP_VER='v0.921';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -616,6 +646,7 @@ window.addEventListener('popstate',()=>{
   if(!layer)return;
   layer=false;
   if(!$('#lb').hidden){$('#lb').hidden=true;$('#lb-img').removeAttribute('src');if(S.sheet)pushLayer();}
+  else if(!$('#docview').hidden)docClose(true);
   else if(S.sheet)closeSheet();
 });
 const dayLabel=ds=>{const d=pYmd(ds);return (d.getMonth()+1)+'월 '+d.getDate()+'일';};
@@ -1048,6 +1079,7 @@ function viewArch(){
   +'<section class="sec"><h3>보관 상태</h3><p>기록 '+n+'건 · 사진 '+ph+'장 · 할 일 '+S.todos.length+'개<br>모든 내용은 이 폰의 브라우저 저장소에만 있습니다. 서버로 보내지 않습니다.'+'<br>앱 사용 용량: <b>'+szText(appBytes().all)+'</b> (사진 '+szText(appBytes().ph)+' · 글 '+szText(appBytes().tx)+')'+(S.uUse?'<br><small>브라우저 표시: '+S.uUse+'</small>'+(S.uPer===true?' · 영구 저장 허용됨':S.uPer===false?' · 영구 저장 미허용(저장 공간이 부족하면 지워질 수 있음)':''):'')+(S.mem?'<br><b>지금은 저장이 꺼져 있어 앱을 닫으면 사라집니다.</b>':'')+'</p></section>'
   +'<section class="sec"><h3>사용 방법</h3><p>기록 남기기부터 백업, 불러오기, 설정까지 간단히 정리했습니다.</p><div class="btns"><button class="btn pri" data-act="help-open">사용 방법 보기</button></div></section>'
   +'<section class="sec"><h3>분류</h3><p>분류는 표준 10개로 고정되어 있습니다. 표시 이름, 순서를 바꾸거나 쓰지 않는 분류를 숨깁니다.</p><div class="btns"><button class="btn" data-act="cats-open">분류 관리</button></div></section>'
+  +'<section class="sec"><h3>기록을 문서로 만들기</h3><p>기간과 분류를 골라 읽기 좋은 문서로 만듭니다. 사진도 넣을 수 있고, 인쇄 · PDF로 저장하거나 HTML 파일로 보관할 수 있습니다.</p><div class="btns"><button class="btn pri" data-act="doc-open">문서로 만들기</button></div></section>'
   +'<section class="sec"><div class="sech"><h3>백업과 복원</h3><button type="button" class="getbk hlb" data-act="info" data-k="backup">도움말</button></div><p>마지막 백업: <b>'+(lb?agoText(lb)+(Number(lsGet('harujang:lastBackupSize'))?' · '+szText(Number(lsGet('harujang:lastBackupSize'))):''):'아직 없음')+'</b><br>폰을 잃어버리거나 브라우저 데이터를 지우면 기록이 사라집니다. 가끔 [백업 파일 저장]으로 파일을 만들고 구글 드라이브나 PC로 옮겨 두세요. 드라이브 등으로 바로 보내려면 [다른 곳으로 보내기]를 두 번 누릅니다(처음은 파일 준비, 두 번째는 공유창). '+(IS_IOS?'아이폰은 저장 창에서 <b>파일에 저장</b>을 고르세요. 사파리는 오래 안 쓴 저장소를 지울 수 있으니 백업을 자주 저장하세요.':'파일은 폰의 다운로드 폴더에 저장됩니다.')+'<br>자세한 사용법은 [도움말]을 누르세요.</p>'
   +'<div class="btns bk2"><button class="btn" data-act="export" data-kind="text">글만 백업 저장<small>약 '+szText(ab.tx)+' · 빠르고 가볍다 · 사진은 빠짐</small></button><button class="btn pri" data-act="export" data-kind="json">전체 백업 저장 (사진 포함)<small>약 '+szText(Math.round(ab.ph*1.37+ab.tx))+'</small></button></div>'+(ph?'<p class="bknote">글만 백업으로 복원하면 사진은 돌아오지 않습니다. 사진은 전체 백업으로 가끔 저장하세요. 마지막 전체 백업: <b>'+(lastFull()?agoText(lastFull()):'아직 없음')+'</b></p>':'')+'<div class="btns"><button class="btn" data-act="bk-share">다른 곳으로 보내기</button><button class="btn" data-act="export" data-kind="md">읽기용(마크다운) 저장</button><label class="btn">백업 불러오기<input id="imp" type="file" accept=".json,application/json" hidden></label></div></section>'+photoSecs(ph,ab)
   +'<section class="sec"><h3>형광색</h3><p>메모에서 글을 선택하고 <b>형광</b>을 누르면 이 색으로 표시됩니다. 표시된 곳을 선택하고 다시 누르면 풀립니다.</p><div class="swrow">'+[['y','노랑'],['g','연두'],['p','분홍'],['b','하늘']].map(x=>'<button type="button" class="sw sw-'+x[0]+(HLC()===x[0]?' on':'')+'" data-act="hl-set" data-v="'+x[0]+'" aria-label="'+x[1]+'" aria-pressed="'+(HLC()===x[0])+'"></button>').join('')+'<span class="swex">예시 <mark class="hl">중요한 문장</mark></span></div></section>'
@@ -1123,6 +1155,77 @@ async function toggleHide(act,t){
   try{await saveHid();}catch(_){toast('저장하지 못했습니다');}
 }
 
+/* ---------- 기록을 문서로 만들기 ---------- */
+S.doc=null;
+function docInit(){
+  const ds=S.entries.map(e=>e.date).filter(Boolean).sort();
+  S.doc={from:ds[0]||ymd(new Date()),to:ymd(new Date()),cat:'all',photos:true,skipHid:true,star:false};
+}
+function docList(){
+  const o=S.doc;if(!o)return [];
+  return S.entries.filter(e=>e.date>=o.from&&e.date<=o.to&&(o.cat==='all'||e.cat===o.cat)&&(!o.star||e.star)&&!(o.skipHid&&S.hid.has(e.id))).sort(byTimeDesc);
+}
+function docCountText(){
+  const l=docList(),pc=S.doc.photos?l.reduce((n,e)=>n+((e.photos||[]).length),0):0;
+  return '기록 '+l.length+'건'+(S.doc.photos?' · 사진 '+pc+'장':'');
+}
+function docDlgRender(){
+  const o=S.doc,b=$('#docdlg-b');if(!b)return;
+  const cats=[{id:'all',name:'전체'}].concat(S.cats.filter(c=>!c.hidden||S.entries.some(e=>e.cat===c.id)));
+  b.innerHTML='<h3>문서로 만들기</h3>'
+   +'<div class="fld"><span class="lbl">기간</span><div class="docrow"><input id="doc-from" type="date" value="'+esc(o.from)+'"><input id="doc-to" type="date" value="'+esc(o.to)+'"></div></div>'
+   +'<div class="fld"><span class="lbl">분류</span><div class="catpick">'+cats.map(c=>'<button type="button" class="cp'+(o.cat===c.id?' on':'')+'" data-act="doc-cat" data-v="'+esc(c.id)+'" style="--c:var(--brand)">'+esc(c.name)+'</button>').join('')+'</div></div>'
+   +'<div class="fld"><span class="lbl">옵션</span>'
+   +[['photos','사진 포함'],['skipHid','가린 기록 제외'],['star','★ 중요 기록만']].map(x=>'<button type="button" class="docopt" data-act="doc-opt" data-k="'+x[0]+'" aria-pressed="'+(!!o[x[0]])+'">'+x[1]+'<i></i></button>').join('')+'</div>'
+   +'<div class="doccnt" id="doc-cnt">'+docCountText()+'</div>'
+   +'<div class="btns" style="margin-top:10px"><button class="btn pri" data-act="doc-make">문서 만들기</button><button class="btn" data-act="doc-close">닫기</button></div>'
+   +'<p class="sub2" style="font-size:12px;color:var(--ink2);margin:8px 0 0">사진은 앱에 저장된 크기 그대로 들어갑니다. 기록이 아주 많으면 기간을 나눠 만드세요.</p>';
+  const f=$('#doc-from'),t=$('#doc-to');
+  const upd=()=>{if(f.value)o.from=f.value;if(t.value)o.to=t.value;const c=$('#doc-cnt');if(c)c.textContent=docCountText();};
+  f.addEventListener('change',upd);t.addEventListener('change',upd);
+}
+function docOpen(){docInit();docDlgRender();$('#docdlg').hidden=false;$('#docdlg-b').scrollTop=0;}
+const DOC_WD=['일','월','화','수','목','금','토'];
+function docBodyHtml(list,opt,srcOf){
+  const pc=opt.photos?list.reduce((n,e)=>n+((e.photos||[]).length),0):0;
+  let h='<h1>하루장 기록</h1><div class="sub">'+esc(opt.from.replace(/-/g,'.'))+' ~ '+esc(opt.to.replace(/-/g,'.'))+(opt.cat!=='all'?' · '+esc(catOf(opt.cat).name):'')+' · 기록 '+list.length+'건'+(opt.photos?' · 사진 '+pc+'장':'')+'</div>';
+  if(!list.length)return h+'<p class="empty">조건에 맞는 기록이 없습니다.</p>';
+  let last='';
+  list.forEach(e=>{
+    if(e.date!==last){last=e.date;const d=pYmd(e.date);h+='<div class="d">'+d.getFullYear()+'년 '+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+DOC_WD[d.getDay()]+'요일</div>';}
+    const c=catOf(e.cat),lf=factsOf(e),hasNote=e.note||mkTag(e)||chapHtml(e);
+    h+='<div class="rec"><div class="h"><b>'+esc(c.name)+'</b>'+esc(e.time||'')+(lf.length?' · '+lf.map(esc).join(' · '):'')+(e.star?' ★':'')+'</div><div class="t">'+esc(e.title)+'</div>';
+    if(hasNote)h+='<div class="m">'+chapHtml(e)+mkTag(e)+nh(e.note||'')+'</div>';
+    if(e.cat==='read'&&e.f&&e.f.thought)h+='<div class="th"><b>생각</b> '+nh(e.f.thought)+'</div>';
+    const ph=opt.photos?(e.photos||[]):[];
+    if(ph.length){const sh=ph.slice(0,6);h+='<div class="ph">'+sh.map(p=>'<img alt="" src="'+esc(srcOf(p))+'">').join('')+(ph.length>6?'<em>+'+(ph.length-6)+'장</em>':'')+'</div>';}
+    h+='</div>';
+  });
+  return h;
+}
+function docShow(){
+  const o=Object.assign({},S.doc),l=docList();
+  if(!l.length){toast('조건에 맞는 기록이 없습니다');return;}
+  $('#dv-page').innerHTML=docBodyHtml(l,o,urlOf);
+  S.docOpt=o;$('#docdlg').hidden=true;$('#docview').hidden=false;$('#docview').scrollTop=0;pushLayer();
+}
+function docClose(fromPop){$('#docview').hidden=true;$('#dv-page').innerHTML='';if(!fromPop)popLayer();}
+async function docSave(){
+  const o=S.docOpt;if(!o)return;
+  const l=S.doc?docList():[];
+  const list=S.entries.filter(e=>e.date>=o.from&&e.date<=o.to&&(o.cat==='all'||e.cat===o.cat)&&(!o.star||e.star)&&!(o.skipHid&&S.hid.has(e.id))).sort(byTimeDesc);
+  try{
+    const m=new Map();
+    if(o.photos)for(const e of list)for(const p of (e.photos||[]).slice(0,6))if(!m.has(p))m.set(p,await toDataUrl(p));
+    const body=docBodyHtml(list,o,p=>m.get(p)||'');
+    const css=[...document.querySelectorAll('style')].map(x=>x.textContent).join('\n').split('/* 기록을 문서로 만들기 */')[1]||'';
+    const css2=css.split('#docview{')[0];
+    const html='<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>하루장 기록 '+o.from+' ~ '+o.to+'</title><style>:root{--sans:"Noto Sans KR","Noto Sans CJK KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}body{margin:0;background:#fff}'+css2+'@media print{.dvp{padding:0;max-width:none}}</style></head><body><div class="dvp">'+body+'</div></body></html>';
+    saveBlob(new Blob([html],{type:'text/html'}),'harujang-doc-'+o.from.replace(/-/g,'')+'-'+o.to.replace(/-/g,'')+'.html');
+    toast('HTML 파일을 저장했습니다.\n열어서 인쇄 → PDF로 저장할 수 있습니다',3500);
+  }catch(_){toast('문서를 저장하지 못했습니다');}
+}
+
 function render(){
   const v=$('#view');
   v.innerHTML=S.tab==='cal'?viewCal():S.tab==='arch'?viewArch():S.tab==='log'?viewLog():viewToday();
@@ -1144,7 +1247,7 @@ function recFormHtml(sh){
   +'<label><span class="lbl" id="lbl-time">시간</span><input id="f-time" type="time" value="'+(e?e.time:hm(now))+'"></label></div>'
   +'<div class="fld xchips" id="xchips" hidden></div><div class="fld xbody" id="xbody" hidden></div>'
   +'<div class="fld xchips mkrow" id="mkrow" hidden></div>'
-  +'<div class="fld"><div class="titlbl"><span class="lbl" id="memo-lbl">메모</span><input id="f-chap" type="text" maxlength="30" placeholder="장 · 소제목 (선택)" autocomplete="off" value="'+esc((sh.chap)||'')+'" hidden><button type="button" class="getbk hlb" data-act="hl" data-t="f-note">형광</button></div><textarea id="f-note" rows="3" placeholder="메모하세요">'+esc(e?e.note:'')+'</textarea></div>'
+  +'<div class="fld"><div class="titlbl"><span class="lbl" id="memo-lbl">메모</span><input id="f-chap" type="text" maxlength="30" placeholder="장 · 소제목 (선택)" autocomplete="off" value="'+esc((sh.chap)||'')+'" hidden><button type="button" class="getbk hlb" id="f-ocr" data-act="ocr-open" hidden style="margin-left:auto;margin-right:6px">📷 사진으로 읽기</button><button type="button" class="getbk hlb" data-act="hl" data-t="f-note">형광</button></div><textarea id="f-note" rows="3" placeholder="메모하세요">'+esc(e?e.note:'')+'</textarea></div>'
   +'<div class="fld thbox" id="thbox" hidden></div>'
   +'<div class="fld msave-w"><button type="submit" form="f" class="hsave msave">저장</button></div>'
   +'<div class="fld"><span class="lbl">사진 <span id="ph-n"></span></span><div class="strip" id="strip"></div>'
@@ -1225,7 +1328,7 @@ function renderExtra(){
   const ft0=$('#f-thought');if(ft0)sh.thought=ft0.value;
   const isRead=sh.cat==='read',isQ=isRead&&sh.mk==='quote';
   const chI=$('#f-chap');if(chI)chI.hidden=!isRead;
-  const ml=$('#memo-lbl');if(ml)ml.textContent=isQ?'인용':'메모';
+  const ml=$('#memo-lbl');if(ml)ml.textContent=isQ?'인용':'메모';const oc=$('#f-ocr');if(oc)oc.hidden=!isQ;
   const nt=$('#f-note');if(nt){nt.placeholder=isQ?'책 문장을 옮겨 적으세요':'메모하세요';nt.classList.toggle('qt',isQ);}
   const tb=$('#thbox');if(tb){tb.hidden=!isQ;tb.innerHTML=!isQ?'':(sh.thOpen?'<div class="titlbl"><span class="lbl thl">내 생각</span><button type="button" class="getbk hlb" data-act="hl" data-t="f-thought">형광</button></div><textarea id="f-thought" rows="3" placeholder="이 인용에 대한 생각">'+esc(sh.thought||'')+'</textarea>':'<button type="button" class="xchip" data-act="th-open">+ 내 생각</button>');const f2=$('#f-thought');if(f2)growTa(f2);}
   const mr=$('#mkrow');if(mr){mr.hidden=!isRead;mr.innerHTML=!isRead?'':MK_ORDER.concat(['']).map(k=>{const on=(sh.mk||'')===k;return '<button type="button" class="xchip'+(on?' on':'')+'" data-act="mk" data-k="'+k+'" aria-pressed="'+on+'">'+(k?MK[k]:'기타')+'</button>';}).join('')+'<button type="button" class="xchip" id="f-done" data-act="done" style="margin-left:auto">□ 완독</button>';}
@@ -1812,6 +1915,18 @@ document.addEventListener('click',ev=>{
       const ids={dist:'#f-dist',cost:'#f-cost',author:'#f-author',pages:'#f-pf'};
       if(sh.xopen[k]&&ids[k]){const el=$(ids[k]);if(el)el.focus();}
       break;}
+    case 'ocr-open':$('#ocrdlg').hidden=false;break;
+    case 'ocr-close':$('#ocrdlg').hidden=true;break;
+    case 'ocr-lens':try{location.href='googleapp://lens';}catch(_){}toast('렌즈가 안 열리면 카메라 앱의 글자 인식을 쓰세요',3500);break;
+    case 'ocr-paste':(async()=>{try{const tx=await navigator.clipboard.readText();if(!tx||!tx.trim()){toast('복사된 글이 없습니다');return;}const n=$('#f-note');if(n){const a=n.selectionStart,b=n.selectionEnd,v=n.value;const add=tx.replace(/\s*\n\s*/g,' ').trim();n.value=(a!=null&&v.length&&a<v.length?v.slice(0,a)+add+v.slice(b):(v?v+'\n':'')+add);n.dispatchEvent(new Event('input',{bubbles:true}));if(typeof growTa==='function')growTa(n);}$('#ocrdlg').hidden=true;toast('붙여넣었습니다');}catch(_){toast('붙여넣기가 막혔습니다.\n인용 칸을 길게 눌러 붙여넣으세요',3500);}})();break;
+    case 'doc-open':docOpen();break;
+    case 'doc-close':$('#docdlg').hidden=true;break;
+    case 'doc-cat':if(S.doc){S.doc.cat=t.dataset.v;docDlgRender();}break;
+    case 'doc-opt':if(S.doc){const k=t.dataset.k;S.doc[k]=!S.doc[k];docDlgRender();}break;
+    case 'doc-make':docShow();break;
+    case 'dv-close':docClose();break;
+    case 'dv-print':window.print();break;
+    case 'dv-save':docSave();break;
     case 'hide-one':case 'hide-grp':case 'hide-all':toggleHide(a,t);break;
     case 'far-toggle':S.far=!S.far;render();break;
     case 'filter':if(t.dataset.cat==='read'&&S.cat!=='read')S.bv=true;if(t.dataset.cat==='trip'&&S.cat!=='trip')S.tv=true;if(t.dataset.cat==='study'&&S.cat!=='study')S.sv=true;S.cat=t.dataset.cat;S.book=null;S.trip=null;S.study=null;S.sf='all';render();break;
