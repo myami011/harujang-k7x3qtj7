@@ -463,7 +463,7 @@ html[data-sk="jrn"] .fab{border-radius:22px;width:62px;height:62px}
 
 <div class="scrim" id="sheet" hidden><div class="panel" id="panel" role="dialog" aria-modal="true" aria-label="입력"></div></div>
 <div class="wipe" id="docdlg" role="dialog" aria-label="문서로 만들기" hidden><div class="box hbox" id="docdlg-b"></div></div>
-<div class="wipe" id="ocrdlg" role="dialog" aria-label="사진으로 읽기" hidden><div class="box hbox"><h3>사진으로 읽기</h3><p style="line-height:1.7;margin:6px 0 10px">1. 아래 버튼으로 구글 렌즈를 엽니다<br>2. 책 문장을 비추고 원하는 부분을 눌러 <b>복사</b><br>3. 돌아와서 <b>붙여넣기</b>를 누릅니다</p><div class="btns"><button class="btn pri" data-act="ocr-lens">구글 렌즈 열기</button><button class="btn" data-act="ocr-paste">붙여넣기</button></div><p style="font-size:12px;color:var(--ink2);margin:8px 0">렌즈가 안 열리면 삼성 키보드의 카메라 아이콘이나 카메라 앱의 글자 인식을 쓰세요. 복사한 글은 인용 칸에서 길게 눌러 붙여넣어도 됩니다.</p><div class="btns"><button class="btn" data-act="ocr-close">닫기</button></div></div></div>
+<div class="wipe" id="ocrdlg" role="dialog" aria-label="사진으로 읽기" hidden><div class="box hbox"><h3>사진으로 읽기</h3><p style="line-height:1.7;margin:6px 0 10px">1. 아래 버튼으로 구글 렌즈를 엽니다<br>2. 책 문장을 비추고 원하는 부분을 눌러 <b>복사</b><br>3. 돌아와서 <b>붙여넣기</b>를 누릅니다</p><div class="btns"><button class="btn pri" data-act="ocr-paste">붙여넣기</button></div><p style="font-size:12px;color:var(--ink2);margin:10px 0 4px"><b>렌즈 열기 시험</b> (1번부터 눌러 보고, 열리는 번호를 알려 주세요)</p><div class="btns" style="flex-wrap:wrap"><a class="btn" href="googleapp://lens">1</a><a class="btn" href="intent://lens#Intent;scheme=googleapp;package=com.google.android.googlequicksearchbox;end">2</a><a class="btn" href="intent://#Intent;action=android.intent.action.MAIN;package=com.google.ar.lens;end">3</a><a class="btn" href="intent://lens#Intent;scheme=googleapp;end">4</a><a class="btn" href="https://lens.google.com/">5</a><a class="btn" href="intent://#Intent;action=android.intent.action.MAIN;package=com.google.android.googlequicksearchbox;end">6</a></div><p style="font-size:12px;color:var(--ink2);margin:6px 0">5번은 웹 렌즈, 6번은 구글 앱입니다.</p><div class="btns"><button class="btn" data-act="ocr-close">닫기</button></div></div></div>
 <div id="docview" hidden><div class="dv-bar"><button class="btn" data-act="dv-close">‹ 닫기</button><span class="dv-sp"></span><button class="btn" data-act="dv-save">HTML 파일로 저장</button><button class="btn pri" data-act="dv-print">인쇄 · PDF</button></div><div class="dvp" id="dv-page"></div></div>
 <div class="scrim lb" id="lb" hidden data-act="lb-close"><button class="x" data-act="lb-close" aria-label="닫기">×</button><img id="lb-img" alt="확대한 사진"></div>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -538,7 +538,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.921';
+const APP_VER='v0.9212';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -1917,7 +1917,6 @@ document.addEventListener('click',ev=>{
       break;}
     case 'ocr-open':$('#ocrdlg').hidden=false;break;
     case 'ocr-close':$('#ocrdlg').hidden=true;break;
-    case 'ocr-lens':try{location.href='googleapp://lens';}catch(_){}toast('렌즈가 안 열리면 카메라 앱의 글자 인식을 쓰세요',3500);break;
     case 'ocr-paste':(async()=>{try{const tx=await navigator.clipboard.readText();if(!tx||!tx.trim()){toast('복사된 글이 없습니다');return;}const n=$('#f-note');if(n){const a=n.selectionStart,b=n.selectionEnd,v=n.value;const add=tx.replace(/\s*\n\s*/g,' ').trim();n.value=(a!=null&&v.length&&a<v.length?v.slice(0,a)+add+v.slice(b):(v?v+'\n':'')+add);n.dispatchEvent(new Event('input',{bubbles:true}));if(typeof growTa==='function')growTa(n);}$('#ocrdlg').hidden=true;toast('붙여넣었습니다');}catch(_){toast('붙여넣기가 막혔습니다.\n인용 칸을 길게 눌러 붙여넣으세요',3500);}})();break;
     case 'doc-open':docOpen();break;
     case 'doc-close':$('#docdlg').hidden=true;break;
