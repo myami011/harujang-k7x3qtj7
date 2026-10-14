@@ -449,6 +449,9 @@ html[data-sk="jrn"] .fab{border-radius:22px;width:62px;height:62px}
 
 .drbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;padding:9px 12px;border-radius:12px;background:var(--card);border:1px solid var(--brand);font-size:calc(13.5px*var(--fz));color:var(--ink)}
 .drbar span{flex:1;min-width:8em}.drbar .btn{padding:6px 12px}
+
+.drtop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;padding:9px 12px;border-radius:12px;background:var(--card);border:1px solid var(--brand);font-size:calc(13.5px*var(--fz));color:var(--ink)}
+.drtop span{flex:1;min-width:8em;overflow:hidden;text-overflow:ellipsis}.drtop .btn{padding:6px 12px}
 </style>
 </head>
 <body>
@@ -541,7 +544,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.9213';
+const APP_VER='v0.9214';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -943,7 +946,7 @@ function feedHtml(){
   return Object.keys(g).sort().reverse().map(d=>
     '<h2 class="day"><span>'+dayLabel(d)+'</span><small>'+dayNote(d)+'</small><em>'+g[d].length+'건</em></h2>'+g[d].map(cardHtml).join('')).join('');
 }
-const topHtml=(t)=>'<header class="top"><span class="brand">하루장'+(t?'<span class="sep">·</span><b class="ptl">'+t+'</b>':'')+'</span>'+(needBackup()?'<button class="pill warn" data-act="tab" data-tab="arch">백업 필요</button>':'')+'</header>';
+const topHtml=(t)=>'<header class="top"><span class="brand">하루장'+(t?'<span class="sep">·</span><b class="ptl">'+t+'</b>':'')+'</span>'+(needBackup()?'<button class="pill warn" data-act="tab" data-tab="arch">백업 필요</button>':'')+'</header><div id="drtop">'+drTopHtml()+'</div>';
 function viewToday(){
   const t=new Date(),td=ymd(t),recs=S.entries.filter(e=>e.date===td).sort(byTimeDesc);
   return topHtml()+bkBanner()
@@ -1517,6 +1520,7 @@ function editFromView(){
 function closeSheet(keep){
   if(!keep)drClear(S.sheet);
   S.sheet=null;$('#sheet').hidden=true;document.body.style.overflow='';popLayer();
+  drRefresh();
 }
 /* ---------- 작성 중 임시 보관 (글만, 이 폰 안에서만) ---------- */
 const DR_P='harujang:dr:';
@@ -1582,13 +1586,43 @@ function drUse(){
   }
   const b=$('#drbar');if(b)b.remove();
 }
-function drDel(){const sh=S.sheet;drClear(sh);const b=$('#drbar');if(b)b.remove();}
+function drDel(){const sh=S.sheet;drClear(sh);const b=$('#drbar');if(b)b.remove();drRefresh();}
 {let tm=null;
   const sched=()=>{if(!S.sheet||!drSlot(S.sheet))return;S.sheet.inp=true;clearTimeout(tm);tm=setTimeout(drSave,500);};
   document.addEventListener('input',ev=>{if(ev.target.closest&&ev.target.closest('#panel'))sched();},true);
   document.addEventListener('click',ev=>{const t=ev.target.closest&&ev.target.closest('#panel [data-act]');if(t&&!/^(dr-|close)/.test(t.dataset.act))sched();},true);
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&S.sheet&&drSlot(S.sheet)){clearTimeout(tm);drSave();}});
   window.addEventListener('pagehide',()=>{if(S.sheet&&drSlot(S.sheet))drSave();});
+}
+/* 임시 보관 목록 (화면 위쪽에 항상 표시) */
+const DR_KEYS=['rn','re','tn','te'];
+function drPending(){
+  const o=[];
+  DR_KEYS.forEach(k=>{try{const d=JSON.parse(localStorage.getItem(DR_P+k)||'null');
+    if(!d||!d.s||Date.now()-d.t>14*864e5)return;
+    if(k==='re'&&!S.entries.some(e=>e.id===d.id))return;
+    if(k==='te'&&!S.todos.some(x=>x.id===d.id))return;
+    o.push({k:k,d:d});}catch(_){}});
+  return o;
+}
+function drTopHtml(){
+  let l=[];try{l=drPending();}catch(_){}
+  if(!l.length)return '';
+  return l.map(x=>{
+    const t=String((x.d.s.title||'')).trim().slice(0,14);
+    const nm=x.k==='rn'?'새 기록'+(t?' · '+t:''):x.k==='re'?'기록 수정 중':x.k==='tn'?'새 할 일'+(t?' · '+t:''):'할 일 수정 중';
+    return '<div class="drtop"><span>✎ 작성 중 · '+esc(nm)+'</span><button type="button" class="btn" data-act="dr-top-use" data-k="'+x.k+'">이어 쓰기</button><button type="button" class="btn" data-act="dr-top-del" data-k="'+x.k+'">지우기</button></div>';
+  }).join('');
+}
+function drRefresh(){const e=$('#drtop');if(e)e.innerHTML=drTopHtml();}
+function drTopUse(k){
+  let d=null;try{d=JSON.parse(localStorage.getItem(DR_P+k)||'null');}catch(_){}
+  if(!d)return;
+  if(k==='rn')openRec(null);
+  else if(k==='re'){const e=S.entries.find(x=>x.id===d.id);if(!e)return;openRec(e);}
+  else if(k==='tn')openSheet({kind:'todo',todo:null,arm:false});
+  else{const x=S.todos.find(y=>y.id===d.id);if(!x)return;openSheet({kind:'todo',todo:x,arm:false});}
+  drUse();
 }
 function renderStrip(){
   const sh=S.sheet;if(!sh||sh.kind!=='rec'||!$('#strip'))return;
@@ -1982,6 +2016,8 @@ document.addEventListener('click',ev=>{
     case 'todo-toggle':toggleTodo(t.dataset.id);break;
     case 'close':dismissSheet();break;
     case 'dr-use':drUse();break;
+    case 'dr-top-use':drTopUse(t.dataset.k);break;
+    case 'dr-top-del':try{localStorage.removeItem(DR_P+t.dataset.k);}catch(_){}drRefresh();break;
     case 'dr-del':drDel();break;
     case 'setcat':{const sh=S.sheet;if(sh){const pv=sh.cat;sh.cat=t.dataset.id;if((pv==='trip'||pv==='study')&&pv!==sh.cat){if(sh.x)sh.x.trip='';sh.tripSet=false;const tf0=$('#f-trip');if(tf0)tf0.value='';}document.querySelectorAll('.cp[data-id]').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();if(sh.cat==='trip'||sh.cat==='study'){const tf=$('#f-trip');if(tf&&!tf.value.trim()){S.noSug=true;tf.focus();S.noSug=false;}}}break;}
     case 'cat-more':{const sh=S.sheet;if(sh&&sh.kind==='rec'){sh.catAll=!sh.catAll;$('#catpick').innerHTML=catChipsHtml(sh);}break;}
