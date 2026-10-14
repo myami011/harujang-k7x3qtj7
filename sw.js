@@ -1,6 +1,6 @@
 /* 하루장 service worker: 앱 파일을 폰에 보관해 오프라인에서도 열리게 한다.
    기록 데이터는 여기서 다루지 않는다(IndexedDB에 따로 저장됨). */
-const VER = 'harujang-v90';
+const VER = 'harujang-v91';
 const SHELL = [
   './',
   './index.html',
@@ -38,7 +38,7 @@ self.addEventListener('fetch', (e) => {
     const cache = await caches.open(VER);
     const hit = await cache.match(req, { ignoreSearch: true });
     const net = fetch(req).then((res) => {
-      if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
+      if (res && (res.ok || res.type === 'opaque') && !url.search) cache.put(req, res.clone());
       return res;
     }).catch(() => null);
     if (hit) { e.waitUntil(net); return hit; }
