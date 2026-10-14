@@ -399,6 +399,20 @@ html[data-sk="jrn"] .chip-f{background:#fff}
 html[data-sk="jrn"] .chip-f[aria-pressed="true"]{background:var(--ink);color:#fff}
 html[data-sk="jrn"] .search{background:#fff;border-radius:20px!important}
 html[data-sk="jrn"] .fab{border-radius:22px;width:62px;height:62px}
+
+/* 내용 가리기 */
+.eyeb{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:var(--ink2);background:transparent;border:0;padding:0;z-index:2;opacity:.75}
+.eyeb svg{width:16px;height:16px}
+.eyeb.on{color:var(--ink);opacity:1}
+.heye{position:relative}
+.heye .card-head{padding-right:30px}
+.heye.bcard .bst{margin-right:30px}
+.card.hid h3,.card.hid>b{letter-spacing:.12em;font-weight:600}
+.blur{filter:blur(5px);opacity:.5;pointer-events:none;user-select:none}
+.hbar{display:flex;align-items:center;gap:6px;margin:6px 0 0;font-size:calc(12px*var(--fz));color:var(--ink2)}
+.hbar b{color:var(--ink);font-weight:600}
+.hbar .eyeb{position:static;margin-left:auto;width:30px;height:30px;opacity:1}
+.hbar .eyeb svg{width:18px;height:18px}
 </style>
 </head>
 <body>
@@ -488,7 +502,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.91';
+const APP_VER='v0.911';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -496,6 +510,7 @@ const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
 const catOf=id=>S.cats.find(c=>c.id===id)||S.cats.find(c=>c.id==='etc')||{id:'etc',name:'기타',color:'slate'};
 const colorOf=c=>'var(--k-'+c.color+')';
 const byTimeDesc=(a,b)=>((b.date||'')+(b.time||'')).localeCompare((a.date||'')+(a.time||''));
+S.hid=new Set();
 const lsGet=k=>{try{return localStorage.getItem(k);}catch(_){return null;}};
 const lsSet=(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}};
 
@@ -556,10 +571,11 @@ async function init(){
     idb=await openDb();
     const meta=await idbAll('meta'),m=meta.find(x=>x.key==='cats');
     if(m&&Array.isArray(m.list))S.cats=buildCats(m.list);
+    const mh=meta.find(x=>x.key==='hid');if(mh&&Array.isArray(mh.list))S.hid=new Set(mh.list.filter(x=>typeof x==='string'));
     S.entries=(await idbAll('entries')).map(normEntry);
     S.todos=await idbAll('todos');
   }catch(_){S.mem=true;toast('이 브라우저에서는 기록을 저장할 수 없습니다. 시크릿 모드인지 확인하세요.');}
-  S.ready=true;render();
+  S.ready=true;render();initHide();
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(_){}
 }
 
@@ -853,7 +869,7 @@ function todosBlock(td){
   return '<h2 class="day"><span>할 일</span><em>'+open.length+'개 남음</em></h2><div class="todos">'
     +(list.length?list.map(x=>todoRow(x,td)).join(''):'<p class="none">'+(far.length?'가까운 할 일이 없습니다.':'할 일이 없습니다.')+'</p>')+btn+'</div>';
 }
-const hay=e=>[e.title,e.note,(e.f&&e.f.thought)||'',(e.f&&e.f.trip)||'',(e.f&&e.f.study)||'',catOf(e.cat).name,(e.tags||[]).join(' '),factsOf(e).join(' ')].join(' ').replace(/==/g,'').toLowerCase();
+const hay=e=>S.hid.has(e.id)?catOf(e.cat).name.toLowerCase():[e.title,e.note,(e.f&&e.f.thought)||'',(e.f&&e.f.trip)||'',(e.f&&e.f.study)||'',catOf(e.cat).name,(e.tags||[]).join(' '),factsOf(e).join(' ')].join(' ').replace(/==/g,'').toLowerCase();
 function filtered(){
   const q=S.q.trim().toLowerCase();
   return S.entries.filter(e=>(S.cat==='all'||e.cat===S.cat)&&(!S.imp||e.star)&&(!q||hay(e).includes(q))).sort(byTimeDesc);
@@ -906,6 +922,7 @@ function viewLog(){
    +(S.cat==='trip'?'<div class="sgm"><button data-act="tv" data-v="1" aria-pressed="'+(!!S.tv)+'">여행별</button><button data-act="tv" data-v="0" aria-pressed="'+(!S.tv)+'">기록순</button></div>':'')
    +(S.cat==='study'?'<div class="sgm"><button data-act="sv" data-v="1" aria-pressed="'+(!!S.sv)+'">학습별</button><button data-act="sv" data-v="0" aria-pressed="'+(!S.sv)+'">기록순</button></div>':'')
   +'<input class="search" id="q" type="search" placeholder="제목, 메모 검색" value="'+esc(S.q)+'" aria-label="검색">'
+  +'<div class="hbar" id="hbar" hidden></div>'
   +'<div id="feed">'+feedHtml()+'</div>';
 }
 function viewCal(){
@@ -1042,6 +1059,63 @@ function syncFab(){
   f.classList.toggle('bk',on);f.setAttribute('aria-label',on?lb:'기록 남기기');
   const l=f.querySelector('.fl');if(l)l.textContent=lb;
 }
+/* ---------- 내용 가리기(눈 버튼): 가린 기록의 id를 meta에 따로 보관 ---------- */
+async function saveHid(){if(idb)await idbPut('meta',{key:'hid',list:[...S.hid]});}
+const EYE_S='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYEX_S='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.8 9.8 0 0 0 4-.8"/></svg>';
+const hideCount=()=>S.entries.reduce((n,e)=>n+(S.hid.has(e.id)?1:0),0);
+const GK={'grp-book':'read','book-open':'read','grp-trip':'trip','trip-open':'trip','grp-study':'study','study-open':'study'};
+function hidIdsOf(kind,k){
+  if(kind==='read'){const b=books().find(x=>x.k===k);return b?b.es.map(e=>e.id):[];}
+  if(kind==='trip'){if(k==='__none')return tripLoose().map(e=>e.id);const b=trips().find(x=>x.k===k);return b?b.es.map(e=>e.id):[];}
+  if(kind==='study'){if(k==='__none')return studyLoose().map(e=>e.id);const b=studies().find(x=>x.k===k);return b?b.es.map(e=>e.id):[];}
+  return [];
+}
+const eyeBtn=(on,act,attr)=>'<button type="button" class="eyeb'+(on?' on':'')+'" data-act="'+act+'" '+(attr||'')+' aria-label="'+(on?'내용 보이기':'내용 가리기')+'">'+(on?EYEX_S:EYE_S)+'</button>';
+function maskCard(c,tsel){
+  const h=c.querySelector(tsel);if(h)h.textContent='••••••';
+  [...c.children].forEach(ch=>{if(!ch.matches('.card-head,.gtag,.eyeb,h3,b,br,.bst'))ch.classList.add('blur');});
+}
+function applyHide(){
+  const v=document.getElementById('view');if(!v||!S.ready)return;
+  if(HOBS)HOBS.disconnect();
+  try{
+    v.querySelectorAll('.card[data-act="rec-open"][data-id]:not([data-hz])').forEach(c=>{
+      c.dataset.hz='1';const id=c.dataset.id,on=S.hid.has(id);c.classList.add('heye');
+      c.insertAdjacentHTML('beforeend',eyeBtn(on,'hide-one','data-id="'+esc(id)+'"'));
+      if(on){c.classList.add('hid');maskCard(c,'h3');}
+    });
+    v.querySelectorAll('.bcard[data-k]:not([data-hz])').forEach(c=>{
+      const kind=GK[c.dataset.act];if(!kind)return;
+      c.dataset.hz='1';const k=c.dataset.k,ids=hidIdsOf(kind,k),on=ids.length>0&&ids.every(i=>S.hid.has(i));
+      c.classList.add('heye');
+      c.insertAdjacentHTML('beforeend',eyeBtn(on,'hide-grp','data-kind="'+kind+'" data-k="'+esc(k)+'"'));
+      if(on){c.classList.add('hid');maskCard(c,'b');}
+    });
+    v.querySelectorAll('.bit[data-act="rec-open"][data-id]:not([data-hz])').forEach(c=>{
+      c.dataset.hz='1';if(S.hid.has(c.dataset.id)){[...c.children].forEach(ch=>ch.classList.add('blur'));}
+    });
+    const bar=document.getElementById('hbar');
+    if(bar){
+      const n=hideCount(),show=S.entries.length>0,sig=show+':'+n;
+      if(bar.dataset.sig!==sig){
+        bar.dataset.sig=sig;bar.hidden=!show;
+        bar.innerHTML='<span>가린 기록 <b>'+n+'건</b> · '+(n?'눈을 누르면 모두 보임':'눈을 누르면 모두 가림')+'</span>'+eyeBtn(n>0,'hide-all','');
+      }
+    }
+  }finally{if(HOBS)HOBS.observe(v,{childList:true,subtree:true});}
+}
+let HOBS=null;
+function initHide(){const v=document.getElementById('view');if(!v||!window.MutationObserver)return;HOBS=new MutationObserver(()=>applyHide());HOBS.observe(v,{childList:true,subtree:true});applyHide();}
+async function toggleHide(act,t){
+  if(act==='hide-one'){const id=t.dataset.id;if(S.hid.has(id))S.hid.delete(id);else S.hid.add(id);}
+  else if(act==='hide-grp'){const ids=hidIdsOf(t.dataset.kind,t.dataset.k);if(!ids.length)return;
+    if(ids.every(i=>S.hid.has(i)))ids.forEach(i=>S.hid.delete(i));else ids.forEach(i=>S.hid.add(i));}
+  else{if(hideCount()>0)S.hid=new Set();else S.hid=new Set(S.entries.map(e=>e.id));}
+  const y=window.scrollY;render();window.scrollTo(0,y);
+  try{await saveHid();}catch(_){toast('저장하지 못했습니다');}
+}
+
 function render(){
   const v=$('#view');
   v.innerHTML=S.tab==='cal'?viewCal():S.tab==='arch'?viewArch():S.tab==='log'?viewLog():viewToday();
@@ -1570,6 +1644,7 @@ function saveBlob(blob,name){
 async function backupText(full){
   const entries=await Promise.all(S.entries.map(async e=>Object.assign({},e,{photos:full===false?[]:await Promise.all((e.photos||[]).map(toDataUrl))})));
   const o={app:'하루장',version:3,exportedAt:new Date().toISOString(),categories:slimCats(),todos:S.todos,entries:entries};
+  const hl=S.entries.filter(e=>S.hid.has(e.id)).map(e=>e.id);if(hl.length)o.hidden=hl;
   if(full===false)o.noPhotos=true;
   return JSON.stringify(o);
 }
@@ -1671,6 +1746,7 @@ async function doImport(file){
       await putEntry(e);if(old)upE++;else n++;
     }catch(_){bad++;}
   }
+  if(data&&Array.isArray(data.hidden)){let hc=0;data.hidden.forEach(i=>{if(typeof i==='string'&&!S.hid.has(i)){S.hid.add(i);hc++;}});if(hc)await saveHid();}
   let tn=0,upT=0,sameT=0;
   if(data&&Array.isArray(data.todos)){
     for(const raw of data.todos){
@@ -1727,6 +1803,7 @@ document.addEventListener('click',ev=>{
       const ids={dist:'#f-dist',cost:'#f-cost',author:'#f-author',pages:'#f-pf'};
       if(sh.xopen[k]&&ids[k]){const el=$(ids[k]);if(el)el.focus();}
       break;}
+    case 'hide-one':case 'hide-grp':case 'hide-all':toggleHide(a,t);break;
     case 'far-toggle':S.far=!S.far;render();break;
     case 'filter':if(t.dataset.cat==='read'&&S.cat!=='read')S.bv=true;if(t.dataset.cat==='trip'&&S.cat!=='trip')S.tv=true;if(t.dataset.cat==='study'&&S.cat!=='study')S.sv=true;S.cat=t.dataset.cat;S.book=null;S.trip=null;S.study=null;S.sf='all';render();break;
     case 'bv':S.bv=t.dataset.v==='1';S.book=null;S.bk='';render();break;
