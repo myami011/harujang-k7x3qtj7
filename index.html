@@ -207,6 +207,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .dots i.ring,.legend i.ring{background:none;border:1.5px solid var(--ink2);width:7px;height:7px}
 .dots i.ring{width:6px;height:6px;border-width:1.5px}
 .duerow{display:flex;gap:6px;flex-wrap:wrap}
+.drow{display:grid;grid-template-columns:4.2em 1fr;align-items:center;gap:8px 8px}.drow .lbl{margin:0;white-space:nowrap}
+.dbtns{display:flex;gap:8px}.dbtns .btn{flex:1;padding:0;min-height:44px}.dbtns .btn.on{background:color-mix(in srgb,var(--brand) 14%,transparent);border-color:var(--brand);color:var(--brand);font-weight:700}
+.drow #t-due{width:100%;min-width:0;min-height:48px;font-weight:600}
 .duerow input{flex:1 1 140px;width:auto}
 .duerow .btn{padding:8px 12px;min-height:44px}
 .snack{position:fixed;z-index:75;left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));width:calc(100vw - 32px);max-width:488px;display:flex;align-items:center;gap:6px;background:var(--ink);color:var(--bg);padding:8px 8px 8px 16px;border-radius:14px;box-shadow:var(--shadow);font-size:calc(14px*var(--fz))}
@@ -567,7 +570,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.934';
+const APP_VER='v0.9342';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -1364,8 +1367,8 @@ function todoFormHtml(sh){
   return '<div class="sh-head"><h2>'+(x?'할 일 수정':'할 일 추가')+'</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
   +'<form id="tf" class="grid" autocomplete="off" novalidate>'
   +'<label class="fld"><span class="lbl">할 일</span><input id="t-title" type="text" maxlength="80" placeholder="무엇을 할까요" value="'+esc(x?x.title:'')+'"><small class="err" id="err-t" hidden>할 일을 입력하세요</small></label>'
-  +'<div class="fld"><span class="lbl">예정일</span><div class="duerow"><input id="t-due" type="date" value="'+esc(x?x.due:ymd(new Date()))+'" aria-label="예정일">'
-  +'<button type="button" class="btn" data-act="due-set" data-n="0">오늘</button><button type="button" class="btn" data-act="due-set" data-n="1">내일</button><button type="button" class="btn" data-act="due-set" data-n="-1">날짜 없음</button></div></div>'
+  +'<div class="fld"><div class="drow"><span class="lbl">예정일</span><div class="dbtns" id="t-dbtns"><button type="button" class="btn" data-act="due-set" data-n="0">오늘</button><button type="button" class="btn" data-act="due-set" data-n="1">내일</button><button type="button" class="btn" data-act="due-set" data-n="-1">지정없음</button></div>'
+  +'<label class="lbl" for="t-due">날짜지정</label><input id="t-due" type="date" value="'+esc(x?x.due:ymd(new Date()))+'" aria-label="날짜지정"></div></div>'
   +'<div class="fld"><span class="lbl">시간 (선택)</span><div class="duerow"><input id="t-time" type="time" value="'+esc(x&&x.time||'')+'" aria-label="시간"><button type="button" class="btn" data-act="due-time-clear">지움</button><button type="button" class="btn" id="t-alarm" data-act="todo-alarm">🔔 알림 등록</button></div><small class="hint">알림은 휴대전화 캘린더가 울립니다. 버튼을 누르면 캘린더에 일정이 채워져 열리고, 저장만 누르면 됩니다.</small></div>'
   +'<div class="fld actions"><button class="btn pri" type="submit" id="tsave">저장</button>'+(x?'<button class="btn danger" type="button" id="tdel" data-act="todo-del">삭제</button>':'')+'</div></form>';
 }
@@ -1604,7 +1607,11 @@ function renderSheet(){
   $('#panel').classList.toggle('rec',sh.kind==='rec');
   $('#panel').innerHTML=sh.kind==='rec'?recFormHtml(sh):sh.kind==='view'?viewHtml(sh):sh.kind==='todo'?todoFormHtml(sh):catsHtml(sh);
   if(sh.kind==='rec'){renderStrip();renderGeo();renderExtra();scrollCat();}
+  if(sh.kind==='todo')dueSync();
 }
+function dueSync(){const d=$('#t-due'),bs=$('#t-dbtns');if(!d||!bs)return;const v=d.value,t0=ymd(new Date()),on=!v?'-1':v===t0?'0':v===addDays(t0,1)?'1':'';bs.querySelectorAll('.btn').forEach(b=>b.classList.toggle('on',b.dataset.n===on));}
+document.addEventListener('change',ev=>{if(ev.target&&ev.target.id==='t-due')dueSync();});
+document.addEventListener('input',ev=>{if(ev.target&&ev.target.id==='t-due')dueSync();});
 function openSheet(sh){
   S.sheet=sh;renderSheet();
   if(sh.kind==='rec'&&!sh.entry){/* 방어: 선택된 분류가 칩에 없거나 양식과 어긋나면 기본 분류로 되돌려 다시 그린다 */
@@ -1714,7 +1721,7 @@ function drUse(){
   }else{
     renderSheet();
     const set=(id,v)=>{const e=$(id);if(e&&v!=null)e.value=v;};
-    set('#t-title',s0.title);set('#t-due',s0.due);set('#t-time',s0.time);
+    set('#t-title',s0.title);set('#t-due',s0.due);set('#t-time',s0.time);dueSync();
   }
   const b=$('#drbar');if(b)b.remove();
 }
@@ -2353,7 +2360,7 @@ document.addEventListener('click',ev=>{
     case 'todo-del':delTodoUi();break;
     case 'due-time-clear':$('#t-time').value='';break;
     case 'todo-alarm':todoAlarm();break;
-    case 'due-set':{const el=$('#t-due'),n=Number(t.dataset.n);el.value=n<0?'':addDays(ymd(new Date()),n);break;}
+    case 'due-set':{const el=$('#t-due'),n=Number(t.dataset.n);el.value=n<0?'':addDays(ymd(new Date()),n);dueSync();break;}
     case 'photo':{const e=S.entries.find(x=>x.id===t.dataset.id);if(e&&e.photos[Number(t.dataset.i)])showLb(urlOf(e.photos[Number(t.dataset.i)]));break;}
     case 'lb-close':hideLb();break;
     case 'export':doExport(t.dataset.kind);break;
