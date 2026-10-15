@@ -460,7 +460,8 @@ html[data-sk="jrn"] .fab{border-radius:22px;width:62px;height:62px}
 
 .stmenu{position:absolute;right:0;top:30px;z-index:30;min-width:110px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px #0003;padding:4px;display:flex;flex-direction:column}
 .stmenu[hidden]{display:none}.stmenu button{text-align:left;padding:10px 12px;border-radius:8px;background:none;border:0;color:var(--ink);font:500 calc(14px*var(--fz)) var(--sans)}.stmenu button:active{background:var(--line)}
-.trh{position:relative}.stbtn{white-space:nowrap}
+.inw{position:relative;display:block}.inw input{padding-right:40px}.inw .clr{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;border:0;background:var(--line);color:var(--ink2);font:400 20px/1 var(--sans);display:flex;align-items:center;justify-content:center;padding:0}.inw input:placeholder-shown~.clr{display:none}
+.trh{position:relative;flex-wrap:nowrap}.stbtn,.trh .getbk{white-space:nowrap}.trh .lbl{white-space:nowrap}.ktag{font-size:calc(11px*var(--fz));font-weight:700;padding:1px 7px;border-radius:99px;background:color-mix(in srgb,var(--k-brown) 16%,transparent);color:var(--k-brown);margin:0 4px}.ktag.k-gen{background:var(--line);color:var(--ink2)}.site{font-weight:400;font-size:.75em;color:var(--ink2);opacity:.6;margin-left:6px}
 .trr{margin-left:auto;display:flex;gap:8px;align-items:center}.hkbox{position:relative;margin-bottom:8px}.hkline{display:flex;gap:8px;align-items:center}.hkline #f-hg{flex:3;min-width:0}.hkline #f-hgoal{flex:1.2;min-width:0}
 .hkhint{display:block;margin-top:6px;color:var(--ink2);font-size:calc(12.5px*var(--fz))}.hkhint:empty{display:none}
 #hkbox[hidden],#hkget[hidden],#f-hgoal[hidden],#f-paste[hidden],.gmb[hidden]{display:none!important}
@@ -485,6 +486,13 @@ html .bcard b{display:block;font-size:calc(20px*var(--fz))!important;letter-spac
 .bcard br{display:none}
 .bcard small:not(.gtag){display:block;margin-top:3px;color:var(--ink2)}
 .bcard .gtag{float:right;font-size:calc(11px*var(--fz));font-weight:700;padding:2px 8px;border-radius:99px;margin-left:8px;background:color-mix(in srgb,var(--c) 16%,transparent);color:color-mix(in srgb,var(--c) 78%,var(--ink))}
+
+/* v0.9346 묶음 안 머리글 */
+.bkp{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:14px;padding:10px 16px 12px;margin:10px 0 6px;box-shadow:var(--shadow)}
+.bkp .bkt{margin:0 0 4px;font-size:calc(26px*var(--fz));letter-spacing:-.4px;color:color-mix(in srgb,var(--c) 78%,var(--ink))}
+.bkp .bks{display:block;font-size:calc(13px*var(--fz))}
+.bkp .tsum{margin-top:4px;font-weight:600;color:var(--ink);background:none;padding:0}
+.bkp .bar{margin-top:8px}
 </style>
 </head>
 <body>
@@ -578,7 +586,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.9345';
+const APP_VER='v0.9347';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -773,8 +781,8 @@ function booksHtml(){
       const kinds=[['','전체']].concat(MK_ORDER.map(k=>[k,MK[k]]),[['none','기타']]);
       const list=b.es.slice().reverse().filter(e=>!S.bk||(S.bk==='none'?!(e.f&&e.f.mk):(e.f&&e.f.mk)===S.bk||(S.bk==='think'&&e.f&&e.f.thought)));
       return '<button type="button" class="bkback" data-act="book-back">‹ 책별</button>'
-        +'<div class="bkh"><h2 class="bkt">'+esc(b.title)+(b.done?' <span class="dn">완독 ✓</span>':'')+'</h2><button class="chip-f edit" data-act="book-export">내보내기</button></div>'
-        +'<small class="bks">'+esc(b.author||'저자 미입력')+' · '+mdShort(b.first)+' ~ '+mdShort(b.last)+' · 기록 '+b.es.length+'건</small>'+bookBar(b)
+        +'<div class="bkp" style="--c:var(--k-moss)"><div class="bkh"><h2 class="bkt">'+esc(b.title)+(b.done?' <span class="dn">완독 ✓</span>':'')+'</h2><button class="chip-f edit" data-act="book-export">내보내기</button></div>'
+        +'<small class="bks">'+esc(b.author||'저자 미입력')+' · '+mdShort(b.first)+' ~ '+mdShort(b.last)+' · 기록 '+b.es.length+'건</small>'+bookBar(b)+'</div>'
         +'<div class="chips" style="padding-block:10px 6px">'+kinds.map(k=>'<button class="chip-f" data-act="bk-filter" data-v="'+k[0]+'" aria-pressed="'+(S.bk===k[0])+'">'+k[1]+'</button>').join('')+'</div>'
         +(list.length?'<div class="btl">'+list.map(e=>'<div class="bit" data-act="rec-open" data-id="'+esc(e.id)+'" tabindex="0"><small>'+esc(dayLabelShort(e.date))+(pagesText(e.f)?' · <b class="pgx">'+pagesText(e.f)+'</b>':'')+((e.photos||[]).length?' · 사진 '+e.photos.length:'')+'</small><div class="bm">'+chapHtml(e)+mkTag(e)+(e.note?nh(e.note):((e.f.thought||(e.f.chapter&&e.cat==='read'))?'':'<span class="dim">메모 없음</span>'))+(e.f.thought?'<div class="thk"><b>생각</b>'+nh(e.f.thought)+'</div>':'')+'</div></div>').join('')+'</div>'
           :'<p class="empty">이 종류의 메모가 없습니다.</p>');
@@ -816,10 +824,10 @@ function tripsHtml(){
       const tl=Object.keys(g).sort().reverse().map(d=>'<h2 class="day"><span>'+dayLabel(d)+'</span><small>'+dayNote(d)+'</small><em>'+g[d].length+'건</em></h2>'+g[d].map(cardHtml).join('')).join('');
       S._ht=false;
       return '<button type="button" class="bkback" data-act="trip-back">‹ 여행별</button>'
-        +'<div class="bkh"><h2 class="bkt">'+(none?'여행명 없음':esc(b.title))+'</h2>'+(none?'':'<button class="chip-f edit" data-act="trip-export">내보내기</button>')+'</div>'
+        +'<div class="bkp" style="--c:var(--k-sky)"><div class="bkh"><h2 class="bkt">'+(none?'여행명 없음':esc(b.title))+'</h2>'+(none?'':'<button class="chip-f edit" data-act="trip-export">내보내기</button>')+'</div>'
         +(none?'<small class="bks">여행명을 붙이지 않은 단독 기록 '+es.length+'건</small>'
           :'<small class="bks">'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+b.days+'일 · 기록 '+b.es.length+'건</small>'+tripSum(b)
-            +(b.places.length?'<small class="bks tpl">'+esc(b.places.join(' · '))+'</small>':''))
+            +(b.places.length?'<small class="bks tpl">'+esc(b.places.join(' · '))+'</small>':''))+'</div>'
         +tl;
     }
   }
@@ -900,9 +908,9 @@ function hgHtml(){
       const tl=Object.keys(g).sort().reverse().map(d=>'<h2 class="day"><span>'+dayLabel(d)+'</span><small>'+dayNote(d)+'</small><em>'+g[d].length+'건</em></h2>'+g[d].map(cardHtml).join('')).join('');
       S._hh=false;
       return '<button type="button" class="bkback" data-act="g-back">‹ 묶음별</button>'
-        +'<div class="bkh"><h2 class="bkt">'+(none?'단일 기록':esc(b.title))+'</h2></div>'
+        +'<div class="bkp" style="--c:'+cc+'"><div class="bkh"><h2 class="bkt">'+(none?'단일 기록':esc(b.title))+'</h2></div>'
         +(none?'<small class="bks">묶음에 넣지 않은 기록 '+es.length+'건</small>'
-          :'<small class="bks">'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+'</small><div class="tsum">'+esc(hgStat(b))+'</div>'+hgBar(b))
+          :'<small class="bks">'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+'</small><div class="tsum">'+esc(hgStat(b))+'</div>'+hgBar(b))+'</div>'
         +tl;
     }
   }
@@ -938,9 +946,9 @@ function studiesHtml(){
       }
       S._hs=false;
       return '<button type="button" class="bkback" data-act="study-back">‹ 학습별</button>'
-        +'<div class="bkh"><h2 class="bkt">'+(none?'학습명 없음':esc(b.title))+'</h2>'+(none?'':'<button class="chip-f edit" data-act="study-export">내보내기</button>')+'</div>'
+        +'<div class="bkp" style="--c:var(--k-brown)"><div class="bkh"><h2 class="bkt">'+(none?'학습명 없음':esc(b.title))+'</h2>'+(none?'':'<button class="chip-f edit" data-act="study-export">내보내기</button>')+'</div>'
         +(none?'<small class="bks">학습명을 붙이지 않은 기록 '+es.length+'건</small>'
-          :'<small class="bks">'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+b.es.length+'회차</small>'+studySum(b))
+          :'<small class="bks">'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+b.es.length+'회차</small>'+studySum(b))+'</div>'
         +'<div class="chips" style="padding-block:10px 6px">'+[['all','전체'],['core','핵심'],['star','★']].map(k=>'<button class="chip-f" data-act="sf" data-v="'+k[0]+'" aria-pressed="'+(S.sf===k[0])+'">'+k[1]+'</button>').join('')+'</div>'
         +body;
     }
@@ -985,7 +993,7 @@ function cardHtml(e){
   const star=e.star?'<span class="stars-s" aria-label="중요">★</span>':'';
   return '<div class="card" data-act="rec-open" data-id="'+esc(e.id)+'" tabindex="0" style="--c:'+colorOf(c)+'">'
     +'<div class="card-head"><span class="tag-cat">'+icon(c.id)+esc(c.name)+'</span><span class="time">'+esc(e.time||'')+'</span>'+star+'</div>'
-    +'<h3>'+esc(e.title)+'</h3>'+body+'</div>';
+    +'<h3>'+esc(e.title)+(e.f&&e.f.site?'<span class="site">'+esc(e.f.site)+'</span>':'')+'</h3>'+body+'</div>';
 }
 const CAT_TOP=5;
 function catRank(){return S.cats.slice();}
@@ -1356,7 +1364,7 @@ function recFormHtml(sh){
   return '<div class="sh-head"><h2>'+(e?'기록 수정':'기록 남기기')+'</h2><button type="submit" form="f" class="hsave" id="save">저장</button><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
   +'<form id="f" class="grid'+(rdOn(sh)?' rd':'')+(tpOn(sh)?' tp':'')+(tpOn(sh)&&sh.cat==='study'?' sd':'')+(rdOn(sh)&&sh.picked?' pk':'')+'" autocomplete="off" novalidate>'
   +'<div class="fld"><span class="lbl">분류</span><div class="catpick" id="catpick" role="radiogroup" aria-label="분류">'+catChipsHtml(sh)+'</div></div>'
-  +'<div class="fld sugw"><div class="titlbl"><span class="lbl" id="tt-lbl">제목</span><span class="trr"><button type="button" class="getbk" id="getbk" data-act="bk-list" hidden>가져오기</button><button type="button" class="gmb" id="gmb" data-act="gm-toggle" aria-label="단일/묶음 전환"></button></span></div><div class="hkbox" id="hkbox" hidden><div class="hkline"><input id="f-hg" type="text" maxlength="40" placeholder="묶음 이름" autocomplete="off"><input id="f-hgoal" type="number" inputmode="numeric" min="1" placeholder="목표 곳수" autocomplete="off" hidden><button type="button" class="getbk" id="hkget" data-act="hk-list" hidden>가져오기</button></div><small class="err" id="err-hg" hidden>묶음 이름을 입력하세요</small><small class="hkhint" id="hkhint"></small><div class="sug" id="hksug" hidden></div></div><div class="bookline" id="bookline"></div><div class="titrow"><label class="trl"><span class="trh"><span class="lbl">여행명</span><button type="button" class="getbk" id="trget" data-act="trip-list" hidden>가져오기</button><span class="trr"><button type="button" class="getbk" id="f-paste" data-act="paste-word" hidden>📋 붙여넣기</button><button type="button" class="getbk stbtn" id="stype" data-act="stype-open" hidden>일반 ▾</button><button type="button" class="gmb" id="gmb2" data-act="gm-toggle" aria-label="단일/묶음 전환" hidden></button></span><span class="stmenu" id="stmenu" hidden><button type="button" data-act="stype-set" data-v="">일반</button><button type="button" data-act="stype-set" data-v="word">영단어</button><button type="button" data-act="stype-set" data-v="phrasal">구동사</button></span></span><input id="f-trip" type="text" maxlength="40" placeholder="여행명 (필수)" autocomplete="off"></label><label class="tl-l"><input id="f-title" type="text" maxlength="80" placeholder="한 줄로 적어요" value="'+esc(sh.title||'')+'"></label><label class="aul"><input id="f-author" type="text" maxlength="60" placeholder="저자" value="'+esc((sh.x&&sh.x.author)||'')+'"></label></div><small class="err" id="err-trip" hidden>여행명을 입력하세요</small><small class="err" id="err-title" hidden>제목을 입력하세요</small><div class="sug" id="sug" hidden></div><div class="sug" id="tsug" hidden></div></div>'
+  +'<div class="fld sugw"><div class="titlbl"><span class="lbl" id="tt-lbl">제목</span><span class="trr"><button type="button" class="getbk" id="getbk" data-act="bk-list" hidden>가져오기</button><button type="button" class="gmb" id="gmb" data-act="gm-toggle" aria-label="단일/묶음 전환"></button></span></div><div class="hkbox" id="hkbox" hidden><div class="hkline"><input id="f-hg" type="text" maxlength="40" placeholder="묶음 이름" autocomplete="off"><input id="f-hgoal" type="number" inputmode="numeric" min="1" placeholder="목표 곳수" autocomplete="off" hidden><button type="button" class="getbk" id="hkget" data-act="hk-list" hidden>가져오기</button></div><small class="err" id="err-hg" hidden>묶음 이름을 입력하세요</small><small class="hkhint" id="hkhint"></small><div class="sug" id="hksug" hidden></div></div><div class="bookline" id="bookline"></div><div class="titrow"><label class="trl"><span class="trh"><span class="lbl">여행명</span><button type="button" class="getbk" id="trget" data-act="trip-list" hidden>가져오기</button><span class="trr"><button type="button" class="getbk stbtn" id="stype" data-act="stype-open" hidden>일반 ▾</button><button type="button" class="gmb" id="gmb2" data-act="gm-toggle" aria-label="단일/묶음 전환" hidden></button></span><span class="stmenu" id="stmenu" hidden><button type="button" data-act="stype-set" data-v="">일반</button><button type="button" data-act="stype-set" data-v="word">영단어</button><button type="button" data-act="stype-set" data-v="phrasal">구동사</button></span></span><input id="f-trip" type="text" maxlength="40" placeholder="여행명 (필수)" autocomplete="off"></label><label class="tl-l"><span class="inw"><input id="f-title" type="text" maxlength="80" placeholder="한 줄로 적어요" value="'+esc(sh.title||'')+'"><button type="button" class="clr" data-act="clr-title" aria-label="제목 지우기" tabindex="-1">×</button></span></label><label class="aul"><input id="f-author" type="text" maxlength="60" placeholder="저자" value="'+esc((sh.x&&sh.x.author)||'')+'"></label></div><small class="err" id="err-trip" hidden>여행명을 입력하세요</small><small class="err" id="err-title" hidden>제목을 입력하세요</small><div class="sug" id="sug" hidden></div><div class="sug" id="tsug" hidden></div></div>'
   +'<div class="fld ptrow"><label class="ptp"><span class="lbl">장소</span><input id="f-place" type="text" maxlength="60" placeholder="어디에서" value="'+esc((sh.x&&sh.x.place)||'')+'"></label>'
   +'<div class="pgin"><label><span class="lbl">시작쪽</span><input id="f-pf" type="number" inputmode="numeric" min="0" placeholder="시작" value="'+esc((sh.x&&sh.x.pf)||'')+'"></label><label><span class="lbl">끝쪽</span><input id="f-pt" type="number" inputmode="numeric" min="0" placeholder="끝" value="'+esc((sh.x&&sh.x.pt)||'')+'"></label><label><span class="lbl">총쪽수</span><input id="f-ptot" type="number" inputmode="numeric" min="0" placeholder="총" value="'+esc((sh.x&&sh.x.ptot)||'')+'"></label></div>'
   +'<div class="ptbtn"><span class="lbl">일시</span><button type="button" class="ptime" id="dtline" data-act="dt-toggle" aria-expanded="false"><span id="dt-text"></span></button></div></div>'
@@ -1467,7 +1475,6 @@ function renderExtra(){
     const eb=$('#exbox');if(eb)eb.hidden=!W;
     const pb=document.querySelector('.ptbtn');if(pb)pb.hidden=W;
     const sn=$('#save-next');if(sn)sn.hidden=!(W&&!sh.entry);
-    const pw=$('#f-paste');if(pw)pw.hidden=!W;
   }
   updDt();
 }
@@ -1496,7 +1503,7 @@ function updTripSug(all){
   if(!sh||sh.kind!=='rec'||!tpOn(sh)){sg.hidden=true;return;}
   const gs=sh.cat==='study'?studies():trips();
   const q=all===true?'':nrm(fi.value),l=gs.filter(b=>!q||nrm(b.title).includes(q)).slice(0,30);
-  sg.innerHTML=l.map(b=>'<button type="button" data-act="trip-pick" data-v="'+esc(b.title)+'"><b>'+esc(b.title)+'</b> <small>'+mdShort(b.first)+(b.first!==b.last?'~'+mdShort(b.last):'')+' · '+b.es.length+'건</small></button>').join('');
+  sg.innerHTML=l.map(b=>'<button type="button" data-act="trip-pick" data-v="'+esc(b.title)+'"><b>'+esc(b.title)+'</b>'+(sh.cat==='study'?' <span class="ktag k-'+(b.stype||'gen')+'">'+stKind(b.stype)+'</span>':'')+' <small>'+mdShort(b.first)+(b.first!==b.last?'~'+mdShort(b.last):'')+' · '+(sh.cat==='study'?(b.stype?b.es.length+'개':b.es.length+'회차'):b.es.length+'건')+'</small></button>').join('');
   sg.hidden=!l.length||(all!==true&&l.length===1&&nrm(l[0].title)===q);const gb=$('#trget');if(gb)gb.hidden=!gs.length;
 }
 function updHkSug(all){
@@ -1786,21 +1793,14 @@ function parseWord(raw){
   if(wordLike(L[0]))return {w:L[0],m:L.slice(1).join('\n')};
   return null;
 }
-function pasteWord(){
-  const ti=$('#f-title'),nt=$('#f-note');
-  const ok=t=>{
-    t=String(t||'').trim();if(!t){toast('복사한 글이 없습니다',2500);return;}
-    const p=parseWord(t);
-    if(ti&&!ti.value.trim()){
-      if(p){ti.value=p.w;if(p.m&&nt&&!nt.value.trim()){nt.value=p.m;growNote();}}
-      else ti.value=t.replace(/\s+/g,' ').slice(0,80);
-      const e1=$('#err-title');if(e1)e1.hidden=true;
-      if(nt&&!nt.value.trim())nt.focus();
-    }else if(nt){nt.value=(nt.value?nt.value+'\n':'')+t;growNote();nt.focus();}
-  };
-  try{navigator.clipboard.readText().then(ok,()=>toast('붙여넣기를 할 수 없습니다. 칸을 길게 눌러 붙여넣으세요',3500));}
-  catch(_){toast('붙여넣기를 할 수 없습니다. 칸을 길게 눌러 붙여넣으세요',3500);}
-}
+document.addEventListener('paste',ev=>{
+  const t=ev.target;if(!t||t.id!=='f-title')return;const sh=S.sheet;if(!(sh&&sh.kind==='rec'&&sh.cat==='study'&&sh.stype))return;
+  let txt='';try{txt=(ev.clipboardData||window.clipboardData).getData('text')||'';}catch(_){}
+  const pw=parseWord(txt);if(!pw||!pw.m)return;
+  ev.preventDefault();t.value=pw.w;const nt=$('#f-note');if(nt&&!nt.value.trim()){nt.value=pw.m;growNote();}
+  const e1=$('#err-title');if(e1)e1.hidden=true;if(nt)nt.focus();
+});
+const siteOf=u=>{try{const h=new URL(u).hostname.replace(/^(www|m)\./,'');if(/(^|\.)(youtube\.com|youtu\.be)$/.test(h))return '유튜브';return h;}catch(_){return '';}};
 function handleShare(){
   let q;try{q=new URLSearchParams(location.search);}catch(_){return;}
   if(!(q.has('title')||q.has('text')||q.has('url')))return;
@@ -1808,18 +1808,15 @@ function handleShare(){
   const t0=g('title'),x0=g('text'),u0=g('url');
   const m=(u0||x0).match(/https?:\/\/[^\s<>"']+/)||x0.match(/https?:\/\/[^\s<>"']+/);
   const link=u0&&/^https?:\/\//.test(u0)?u0:(m?m[0]:'');
-  let title=t0||x0.replace(/https?:\/\/[^\s<>"']+/g,'').replace(/\s+/g,' ').trim();
-  if(title===link)title='';
-  title=title.slice(0,80);
   try{history.replaceState(null,'',location.pathname);}catch(_){}
   const study=S.cats.find(c=>c.id==='study'&&!c.hidden)?'study':null;
-  /* 짧은 영어 단어를 선택해 공유하면 영단어(또는 구동사)로 열고, 마지막에 쓴 단어장을 붙인다 */
-  const pw=(study&&!t0&&!link)?parseWord(x0):((study&&link&&!t0)?parseWord(x0):null);
-  if(pw){
+  /* 짧은 영어 단어를 선택해 공유하면 영단어(또는 구동사) 묶음으로 열고, 마지막에 쓴 단어장을 붙인다 */
+  const pw=(study&&(!t0||(link&&!t0)))?parseWord(x0):null;
+  if(pw&&!(link&&t0)){
     const kind=pw.w.trim().split(/\s+/).length>=2?'phrasal':'word';
     const gs=studies(),grp=gs.find(b=>b.stype===kind)||gs.find(b=>b.stype==='word'||b.stype==='phrasal');
     const sh2=recSheetOf(null,{title:pw.w.slice(0,80)});
-    sh2.cat='study';sh2.picked=true;sh2.stype=grp?(grp.stype):kind;
+    sh2.cat='study';sh2.picked=true;sh2.stype=grp?(grp.stype):kind;sh2.gm=true;sh2.share=true;
     if(grp){sh2.x={trip:grp.title};sh2.tripSet=true;}
     openSheet(sh2);
     const n3=$('#f-note');if(n3){n3.value=(pw.m||'')+(link?((pw.m?'\n':'')+link):'');growNote();}
@@ -1827,12 +1824,20 @@ function handleShare(){
     setTimeout(()=>{const f3=(grp?$('#f-note'):$('#f-trip'));if(f3)f3.focus();},450);
     return;
   }
+  /* 제목 = 받은 제목, 없으면 글의 첫 줄. 나머지는 메모. 링크는 메모 맨 위. 제목이 없으면 '무제'+흐린 사이트 이름 */
+  const lines=x0.replace(/https?:\/\/[^\s<>"']+/g,' ').split(/\n+/).map(z=>z.replace(/[ \t]+/g,' ').trim()).filter(Boolean);
+  let title,rest;
+  if(t0&&t0!==link){title=t0;rest=lines.filter(l=>l!==t0);}else{title=lines[0]||'';rest=lines.slice(1);}
+  if(title.length>80){rest.unshift(title);title=title.slice(0,80);}
+  let site='';
+  if(!title){title='무제';site=link?siteOf(link):'';}
   const sh=recSheetOf(null,{title:title});
-  if(study){sh.cat='study';sh.picked=true;}
+  const cat0=lsGet('harujang:shcat');
+  const cid=(cat0&&S.cats.find(c=>c.id===cat0&&!c.hidden))?cat0:(study||sh.cat);
+  sh.cat=cid;sh.picked=true;sh.gm=false;sh.share=true;if(site)sh.x=Object.assign(sh.x||{},{site:site});
   openSheet(sh);
-  const n=$('#f-note');if(n&&(link||(!title&&x0))){n.value=link||x0;growNote();}
-  if(!title)toast('제목이 오지 않았습니다. 제목을 적어 주세요',3500);
-  else toast('공유받았습니다. 묶음 이름을 넣고 저장하세요',3000);
+  const n=$('#f-note');const memo=(link?[link]:[]).concat(rest).join('\n');if(n&&memo){n.value=memo;growNote();}
+  toast('공유받았습니다. 분류를 확인하고 저장하세요',3000);
 }
 /* ---------- 학습 단어 (영단어 · 구동사) ---------- */
 S.wf='left';S.wsort='new';S.wopen=false;S.wrev=new Set();try{S.wh=lsGet('wh')==='1';}catch(_){S.wh=false;}
@@ -1856,8 +1861,8 @@ function wordsView(b){
   else body=(left.length?'<div class="wl">'+left.map(wordRow).join('')+'</div>':'<p class="empty">'+(S.wf==='star'?'★ 표시한 단어가 없습니다.':nLeft?'':'남은 단어가 없습니다.')+'</p>')
     +(done.length?'<button type="button" class="wdh" data-act="w-open" aria-expanded="'+!!S.wopen+'"><span>외운 단어 '+done.length+'개</span><span>'+(S.wopen?'접기 ▴':'펼치기 ▾')+'</span></button>'+(S.wopen?'<div class="wl">'+done.map(wordRow).join('')+'</div>':''):'');
   return '<button type="button" class="bkback" data-act="study-back">‹ 학습별</button>'
-    +'<div class="bkh"><h2 class="bkt">'+esc(b.title)+'</h2><button class="chip-f edit" data-act="study-export">내보내기</button></div>'
-    +'<small class="bks">'+kind+' '+all.length+'개 · 남은 '+nLeft+' · 외운 '+nDone+'</small>'
+    +'<div class="bkp" style="--c:var(--k-brown)"><div class="bkh"><h2 class="bkt">'+esc(b.title)+'</h2><button class="chip-f edit" data-act="study-export">내보내기</button></div>'
+    +'<small class="bks">'+kind+' '+all.length+'개 · 남은 '+nLeft+' · 외운 '+nDone+'</small></div>'
     +'<div class="chips" style="padding-block:10px 6px">'+[['left','남은'],['done','외운'],['star','★']].map(k=>'<button class="chip-f" data-act="wf" data-v="'+k[0]+'" aria-pressed="'+(S.wf===k[0])+'">'+k[1]+'</button>').join('')
     +'<button class="chip-f" data-act="w-hide" aria-pressed="'+!!S.wh+'">뜻 가리기</button><button class="chip-f" data-act="w-sort" aria-pressed="'+(S.wsort==='az')+'">가나다순</button></div>'
     +body;
@@ -1909,6 +1914,7 @@ async function saveRec(next){
   const e=Object.assign({},old||{},{id:old?old.id:newId(),cat:sh.cat,title:title,date:$('#f-date').value||ymd(new Date()),time:$('#f-time').value||hm(new Date()),
     note:$('#f-note').value.trim(),photos:sh.photos.slice(),star:star,createdAt:old?old.createdAt:now,updatedAt:now});
   e.f=Object.assign({},e.f||{});
+  if(title==='무제'&&x.site)e.f.site=String(x.site).slice(0,60);else if(title!=='무제')delete e.f.site;
   const cc=!!(old&&old.cat!==sh.cat);
   if(cc)['study','stype','ex','trip','hg','hgoal','done','mk','chapter','thought','solo'].forEach(k=>{delete e.f[k];});
   if(place)e.f.place=place;else delete e.f.place;
@@ -2296,7 +2302,8 @@ document.addEventListener('click',ev=>{
     case 'dr-top-use':drTopUse(t.dataset.k);break;
     case 'dr-top-del':try{localStorage.removeItem(DR_P+t.dataset.k);}catch(_){}drRefresh();break;
     case 'dr-del':drDel();break;
-    case 'setcat':{const sh=S.sheet;if(sh){const pv=sh.cat;sh.cat=t.dataset.id;sh.gm=(sh.entry&&sh.entry.cat===sh.cat)?gmOfEntry(sh.entry):undefined;if((pv==='trip'||pv==='study')&&pv!==sh.cat){if(sh.x)sh.x.trip='';sh.tripSet=false;const tf0=$('#f-trip');if(tf0)tf0.value='';}document.querySelectorAll('.cp[data-id]').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();scrollCat();if(tpOn(sh)){const tf=$('#f-trip');if(tf&&!tf.value.trim()){S.noSug=true;tf.focus();S.noSug=false;}}}break;}
+    case 'clr-title':{const ti=$('#f-title');if(ti){ti.value='';ti.dispatchEvent(new Event('input',{bubbles:true}));ti.focus();}break;}
+    case 'setcat':{const sh=S.sheet;if(sh){const pv=sh.cat;sh.cat=t.dataset.id;sh.gm=(sh.entry&&sh.entry.cat===sh.cat)?gmOfEntry(sh.entry):(sh.share?false:undefined);if(sh.share)lsSet('harujang:shcat',sh.cat);if((pv==='trip'||pv==='study')&&pv!==sh.cat){if(sh.x)sh.x.trip='';sh.tripSet=false;const tf0=$('#f-trip');if(tf0)tf0.value='';}document.querySelectorAll('.cp[data-id]').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();scrollCat();if(tpOn(sh)){const tf=$('#f-trip');if(tf&&!tf.value.trim()){S.noSug=true;tf.focus();S.noSug=false;}}}break;}
     case 'cat-more':{const sh=S.sheet;if(sh&&sh.kind==='rec'){sh.catAll=!sh.catAll;$('#catpick').innerHTML=catChipsHtml(sh);}break;}
     case 'dt-toggle':{const box=$('#dt-box'),btn=$('#dtline');if(box&&btn){box.hidden=!box.hidden;btn.setAttribute('aria-expanded',String(!box.hidden));}break;}
     case 'x-chip':{
@@ -2337,7 +2344,6 @@ document.addEventListener('click',ev=>{
       break;}
     case 'hk-list':{const sg=$('#hksug');if(sg&&!sg.hidden){sg.hidden=true;break;}if(!hgroups(S.sheet&&S.sheet.cat).length){toast('아직 묶음이 없어요. 이름을 입력하면 새로 만들어져요');break;}updHkSug(true);break;}
     case 'hk-pick':{const sh=S.sheet;if(!sh)break;collectX();const x=sh.x||(sh.x={});x.hg=t.dataset.v;const g0=hgroups(sh.cat).find(b=>b.title===t.dataset.v);sh.gm=true;const er=$('#err-hg');if(er)er.hidden=true;const sg=$('#hksug');if(sg)sg.hidden=true;renderExtra();const ti=$('#f-title');if(ti&&!ti.value)ti.focus();break;}
-    case 'paste-word':pasteWord();break;
     case 'study-back':S.study=null;$('#feed').innerHTML=feedHtml();syncFab();break;
     case 'sf':S.sf=t.dataset.v;$('#feed').innerHTML=feedHtml();break;
     case 'study-export':{const b=studies().find(x=>x.k===S.study);if(b){saveBlob(new Blob([studyMd(b)],{type:'text/markdown'}),mdName('study',b.title));toast('저장했습니다');}break;}
