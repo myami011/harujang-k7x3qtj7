@@ -303,6 +303,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .pgx{color:var(--k-moss)}
 .bm{background:var(--card);border-radius:12px;padding:10px 12px;margin-top:4px;font-size:calc(14px*var(--fz));line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .dim{color:var(--ink2)}
+.autoh{font-size:12px;color:var(--ink2);margin:6px 2px 0}.autoh b{color:var(--brand)}
 .xchip[aria-expanded="true"]{background:var(--fill)}
 #f-note{resize:none;overflow-y:auto;min-height:calc(4*1.5em + 22px)}
 .card{border-left:4px solid var(--c,var(--line))}
@@ -586,7 +587,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.9347';
+const APP_VER='v0.935';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -1363,7 +1364,7 @@ function recFormHtml(sh){
   const e=sh.entry,now=new Date();
   return '<div class="sh-head"><h2>'+(e?'기록 수정':'기록 남기기')+'</h2><button type="submit" form="f" class="hsave" id="save">저장</button><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>'
   +'<form id="f" class="grid'+(rdOn(sh)?' rd':'')+(tpOn(sh)?' tp':'')+(tpOn(sh)&&sh.cat==='study'?' sd':'')+(rdOn(sh)&&sh.picked?' pk':'')+'" autocomplete="off" novalidate>'
-  +'<div class="fld"><span class="lbl">분류</span><div class="catpick" id="catpick" role="radiogroup" aria-label="분류">'+catChipsHtml(sh)+'</div></div>'
+  +'<div class="fld"><span class="lbl">분류</span><div class="catpick" id="catpick" role="radiogroup" aria-label="분류">'+catChipsHtml(sh)+'</div><div class="autoh" id="autoh"'+(sh.auto?'':' hidden')+'>'+autoHtml(sh)+'</div></div>'
   +'<div class="fld sugw"><div class="titlbl"><span class="lbl" id="tt-lbl">제목</span><span class="trr"><button type="button" class="getbk" id="getbk" data-act="bk-list" hidden>가져오기</button><button type="button" class="gmb" id="gmb" data-act="gm-toggle" aria-label="단일/묶음 전환"></button></span></div><div class="hkbox" id="hkbox" hidden><div class="hkline"><input id="f-hg" type="text" maxlength="40" placeholder="묶음 이름" autocomplete="off"><input id="f-hgoal" type="number" inputmode="numeric" min="1" placeholder="목표 곳수" autocomplete="off" hidden><button type="button" class="getbk" id="hkget" data-act="hk-list" hidden>가져오기</button></div><small class="err" id="err-hg" hidden>묶음 이름을 입력하세요</small><small class="hkhint" id="hkhint"></small><div class="sug" id="hksug" hidden></div></div><div class="bookline" id="bookline"></div><div class="titrow"><label class="trl"><span class="trh"><span class="lbl">여행명</span><button type="button" class="getbk" id="trget" data-act="trip-list" hidden>가져오기</button><span class="trr"><button type="button" class="getbk stbtn" id="stype" data-act="stype-open" hidden>일반 ▾</button><button type="button" class="gmb" id="gmb2" data-act="gm-toggle" aria-label="단일/묶음 전환" hidden></button></span><span class="stmenu" id="stmenu" hidden><button type="button" data-act="stype-set" data-v="">일반</button><button type="button" data-act="stype-set" data-v="word">영단어</button><button type="button" data-act="stype-set" data-v="phrasal">구동사</button></span></span><input id="f-trip" type="text" maxlength="40" placeholder="여행명 (필수)" autocomplete="off"></label><label class="tl-l"><span class="inw"><input id="f-title" type="text" maxlength="80" placeholder="한 줄로 적어요" value="'+esc(sh.title||'')+'"><button type="button" class="clr" data-act="clr-title" aria-label="제목 지우기" tabindex="-1">×</button></span></label><label class="aul"><input id="f-author" type="text" maxlength="60" placeholder="저자" value="'+esc((sh.x&&sh.x.author)||'')+'"></label></div><small class="err" id="err-trip" hidden>여행명을 입력하세요</small><small class="err" id="err-title" hidden>제목을 입력하세요</small><div class="sug" id="sug" hidden></div><div class="sug" id="tsug" hidden></div></div>'
   +'<div class="fld ptrow"><label class="ptp"><span class="lbl">장소</span><input id="f-place" type="text" maxlength="60" placeholder="어디에서" value="'+esc((sh.x&&sh.x.place)||'')+'"></label>'
   +'<div class="pgin"><label><span class="lbl">시작쪽</span><input id="f-pf" type="number" inputmode="numeric" min="0" placeholder="시작" value="'+esc((sh.x&&sh.x.pf)||'')+'"></label><label><span class="lbl">끝쪽</span><input id="f-pt" type="number" inputmode="numeric" min="0" placeholder="끝" value="'+esc((sh.x&&sh.x.pt)||'')+'"></label><label><span class="lbl">총쪽수</span><input id="f-ptot" type="number" inputmode="numeric" min="0" placeholder="총" value="'+esc((sh.x&&sh.x.ptot)||'')+'"></label></div>'
@@ -1801,6 +1802,25 @@ document.addEventListener('paste',ev=>{
   const e1=$('#err-title');if(e1)e1.hidden=true;if(nt)nt.focus();
 });
 const siteOf=u=>{try{const h=new URL(u).hostname.replace(/^(www|m)\./,'');if(/(^|\.)(youtube\.com|youtu\.be)$/.test(h))return '유튜브';return h;}catch(_){return '';}};
+const domOf=u=>{try{return new URL(u).hostname.replace(/^(www|m)\./,'');}catch(_){return '';}};
+function autoHtml(sh){const a=sh.auto;if(!a)return '';return '<b>'+(a.by==='user'?'직접 선택':'자동')+'</b> · '+esc(a.by==='user'?'저장하면 이 사이트의 분류로 기억됩니다':a.why)+(a.by==='user'?'':' · 눌러서 바꾸기');}
+/* 공유 자동 분류: 1) 같은 사이트의 과거 기록 2) 사이트·글 특징 3) 마지막에 고른 분류 */
+const DOMCAT=[[/(^|\.)(coupang|11st|gmarket|auction|ssg|kurly|musinsa|aliexpress|amazon|temu|oliveyoung)\./,'shop','쇼핑몰 주소'],[/smartstore\.naver|shopping\.naver|brand\.naver/,'shop','쇼핑몰 주소'],
+ [/(^|\.)(yes24|aladin|kyobobook|millie|ridibooks|bookk)\./,'read','도서 사이트'],
+ [/(^|\.)(booking|agoda|airbnb|tripadvisor|expedia|trip|hotels|yanolja|goodchoice|skyscanner)\./,'trip','여행 사이트'],
+ [/(^|\.)(map\.naver|map\.kakao|kko\.to|naver\.me)|maps\.google|goo\.gl|maps\.app/,'out','지도 주소'],
+ [/(^|\.)(youtube|youtu|wikipedia|namu|dict|papago|ted|coursera|udemy|arxiv|scholar)\./,'study','학습 사이트']];
+function autoCat(link,x0){
+  const vis=id=>S.cats.find(c=>c.id===id&&!c.hidden)?id:null;
+  const dom=link?domOf(link):'';
+  if(dom){
+    let best=null;
+    S.entries.forEach(e=>{const m=((e.note||'')+' '+(e.title||'')).match(/https?:\/\/[^\s<>"']+/);if(m&&domOf(m[0])===dom&&vis(e.cat)){if(!best||(e.updatedAt||0)>(best.updatedAt||0))best=e;}});
+    if(best)return {cat:best.cat,why:siteOf(link)+' · 전에 '+catOf(best.cat).name+' 분류로 저장',dom:dom};
+    for(const r of DOMCAT){if(r[0].test(dom+'/')&&vis(r[1]))return {cat:r[1],why:r[2]+'로 추정',dom:dom};}
+  }
+  return {cat:null,dom:dom};
+}
 function handleShare(){
   let q;try{q=new URLSearchParams(location.search);}catch(_){return;}
   if(!(q.has('title')||q.has('text')||q.has('url')))return;
@@ -1833,8 +1853,9 @@ function handleShare(){
   if(!title){title='무제';site=link?siteOf(link):'';}
   const sh=recSheetOf(null,{title:title});
   const cat0=lsGet('harujang:shcat');
-  const cid=(cat0&&S.cats.find(c=>c.id===cat0&&!c.hidden))?cat0:(study||sh.cat);
-  sh.cat=cid;sh.picked=true;sh.gm=false;sh.share=true;if(site)sh.x=Object.assign(sh.x||{},{site:site});
+  const ac=autoCat(link,x0);
+  const cid=ac.cat||((cat0&&S.cats.find(c=>c.id===cat0&&!c.hidden))?cat0:(study||sh.cat));
+  sh.cat=cid;sh.picked=true;sh.gm=false;sh.share=true;if(ac.dom){sh.auto0=ac.cat?{by:'auto',why:ac.why,cat:ac.cat}:null;sh.auto=sh.auto0||{by:'user'};}if(site)sh.x=Object.assign(sh.x||{},{site:site});
   openSheet(sh);
   const n=$('#f-note');const memo=(link?[link]:[]).concat(rest).join('\n');if(n&&memo){n.value=memo;growNote();}
   toast('공유받았습니다. 분류를 확인하고 저장하세요',3000);
@@ -2303,7 +2324,7 @@ document.addEventListener('click',ev=>{
     case 'dr-top-del':try{localStorage.removeItem(DR_P+t.dataset.k);}catch(_){}drRefresh();break;
     case 'dr-del':drDel();break;
     case 'clr-title':{const ti=$('#f-title');if(ti){ti.value='';ti.dispatchEvent(new Event('input',{bubbles:true}));ti.focus();}break;}
-    case 'setcat':{const sh=S.sheet;if(sh){const pv=sh.cat;sh.cat=t.dataset.id;sh.gm=(sh.entry&&sh.entry.cat===sh.cat)?gmOfEntry(sh.entry):(sh.share?false:undefined);if(sh.share)lsSet('harujang:shcat',sh.cat);if((pv==='trip'||pv==='study')&&pv!==sh.cat){if(sh.x)sh.x.trip='';sh.tripSet=false;const tf0=$('#f-trip');if(tf0)tf0.value='';}document.querySelectorAll('.cp[data-id]').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();scrollCat();if(tpOn(sh)){const tf=$('#f-trip');if(tf&&!tf.value.trim()){S.noSug=true;tf.focus();S.noSug=false;}}}break;}
+    case 'setcat':{const sh=S.sheet;if(sh){const pv=sh.cat;sh.cat=t.dataset.id;sh.gm=(sh.entry&&sh.entry.cat===sh.cat)?gmOfEntry(sh.entry):(sh.share?false:undefined);if(sh.share){lsSet('harujang:shcat',sh.cat);if(sh.auto){sh.auto=(sh.auto0&&sh.auto0.cat===sh.cat)?sh.auto0:{by:'user'};const ah=$('#autoh');if(ah){ah.hidden=false;ah.innerHTML=autoHtml(sh);}}}if((pv==='trip'||pv==='study')&&pv!==sh.cat){if(sh.x)sh.x.trip='';sh.tripSet=false;const tf0=$('#f-trip');if(tf0)tf0.value='';}document.querySelectorAll('.cp[data-id]').forEach(b=>{const on=b.dataset.id===sh.cat;b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));});collectX();renderExtra();scrollCat();if(tpOn(sh)){const tf=$('#f-trip');if(tf&&!tf.value.trim()){S.noSug=true;tf.focus();S.noSug=false;}}}break;}
     case 'cat-more':{const sh=S.sheet;if(sh&&sh.kind==='rec'){sh.catAll=!sh.catAll;$('#catpick').innerHTML=catChipsHtml(sh);}break;}
     case 'dt-toggle':{const box=$('#dt-box'),btn=$('#dtline');if(box&&btn){box.hidden=!box.hidden;btn.setAttribute('aria-expanded',String(!box.hidden));}break;}
     case 'x-chip':{
