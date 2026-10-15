@@ -594,7 +594,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.9351';
+const APP_VER='v0.9352';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -1105,10 +1105,10 @@ function viewToday(){
 }
 function viewLog(){
   return topHtml('기록')
-  +'<div class="chips" role="group" aria-label="분류 필터">'+[{id:'all',name:'전체'},{id:'past',name:'지난 일'}].concat(S.cats.filter(c=>!c.hidden||S.cat===c.id||S.entries.some(e=>e.cat===c.id))).map((c,i)=>
+  +'<div class="chips" role="group" aria-label="분류 필터">'+[{id:'all',name:'전체'}].concat(S.cats.filter(c=>!c.hidden||S.cat===c.id||S.entries.some(e=>e.cat===c.id))).map((c,i)=>
     '<button class="chip-f" data-act="filter" data-cat="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'
-    +(i===1?'<button class="chip-f" data-act="imp-filter" aria-pressed="'+S.imp+'">★ 중요</button>':'')).join('')
-  +'<button class="chip-f edit" data-act="cats-open">분류 편집</button></div>'
+    +(i===0?'<button class="chip-f" data-act="imp-filter" aria-pressed="'+S.imp+'">★ 중요</button>':'')).join('')
+  +'<button class="chip-f" data-act="filter" data-cat="past" aria-pressed="'+(S.cat==='past')+'">지난 일</button><button class="chip-f edit" data-act="cats-open">분류 편집</button></div>'
   +(S.cat==='read'?'<div class="sgm"><button data-act="bv" data-v="1" aria-pressed="'+(!!S.bv)+'">책별</button><button data-act="bv" data-v="0" aria-pressed="'+(!S.bv)+'">기록순</button></div>':'')
    +(S.cat==='trip'?'<div class="sgm"><button data-act="tv" data-v="1" aria-pressed="'+(!!S.tv)+'">여행별</button><button data-act="tv" data-v="0" aria-pressed="'+(!S.tv)+'">기록순</button></div>':'')
    +(S.cat==='study'?'<div class="sgm"><button data-act="sv" data-v="1" aria-pressed="'+(!!S.sv)+'">학습별</button><button data-act="sv" data-v="0" aria-pressed="'+(!S.sv)+'">기록순</button></div>':'')
