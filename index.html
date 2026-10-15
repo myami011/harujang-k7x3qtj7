@@ -303,6 +303,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .pgx{color:var(--k-moss)}
 .bm{background:var(--card);border-radius:12px;padding:10px 12px;margin-top:4px;font-size:calc(14px*var(--fz));line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .dim{color:var(--ink2)}
+.ph-s{display:flex;justify-content:space-between;align-items:baseline;margin:14px 2px 4px;font-size:calc(13px*var(--fz));color:var(--ink2)}.ph-s b{color:var(--brand)}
+.pr .t{padding:11px 0}.pr .due{flex:none;margin-left:8px;font-size:calc(12px*var(--fz));color:var(--ink2)}.pr .due.late{color:var(--late,#B3402A)}
+.pact{display:flex;gap:6px;margin:0 0 8px;padding:8px;background:var(--fill);border-radius:12px}
+.pact button{flex:1;padding:10px 4px;border-radius:10px;background:var(--card);border:1px solid var(--line);font:500 calc(13px*var(--fz)) var(--sans);color:var(--ink);white-space:nowrap}
+.pact button.pri{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:700}
+.pr.open{background:color-mix(in srgb,var(--brand) 8%,transparent);border-radius:10px}
 .autoh{font-size:12px;color:var(--ink2);margin:6px 2px 0}.autoh b{color:var(--brand)}
 .xchip[aria-expanded="true"]{background:var(--fill)}
 #f-note{resize:none;overflow-y:auto;min-height:calc(4*1.5em + 22px)}
@@ -526,6 +532,7 @@ html .bcard b{display:block;font-size:calc(20px*var(--fz))!important;letter-spac
 <div id="wp3" hidden><p><b>3.</b> 지우려면 아래 칸에 <b>지우기</b>라고 입력하세요.</p><input id="wipe-in" autocomplete="off" aria-label="확인 글자"><div class="btns" style="margin-top:10px"><button class="btn dangerf" id="wipe-go" data-act="wipe-do" disabled>모두 지우기</button></div></div>
 <div class="btns" style="margin-top:12px"><button class="btn" data-act="wipe-cancel">취소</button></div></div></div>
 <div class="snack" id="snack" hidden role="status"><span id="snack-t"></span><button class="ok" data-act="snack-ok">기록하기</button><button data-act="snack-no" aria-label="닫기">×</button></div>
+<div class="snack" id="usnack" hidden role="status"><span id="usnack-t"></span><button class="ok" data-act="udel-undo">되돌리기</button></div>
 <script>
 (function(){
 'use strict';
@@ -587,7 +594,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.935';
+const APP_VER='v0.9351';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -864,7 +871,7 @@ function studies(){
   }).sort((x,y)=>y.lastKey.localeCompare(x.lastKey));
 }
 /* ---------- 묶음 (등산·운동·업무·만남·쇼핑·외출·기타 공통, 묶음 이름 f.hg) ---------- */
-const isGen=c=>c!=='trip'&&c!=='study'&&c!=='read'&&c!=='all'&&!!c;
+const isGen=c=>c!=='trip'&&c!=='study'&&c!=='read'&&c!=='all'&&c!=='past'&&!!c;
 const gmDef=c=>c==='trip'||c==='study'||c==='read';
 const gmOfEntry=e=>{const f=e.f||{};return e.cat==='trip'?!!f.trip:e.cat==='study'?!!f.study:e.cat==='read'?!f.solo:!!f.hg;};
 const gmOn=sh=>sh.gm===undefined?gmDef(sh.cat):!!sh.gm;
@@ -1009,11 +1016,30 @@ function todoRow(x,td){
     +'<button type="button" class="t" data-act="todo-edit" data-id="'+esc(x.id)+'">'+(x.time?'<span class="tm">🔔 '+esc(x.time)+'</span> ':'')+esc(x.title)+'</button>'
     +(x.due&&x.due!==td?'<span class="due'+(late?' late':'')+'">'+dueText(x.due,td)+'</span>':'')+'</div>';
 }
+function pastBuckets(td){
+  const un=S.todos.filter(x=>!x.done&&x.due&&x.due<td).sort((a,b)=>a.due.localeCompare(b.due));
+  const dn=S.todos.filter(x=>x.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
+  return {un:un,dn:dn};
+}
+function daysAgo(due,td){const n=Math.round((pYmd(td)-pYmd(due))/86400000);return n<=1?'어제':n+'일 전';}
+function pastRow(x,td){
+  const op=S.pastOpen===x.id,late=!x.done;
+  const dd=x.done?(x.doneDate?dueText(x.doneDate,td):''):daysAgo(x.due,td);
+  return '<div class="todo pr'+(x.done?' done':'')+(op?' open':'')+'"><button type="button" class="t" data-act="past-open" data-id="'+esc(x.id)+'">'+esc(x.title)+'</button><span class="due'+(late?' late':'')+'">'+esc(dd)+'</span></div>'
+   +(op?'<div class="pact">'+(x.done?'<button type="button" class="pri" data-act="past-undo" data-id="'+esc(x.id)+'">안 했음으로</button>':'<button type="button" data-act="todo-edit" data-id="'+esc(x.id)+'">날짜변경</button><button type="button" class="pri" data-act="past-do" data-id="'+esc(x.id)+'">했음</button>')
+   +'<button type="button" data-act="past-del" data-id="'+esc(x.id)+'">지우기</button><button type="button" data-act="past-close">취소</button></div>':'');
+}
+function pastHtml(){
+  const td=ymd(new Date()),b=pastBuckets(td);
+  return '<div class="ph-s"><b>안 한 것 '+b.un.length+'</b><span>오래된 순</span></div><div class="todos">'+(b.un.length?b.un.map(x=>pastRow(x,td)).join(''):'<p class="none">기한이 지난 할 일이 없습니다.</p>')+'</div>'
+   +'<div class="ph-s"><b>한 것 '+b.dn.length+'</b><span>최근 순</span></div><div class="todos">'+(b.dn.length?b.dn.map(x=>pastRow(x,td)).join(''):'<p class="none">완료한 할 일이 없습니다.</p>')+'</div>';
+}
 function todosBlock(td){
   const open=S.todos.filter(x=>!x.done);
   const lim=addDays(td,3);
-  const late=open.filter(x=>x.due&&x.due<td).sort((a,b)=>a.due.localeCompare(b.due));
-  const seen=new Set(late.map(x=>x.id));
+  const old3=open.filter(x=>x.due&&x.due<addDays(td,-3));
+  const late=open.filter(x=>x.due&&x.due<td&&x.due>=addDays(td,-3)).sort((a,b)=>a.due.localeCompare(b.due));
+  const seen=new Set(late.map(x=>x.id));old3.forEach(x=>seen.add(x.id));
   const now=S.todos.filter(x=>!seen.has(x.id)&&(x.due===td||(!x.due&&!x.done)||(x.done&&x.doneDate===td)))
     .sort((a,b)=>(a.done-b.done)||((a.time||'99')<(b.time||'99')?-1:(a.time||'99')>(b.time||'99')?1:0)||((a.createdAt||0)-(b.createdAt||0)));
   now.forEach(x=>seen.add(x.id));
@@ -1021,7 +1047,8 @@ function todosBlock(td){
   soon.forEach(x=>seen.add(x.id));
   const far=open.filter(x=>!seen.has(x.id)&&x.due>lim).sort((a,b)=>a.due.localeCompare(b.due));
   const list=late.concat(now.filter(x=>!x.done),soon,S.far?far:[],now.filter(x=>x.done));
-  const btn=far.length?'<button type="button" class="more-t" data-act="far-toggle">'+(S.far?'먼 일정 접기':'이후 일정 '+far.length+'개 보기')+'</button>':'';
+  const oldBtn=old3.length?'<button type="button" class="more-t" data-act="past-go">3일 넘게 지난 할 일 '+old3.length+'개 보기</button>':'';
+  const btn=oldBtn+(far.length?'<button type="button" class="more-t" data-act="far-toggle">'+(S.far?'먼 일정 접기':'이후 일정 '+far.length+'개 보기')+'</button>':'');
   return '<h2 class="day"><span>할 일</span><em>'+open.length+'개 남음</em></h2><div class="todos">'
     +(list.length?list.map(x=>todoRow(x,td)).join(''):'<p class="none">'+(far.length?'가까운 할 일이 없습니다.':'할 일이 없습니다.')+'</p>')+btn+'</div>';
 }
@@ -1052,6 +1079,7 @@ function allGroupedHtml(){
   return Object.keys(g).sort().reverse().map(d=>'<h2 class="day"><span>'+dayLabel(d)+'</span><small>'+dayNote(d)+'</small><em>'+g[d].length+'건</em></h2>'+g[d].map(i=>i.h).join('')).join('');
 }
 function feedHtml(){
+  if(S.ready&&S.cat==='past')return pastHtml();
   if(S.ready&&S.cat==='read'&&S.bv)return booksHtml();
   if(S.ready&&S.cat==='trip'&&S.tv)return tripsHtml();
   if(S.ready&&S.cat==='study'&&S.sv)return studiesHtml();
@@ -1077,15 +1105,15 @@ function viewToday(){
 }
 function viewLog(){
   return topHtml('기록')
-  +'<div class="chips" role="group" aria-label="분류 필터">'+[{id:'all',name:'전체'}].concat(S.cats.filter(c=>!c.hidden||S.cat===c.id||S.entries.some(e=>e.cat===c.id))).map((c,i)=>
+  +'<div class="chips" role="group" aria-label="분류 필터">'+[{id:'all',name:'전체'},{id:'past',name:'지난 일'}].concat(S.cats.filter(c=>!c.hidden||S.cat===c.id||S.entries.some(e=>e.cat===c.id))).map((c,i)=>
     '<button class="chip-f" data-act="filter" data-cat="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'
-    +(i===0?'<button class="chip-f" data-act="imp-filter" aria-pressed="'+S.imp+'">★ 중요</button>':'')).join('')
+    +(i===1?'<button class="chip-f" data-act="imp-filter" aria-pressed="'+S.imp+'">★ 중요</button>':'')).join('')
   +'<button class="chip-f edit" data-act="cats-open">분류 편집</button></div>'
   +(S.cat==='read'?'<div class="sgm"><button data-act="bv" data-v="1" aria-pressed="'+(!!S.bv)+'">책별</button><button data-act="bv" data-v="0" aria-pressed="'+(!S.bv)+'">기록순</button></div>':'')
    +(S.cat==='trip'?'<div class="sgm"><button data-act="tv" data-v="1" aria-pressed="'+(!!S.tv)+'">여행별</button><button data-act="tv" data-v="0" aria-pressed="'+(!S.tv)+'">기록순</button></div>':'')
    +(S.cat==='study'?'<div class="sgm"><button data-act="sv" data-v="1" aria-pressed="'+(!!S.sv)+'">학습별</button><button data-act="sv" data-v="0" aria-pressed="'+(!S.sv)+'">기록순</button></div>':'')
    +(isGen(S.cat)?'<div class="sgm"><button data-act="hv" data-v="1" aria-pressed="'+(!!S.hv)+'">묶음별</button><button data-act="hv" data-v="0" aria-pressed="'+(!S.hv)+'">기록순</button></div>':'')
-  +'<input class="search" id="q" type="search" placeholder="제목, 메모 검색" value="'+esc(S.q)+'" aria-label="검색">'
+  +(S.cat==='past'?'':'<input class="search" id="q" type="search" placeholder="제목, 메모 검색" value="'+esc(S.q)+'" aria-label="검색">')
   +'<div class="hbar" id="hbar" hidden></div>'
   +'<div id="feed">'+feedHtml()+'</div>';
 }
@@ -2309,6 +2337,12 @@ document.addEventListener('click',ev=>{
     case 'rec-edit':editFromView();break;
     case 'todo-edit':{const x=S.todos.find(y=>y.id===t.dataset.id);if(x)openSheet({kind:'todo',todo:x,arm:false});break;}
     case 'todo-toggle':toggleTodo(t.dataset.id);break;
+    case 'past-open':S.pastOpen=(S.pastOpen===t.dataset.id)?null:t.dataset.id;wRef();break;
+    case 'past-close':S.pastOpen=null;wRef();break;
+    case 'past-go':S.tab='log';S.cat='past';S.pastOpen=null;render();window.scrollTo(0,0);break;
+    case 'past-do':case 'past-undo':{S.pastOpen=null;const x=S.todos.find(y=>y.id===t.dataset.id);if(x){const done=a==='past-do';putTodo(Object.assign({},x,{done:done,doneDate:done?ymd(new Date()):null,doneAt:done?Date.now():null,updatedAt:Date.now()})).then(()=>toast(done?'했음으로 옮겼습니다':'안 한 것으로 되돌렸습니다')).catch(()=>toast('저장하지 못했습니다.'));}break;}
+    case 'past-del':{S.pastOpen=null;const x=S.todos.find(y=>y.id===t.dataset.id);if(x){delTodo(x.id).then(()=>{S.udel=x;$('#usnack-t').textContent='"'+x.title+'" 삭제';$('#usnack').hidden=false;clearTimeout(S.udelT);S.udelT=setTimeout(()=>{S.udel=null;$('#usnack').hidden=true;},5000);}).catch(()=>toast('삭제하지 못했습니다.'));}break;}
+    case 'udel-undo':{const x=S.udel;S.udel=null;$('#usnack').hidden=true;clearTimeout(S.udelT);if(x)putTodo(x).then(()=>toast('되돌렸습니다')).catch(()=>toast('저장하지 못했습니다.'));break;}
     case 'close':dismissSheet();break;
     case 'dr-use':drUse();break;
     case 'stype-open':{const m=$('#stmenu');if(m)m.hidden=!m.hidden;break;}
