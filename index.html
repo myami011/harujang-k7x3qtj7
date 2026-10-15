@@ -477,6 +477,14 @@ html[data-sk="jrn"] .fab{border-radius:22px;width:62px;height:62px}
 .wdh{display:flex;justify-content:space-between;width:100%;margin:14px 0 6px;padding:11px 12px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--ink);font:600 calc(14px*var(--fz)) var(--sans)}
 .wfold{display:flex;justify-content:space-between;align-items:center;gap:10px}.wfold span{color:var(--ink2);font-size:calc(13px*var(--fz))}
 .ptbtn[hidden],#exbox[hidden],#save-next[hidden],#stype[hidden]{display:none!important}
+
+/* v0.9344 묶음 카드: 분류색 띠 + 큰 색 제목 */
+.bcard{border-left:6px solid var(--c);padding-left:16px}
+.bcard{position:relative}.bcard .gtag{margin-right:30px}.bcard .bst{position:absolute;float:none;right:16px;top:46px}
+html .bcard b{display:block;font-size:calc(20px*var(--fz))!important;letter-spacing:-.3px;color:color-mix(in srgb,var(--c) 78%,var(--ink))!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bcard br{display:none}
+.bcard small:not(.gtag){display:block;margin-top:3px;color:var(--ink2)}
+.bcard .gtag{float:right;font-size:calc(11px*var(--fz));font-weight:700;padding:2px 8px;border-radius:99px;margin-left:8px;background:color-mix(in srgb,var(--c) 16%,transparent);color:color-mix(in srgb,var(--c) 78%,var(--ink))}
 </style>
 </head>
 <body>
@@ -570,7 +578,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.9343';
+const APP_VER='v0.9345';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -775,7 +783,7 @@ function booksHtml(){
   const l=q?bs.filter(b=>nrm(b.title+' '+b.author).includes(q)):bs;
   const soloCard=(!q&&solo.length)?'<div class="card bcard" data-act="book-open" data-k="__solo" tabindex="0" style="--c:var(--k-moss)"><b>단일 기록</b><br><small>책으로 묶지 않은 기록 '+solo.length+'건</small></div>':'';
   if(!l.length&&!soloCard)return '<p class="empty">'+(bs.length?'조건에 맞는 책이 없습니다.':'독서 기록이 아직 없습니다.')+'</p>';
-  return l.map(b=>'<div class="card bcard" data-act="book-open" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-moss)"><b>'+esc(b.title)+'</b><span class="bst'+(b.done?' dn':'')+'">'+(b.done?'완독 ✓':'읽는 중')+'</span><br><small>'+esc(b.author||'저자 미입력')+' · '+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · 기록 '+b.es.length+'건</small>'+bookBar(b)+'</div>').join('')+soloCard;
+  return l.map(b=>bookCardHtml(b,'book-open')).join('')+soloCard;
 }
 
 /* ---------- 여행 묶기 (여행명) ---------- */
@@ -817,7 +825,7 @@ function tripsHtml(){
   }
   const l=q?ts.filter(b=>nrm(b.title).includes(q)):ts,lo=tripLoose();
   if(!l.length&&!lo.length)return '<p class="empty">'+(ts.length?'조건에 맞는 여행이 없습니다.':'여행 기록이 아직 없습니다.')+'</p>';
-  return l.map(b=>'<div class="card bcard" data-act="trip-open" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-sky)"><b>'+esc(b.title)+'</b><br><small>'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+b.days+'일 · 기록 '+b.es.length+'건</small>'+tripSum(b)+(b.places.length?'<small>'+esc(b.places.slice(0,4).join(' · '))+(b.places.length>4?' 외':'')+'</small>':'')+'</div>').join('')
+  return l.map(b=>tripCardHtml(b,'trip-open')).join('')
     +((!q&&lo.length)?'<div class="card bcard" data-act="trip-open" data-k="__none" tabindex="0" style="--c:var(--k-sky)"><b>여행명 없음</b><br><small>단독 기록 '+lo.length+'건</small></div>':'');
 }
 function tripMd(b){
@@ -900,7 +908,7 @@ function hgHtml(){
   }
   const l=q?hs.filter(b=>nrm(b.title).includes(q)):hs,lo=hgLoose(cat);
   if(!l.length&&!lo.length)return '<p class="empty">'+(hs.length?'조건에 맞는 묶음이 없습니다.':'기록이 아직 없습니다.')+'</p>';
-  return l.map(b=>'<div class="card bcard" data-act="g-open" data-k="'+esc(b.k)+'" tabindex="0" style="--c:'+cc+'"><b>'+esc(b.title)+'</b><br><small>'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+esc(hgStat(b))+'</small>'+hgBar(b)+'</div>').join('')
+  return l.map(b=>gCardHtml(b,'g-open')).join('')
     +((!q&&lo.length)?'<div class="card bcard" data-act="g-open" data-k="__none" tabindex="0" style="--c:'+cc+'"><b>단일 기록</b><br><small>묶음에 넣지 않은 기록 '+lo.length+'건</small></div>':'');
 }
 const studyLoose=()=>S.entries.filter(e=>e.cat==='study'&&!String((e.f&&e.f.study)||'').trim());
@@ -939,7 +947,7 @@ function studiesHtml(){
   }
   const l=q?ss.filter(b=>nrm(b.title).includes(q)):ss,lo=studyLoose();
   if(!l.length&&!lo.length)return '<p class="empty">'+(ss.length?'조건에 맞는 학습이 없습니다.':'학습 기록이 아직 없습니다.')+'</p>';
-  return l.map(b=>'<div class="card bcard" data-act="study-open" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-brown)"><b>'+esc(b.title)+'</b><br><small>'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+(b.stype?' · '+stKind(b.stype)+' '+b.es.length+'개 · 남은 '+b.es.filter(e=>!(e.f&&e.f.done)).length:' · '+b.es.length+'회차')+'</small><br><small>마지막: '+esc(b.lastTitle)+(b.stars?' · ★ 다시 볼 것 '+b.stars+'건':'')+'</small>'+(b.stype?'':studySum(b))+'</div>').join('')
+  return l.map(b=>studyCardHtml(b,'study-open')).join('')
     +((!q&&lo.length)?'<div class="card bcard" data-act="study-open" data-k="__none" tabindex="0" style="--c:var(--k-brown)"><b>학습명 없음</b><br><small>학습명이 없는 기록 '+lo.length+'건 · 열어서 학습명을 넣으면 정리됩니다</small></div>':'');
 }
 function studyMd(b){
@@ -1014,11 +1022,15 @@ function filtered(){
   return S.entries.filter(e=>(S.cat==='all'||e.cat===S.cat)&&(!S.imp||e.star)&&(!q||hay(e).includes(q))).sort(byTimeDesc);
 }
 /* ---------- 전체 목록: 책·여행·학습은 묶음 카드로 ---------- */
-const gTag=n=>'<small class="gtag">'+n+'</small> ';
-function bookCardHtml(b){return '<div class="card bcard" data-act="grp-book" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-moss)">'+gTag('독서')+'<b>'+esc(b.title)+'</b><span class="bst'+(b.done?' dn':'')+'">'+(b.done?'완독 ✓':'읽는 중')+'</span><br><small>'+esc(b.author||'저자 미입력')+' · 기록 '+b.es.length+'건</small>'+bookBar(b)+'</div>';}
-function tripCardHtml(b){return '<div class="card bcard" data-act="grp-trip" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-sky)">'+gTag('여행')+'<b>'+esc(b.title)+'</b><br><small>'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+b.days+'일 · 기록 '+b.es.length+'건</small>'+tripSum(b)+'</div>';}
-function studyCardHtml(b){return '<div class="card bcard" data-act="grp-study" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-brown)">'+gTag(b.stype?stKind(b.stype):'학습')+'<b>'+esc(b.title)+'</b><br><small>'+(b.stype?stKind(b.stype)+' '+b.es.length+'개 · 남은 '+b.es.filter(e=>!(e.f&&e.f.done)).length:b.es.length+'회차 · 마지막: '+esc(b.lastTitle))+(b.stars?' · ★ '+b.stars+'건':'')+'</small>'+(b.stype?'':studySum(b))+'</div>';}
-function gCardHtml(b){return '<div class="card bcard" data-act="grp-g" data-k="'+esc(b.k)+'" data-c="'+esc(b.cat)+'" tabindex="0" style="--c:'+colorOf(catOf(b.cat))+'">'+gTag(esc(catOf(b.cat).name))+'<b>'+esc(b.title)+'</b><br><small>'+mdShort(b.first)+(b.first!==b.last?' ~ '+mdShort(b.last):'')+' · '+esc(hgStat(b))+'</small>'+hgBar(b)+'</div>';}
+const gTag=n=>S.cat==='all'?'<small class="gtag">'+n+'</small>':'';
+const rngOf=b=>mdShort(b.first)+(b.first!==b.last?'~'+mdShort(b.last):'');
+const cardSub=a=>'<small>'+a.filter(Boolean).map(esc).join(' · ')+'</small>';
+function bookCardHtml(b,act){act=act||'grp-book';const pc=b.total&&b.page?Math.min(100,Math.round(b.page/b.total*100)):(b.done?100:0);
+  const pr=b.total?(b.done?b.total+'쪽 완독':(b.page||0)+' / '+b.total+'쪽 ('+pc+'%)'):(b.page?b.page+'쪽까지':'');
+  return '<div class="card bcard" data-act="'+act+'" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-moss)">'+gTag('독서')+'<b>'+esc(b.title)+'</b><span class="bst'+(b.done?' dn':'')+'">'+(b.done?'완독 ✓':'읽는 중')+'</span>'+cardSub([b.author||'저자 미입력',pr,rngOf(b)])+(b.total||b.done?'<div class="bar"><i style="width:'+(b.done?100:pc)+'%"></i></div>':'')+'</div>';}
+function tripCardHtml(b,act){act=act||'grp-trip';return '<div class="card bcard" data-act="'+act+'" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-sky)">'+gTag('여행')+'<b>'+esc(b.title)+'</b>'+cardSub([b.days+'일',b.cost?fmt(b.cost)+'원':'',rngOf(b)])+'</div>';}
+function studyCardHtml(b,act){act=act||'grp-study';const nd=b.es.filter(e=>!(e.f&&e.f.done)).length;return '<div class="card bcard" data-act="'+act+'" data-k="'+esc(b.k)+'" tabindex="0" style="--c:var(--k-brown)">'+gTag(b.stype?stKind(b.stype):'학습')+'<b>'+esc(b.title)+'</b>'+cardSub(b.stype?[stKind(b.stype)+' '+b.es.length+'개','남은 '+nd,rngOf(b)]:[b.es.length+'회차',b.min?durText(b.min):'',b.stars?'★ '+b.stars+'건':'',rngOf(b)])+'</div>';}
+function gCardHtml(b,act){act=act||'grp-g';return '<div class="card bcard" data-act="'+act+'" data-k="'+esc(b.k)+'" data-c="'+esc(b.cat)+'" tabindex="0" style="--c:'+colorOf(catOf(b.cat))+'">'+gTag(esc(catOf(b.cat).name))+'<b>'+esc(b.title)+'</b>'+cardSub([hgStat(b),rngOf(b)])+'</div>';}
 function allGroupedHtml(){
   const used=new Set(),items=[];
   books().forEach(b=>{b.es.forEach(e=>used.add(e.id));items.push({d:b.last,k:b.lastKey,h:bookCardHtml(b)});});
