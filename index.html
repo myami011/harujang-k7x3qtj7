@@ -567,7 +567,7 @@ function buildCats(list){
   return out;
 }
 const slimCats=()=>S.cats.map(c=>({id:c.id,name:c.name,hidden:!!c.hidden}));
-const APP_VER='v0.933';
+const APP_VER='v0.934';
 const LB_KEY='harujang:lastBackup',LC_KEY='harujang:lastCat',LF_KEY='harujang:lastFull',PM_KEY='harujang:photoMax';
 
 const S={entries:[],todos:[],cats:buildCats(null),ready:false,mem:false,
@@ -699,10 +699,18 @@ function pagesText(f){const a=f.pFrom,b=f.pTo;return (a&&b)?(a+'–'+b+'쪽'):b?
 const chapHtml=e=>(e.cat==='read'&&e.f&&e.f.chapter)?'<b class="chap">'+esc(e.f.chapter)+'</b>':'';
 const thoughtHtml=e=>(e.cat==='read'&&e.f&&e.f.thought)?'<p class="thk"><b>생각</b>'+nh(e.f.thought)+'</p>':'';
 const mkTag=e=>{const k=e.f&&e.f.mk;return MK[k]?'<b class="mkt">'+MK[k]+'</b>':'';};
+function hgTag(e){
+  const f=e.f||{},k=nrm(f.hg),all=S.entries.filter(x=>x.cat===e.cat&&x.f&&nrm(x.f.hg)===k).sort(seqCmp),i=all.findIndex(x=>x.id===e.id);
+  const upto=i<0?all:all.slice(0,i+1);let km=0;const pk=new Set();
+  upto.forEach(x=>{km+=Number(x.f&&x.f.distKm)||0;const p=nrm((x.f&&x.f.place)||x.title);if(p)pk.add(p);});
+  const o=[];if(!S._hh)o.push(String(f.hg));o.push((i<0?all.length:i+1)+'번째');
+  if(km>0)o.push('누적 '+fmt(Math.round(km*10)/10)+'km');else if(e.cat==='hike'&&pk.size)o.push('오른 산 '+pk.size+'곳');
+  return o.join(' · ');
+}
 function factsOf(e){
   const f=e.f||{},o=[],en=fieldsOf(catOf(e.cat));
   if(e.cat==='trip'&&f.trip&&!S._ht)o.push(String(f.trip));
-  if(isGen(e.cat)&&f.hg&&!S._hh)o.push(String(f.hg));
+  if(isGen(e.cat)&&f.hg)o.push(hgTag(e));
   if(e.cat==='study'&&f.study){if(!S._hs)o.push(String(f.study));if(!f.stype){const sn=snOf(e);if(sn)o.push(sn+'회차');}}
   if(f.place&&f.place!==e.title)o.push(String(f.place));
   if(f.cost&&en.includes('cost'))o.push(fmt(f.cost)+'원');
@@ -855,14 +863,14 @@ function hgroups(cat){
     b.min=b.es.reduce((a,e)=>a+(Number(e.f&&e.f.durMin)||0),0);
     b.cost=b.es.reduce((a,e)=>a+(Number(e.f&&e.f.cost)||0),0);
     const pk=new Set();b.es.forEach(e=>{const p=nrm((e.f&&e.f.place)||e.title);if(p)pk.add(p);});b.peaks=pk.size;
-    b.goal=0;for(let i=b.es.length-1;i>=0;i--){const gl=Number(b.es[i].f&&b.es[i].f.hgoal);if(gl>0){b.goal=gl;break;}}
+    b.goal=0;
     return b;
   }).sort((x,y)=>y.lastKey.localeCompare(x.lastKey));
 }
 const hgLoose=cat=>S.entries.filter(e=>e.cat===cat&&!String((e.f&&e.f.hg)||'').trim());
 function hgStat(b){
   const o=[b.es.length+'회'];
-  if(b.goal)o.push((b.cat==='hike'?'오른 산 ':'장소 ')+b.peaks+' / '+b.goal+'곳');
+  if(b.cat==='hike'&&b.peaks>0)o.push('오른 산 '+b.peaks+'곳');
   if(b.km>0)o.push('누적 '+fmt(Math.round(b.km*10)/10)+'km');
   if(b.min>0)o.push(durText(b.min));
   if(b.cost>0)o.push('비용 '+fmt(b.cost)+'원');
@@ -1414,7 +1422,7 @@ function renderExtra(){
     const g1=$('#gmb'),g2=$('#gmb2');
     if(g1){g1.hidden=T;g1.innerHTML=(on?IC2:IC1)+(on?'묶음':'단일');g1.classList.toggle('on',on);g1.setAttribute('aria-pressed',String(on));}
     if(g2){g2.hidden=!T;g2.innerHTML=IC2;g2.classList.toggle('on',true);}
-    const hb=$('#hkbox');if(hb){hb.hidden=!G;if(G){const gs=hgroups(sh.cat);$('#hkget').hidden=!gs.length;const gl=$('#f-hgoal');if(gl)gl.hidden=sh.cat!=='hike';const a=$('#f-hg');if(a&&document.activeElement!==a)a.value=x.hg||'';if(gl&&document.activeElement!==gl)gl.value=x.hgoal||'';updHkHint();}else{const sg=$('#hksug');if(sg)sg.hidden=true;}}}
+    const hb=$('#hkbox');if(hb){hb.hidden=!G;if(G){const gs=hgroups(sh.cat);$('#hkget').hidden=false;const gl=$('#f-hgoal');if(gl)gl.hidden=true;const a=$('#f-hg');if(a){if(document.activeElement!==a)a.value=x.hg||'';a.placeholder=(GPH[sh.cat]||GPH.etc)[0];}updHkHint();}else{const sg=$('#hksug');if(sg)sg.hidden=true;}}}
   {const tlb=document.querySelector('.trh .lbl'),er=$('#err-trip'),isS=sh.cat==='study';if(tlb)tlb.textContent=isS?'학습명':'여행명';if(er)er.textContent=isS?'학습명을 입력하세요':'여행명을 입력하세요';const fi0=$('#f-trip');if(fi0)fi0.placeholder=isS?'학습명 (필수)':'여행명 (필수)';}
   if(tpOn(sh)){
     const fi=$('#f-trip');if(fi&&document.activeElement!==fi)fi.value=x.trip||'';const gb=$('#trget');if(gb)gb.hidden=!(sh.cat==='study'?studies():trips()).length;
@@ -1424,7 +1432,7 @@ function renderExtra(){
   chips.innerHTML=ks.map(k=>'<button type="button" class="xchip'+(filledX(x,k)?' on':'')+'" data-act="x-chip" data-k="'+k+'" aria-expanded="'+(!!op[k])+'">'+esc(xChipText(k,x))+'</button>').join('');
   body.innerHTML=ks.filter(k=>op[k]).map(k=>xRowHtml(k,x)).join('');
   body.hidden=!body.innerHTML;
-  const ti=$('#f-title');if(ti)ti.placeholder=rdOn(sh)&&en.includes('author')?'책 제목':sh.cat==='trip'?'제목 (필수)':sh.cat==='study'?'제목 (자료·범위)':'한 줄로 적어요';
+  const ti=$('#f-title');if(ti)ti.placeholder=rdOn(sh)&&en.includes('author')?'책 제목':sh.cat==='trip'?'제목 (필수)':sh.cat==='study'?'제목 (자료·범위)':(isGen(sh.cat)&&gmOn(sh)?(GPH[sh.cat]||GPH.etc)[1]:'한 줄로 적어요');
   $('#lbl-time').textContent=en.includes('end')?'시작시간':'시간';
   const ft0=$('#f-thought');if(ft0)sh.thought=ft0.value;
   const isRead=rdOn(sh),isQ=isRead&&sh.mk==='quote';
@@ -1484,10 +1492,11 @@ function updHkSug(all){
   sg.hidden=!l.length||(all!==true&&l.length===1&&nrm(l[0].title)===q);
   updHkHint();
 }
+const GPH={out:['병원 다니기 등','오늘 다녀온 곳·일정'],work:['○○ 프로젝트 등','오늘 한 일·회의'],meet:['동창 모임 등','오늘 만남 내용'],hike:['북한산·백대명산 등','당일 산행 코스 등'],sport:['한강 러닝 등','오늘 운동 코스·종목'],shop:['이사 준비 등','산 물건·가게'],etc:['묶음 이름 (예: 취미 활동)','이번 기록 제목']};
 function updHkHint(){
   const sh=S.sheet,h=$('#hkhint'),fi=$('#f-hg');if(!h||!fi||!sh)return;
   const nm=nrm(fi.value),b=nm?hgroups(sh.cat).find(x=>x.k===sh.cat+'|'+nm):null;
-  if(!b){h.textContent='';return;}
+  if(!b){h.textContent='첫 기록이에요';return;}
   const own=!!(sh.entry&&sh.entry.cat===sh.cat&&nrm((sh.entry.f&&sh.entry.f.hg)||'')===nm);
   const st=hgStat(b).split(' · ').slice(1).join(' · ');
   h.textContent=(b.es.length+(own?0:1))+'번째 기록'+(st?' · '+st:'');
@@ -1902,7 +1911,7 @@ async function saveRec(next){
   }
   if(sh.cat==='trip'){const tp=gmOn(sh)?String(x.trip||'').trim().slice(0,40):'';if(tp)e.f.trip=tp;else delete e.f.trip;}
   if(sh.cat==='study'){const sd=gmOn(sh)?String(x.trip||'').trim().slice(0,40):'';if(sd)e.f.study=sd;else delete e.f.study;}
-  if(isGen(sh.cat)&&gmOn(sh)&&String(x.hg||'').trim()){e.f.hg=String(x.hg).trim().slice(0,40);const gl=parseInt(x.hgoal,10);if(sh.cat==='hike'&&isFinite(gl)&&gl>0)e.f.hgoal=gl;else delete e.f.hgoal;}else{delete e.f.hg;delete e.f.hgoal;}
+  if(isGen(sh.cat)&&gmOn(sh)&&String(x.hg||'').trim()){e.f.hg=String(x.hg).trim().slice(0,40);delete e.f.hgoal;}else{delete e.f.hg;delete e.f.hgoal;}
   if(sh.cat==='study'&&gmOn(sh)&&sh.stype){e.f.stype=sh.stype;const exv=(($('#f-ex')||{}).value||'').trim();if(exv)e.f.ex=exv;else delete e.f.ex;}else if(sh.cat==='study'){delete e.f.stype;delete e.f.ex;}
   if(sh.cat==='read'&&!gmOn(sh)){e.f.solo=true;['done','mk','chapter','thought','author','pFrom','pTo','pTotal'].forEach(k=>{delete e.f[k];});}
   else if(sh.cat==='read'){
@@ -2244,7 +2253,7 @@ document.addEventListener('click',ev=>{
         const sb2=(S.tab==='log'&&S.cat==='study'&&S.sv&&S.study&&S.study!=='__none')?studies().find(x=>x.k===S.study):null;
         const tb=(S.tab==='log'&&S.cat==='trip'&&S.tv&&S.trip&&S.trip!=='__none')?trips().find(x=>x.k===S.trip):null;
         const hb2=(S.tab==='log'&&isGen(S.cat)&&S.hv&&S.hike&&S.hike!=='__none')?hgroups(S.cat).find(x=>x.k===S.hike):null;
-        if(hb2){const sh=recSheetOf(null,null);sh.cat=S.cat;sh.gm=true;sh.x={hg:hb2.title,hgoal:hb2.goal||''};openSheet(sh);}
+        if(hb2){const sh=recSheetOf(null,null);sh.cat=S.cat;sh.gm=true;sh.x={hg:hb2.title};openSheet(sh);}
         else if(sb2){const sh=recSheetOf(null,null);sh.cat='study';sh.stype=sb2.stype||'';sh.x={trip:sb2.title};sh.tripSet=true;openSheet(sh);}
         else if(tb){const sh=recSheetOf(null,null);sh.cat='trip';sh.x={trip:tb.title};sh.tripSet=true;openSheet(sh);}
         else openRec(null);
@@ -2307,8 +2316,8 @@ document.addEventListener('click',ev=>{
     case 'gm-toggle':{const sh=S.sheet;if(!sh||sh.kind!=='rec')break;collectX();const on=!gmOn(sh);sh.gm=on;if(sh.cat==='read'&&on)sh.picked=false;const m=$('#stmenu');if(m)m.hidden=true;renderExtra();
       if(on){const nf=tpOn(sh)?$('#f-trip'):isGen(sh.cat)?$('#f-hg'):$('#f-title');if(nf&&!nf.value.trim()){S.noSug=true;nf.focus();S.noSug=false;if(tpOn(sh))updTripSug(true);else if(isGen(sh.cat))updHkSug(true);}}
       break;}
-    case 'hk-list':{const sg=$('#hksug');if(sg&&!sg.hidden){sg.hidden=true;}else updHkSug(true);break;}
-    case 'hk-pick':{const sh=S.sheet;if(!sh)break;collectX();const x=sh.x||(sh.x={});x.hg=t.dataset.v;const g0=hgroups(sh.cat).find(b=>b.title===t.dataset.v);if(g0&&g0.goal)x.hgoal=g0.goal;sh.gm=true;const er=$('#err-hg');if(er)er.hidden=true;const sg=$('#hksug');if(sg)sg.hidden=true;renderExtra();const ti=$('#f-title');if(ti&&!ti.value)ti.focus();break;}
+    case 'hk-list':{const sg=$('#hksug');if(sg&&!sg.hidden){sg.hidden=true;break;}if(!hgroups(S.sheet&&S.sheet.cat).length){toast('아직 묶음이 없어요. 이름을 입력하면 새로 만들어져요');break;}updHkSug(true);break;}
+    case 'hk-pick':{const sh=S.sheet;if(!sh)break;collectX();const x=sh.x||(sh.x={});x.hg=t.dataset.v;const g0=hgroups(sh.cat).find(b=>b.title===t.dataset.v);sh.gm=true;const er=$('#err-hg');if(er)er.hidden=true;const sg=$('#hksug');if(sg)sg.hidden=true;renderExtra();const ti=$('#f-title');if(ti&&!ti.value)ti.focus();break;}
     case 'paste-word':pasteWord();break;
     case 'study-back':S.study=null;$('#feed').innerHTML=feedHtml();syncFab();break;
     case 'sf':S.sf=t.dataset.v;$('#feed').innerHTML=feedHtml();break;
