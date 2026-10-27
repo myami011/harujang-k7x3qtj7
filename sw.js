@@ -1,5 +1,5 @@
 /* © 2026 Dongwook Kim <myami011@gmail.com> (GitHub: myami011). All rights reserved. */
-const VER = 'harujang-v9992';
+const VER = 'harujang-v9993';
 const SHELL = [
   './',
   './index.html',
