@@ -1,5 +1,5 @@
 /* © 2026 Dongwook Kim <myami011@gmail.com> (GitHub: myami011). All rights reserved. */
-const VER = 'harujang-v99999';
+const VER = 'harujang-v100000';
 const ST = 'harujang-state', STK = './__state';
 const SHELL = [
   './',
